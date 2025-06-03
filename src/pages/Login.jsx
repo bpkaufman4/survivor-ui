@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import apiUrl from "../apiUrls";
-import Layout from "./Layout";
+import Layout from "../components/Layout";
 
 function Login() {
 

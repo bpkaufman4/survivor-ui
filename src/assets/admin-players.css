@@ -1,0 +1,24 @@
+.player-head-shot {    
+    height: 100px;
+    width: 100px;
+    border-radius: 100%;
+    border: 1px solid #333;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    text-shadow: 0 0 black;
+    background-size: cover;
+    justify-content: center;
+}
+
+.player-head-shot.table {
+    height: 50px;
+    width: 50px;
+    cursor: default;
+    margin: unset;
+    display: block;
+    object-fit: cover;
+}
+
+table {width: 100%;}
