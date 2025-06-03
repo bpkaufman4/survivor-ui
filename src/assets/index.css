@@ -1,0 +1,5 @@
+tr {border-bottom: 1px solid #333; padding: 10px 0; font-size: 12px;}
+tr:last-child {border-bottom: none;}
+table, tbody, thead {width: 100%;}
+td input {width: 30px;}
+.myTeam td {padding: 10px 0;}
