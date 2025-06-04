@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import apiUrl from "../apiUrls";
-import Layout from "../components/Layout";
+import Main from "../components/Main";
 
 function Login() {
 
@@ -41,7 +41,7 @@ function Login() {
   }
 
   return(
-    <Layout>
+    <Main>
       <div className="d-flex flex-column justify-content-center h-100">
         <form id="loginForm" onSubmit={login}>
           <div className="input-group mb-3">
@@ -62,7 +62,7 @@ function Login() {
           )}
         </form>
       </div>
-    </Layout>
+    </Main>
   )
 }
 
