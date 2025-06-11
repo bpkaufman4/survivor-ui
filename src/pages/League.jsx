@@ -10,6 +10,7 @@ import PlayerStandings from "./LeagueComponents/PlayerStandings";
 import MyTeam from "./LeagueComponents/MyTeam";
 import Survey from "./LeagueComponents/Survey";
 import Note from "./LeagueComponents/Note";
+import MyPolls from "./LeagueComponents/MyPolls";
 
 export default function League() {
   const { leagueId } = useParams();
@@ -63,6 +64,8 @@ export default function League() {
         return <PlayerStandings leagueId={leagueId}></PlayerStandings>
       case 'my-team':
         return <MyTeam leagueId={leagueId}></MyTeam>
+      case 'polls':
+        return <MyPolls leagueId={leagueId}></MyPolls>
     }
 
   }

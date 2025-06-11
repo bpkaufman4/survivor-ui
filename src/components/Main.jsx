@@ -15,7 +15,11 @@ const Main = ({ children, page }) => {
       <nav className="navbar bg-dark d-flex justify-content-around" style={{height: headerHeight}} data-bs-theme="dark">
         <img src={icon} className="h-100" onClick={() => window.location.assign(localStorage.getItem('homeTarget') || '/')} />
       </nav>
-      <main className="container py-3" style={{height: mainHeight, overflowY: 'overlay'}}>{children}</main>
+      <main style={{height: mainHeight, overflowY: 'overlay'}}>
+        <div className="container py-3">
+          {children}
+        </div>
+      </main>
       <nav className='fixed-bottom border-top border-black' style={{height: footerHeight}}>
         <div className="row text-center">
           <div className="col-3 py-3" onClick={() => window.location.assign('../')}>

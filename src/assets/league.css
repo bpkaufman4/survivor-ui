@@ -24,7 +24,7 @@
   display: inline-block; /* Or block, etc. */
   /* Positioning if needed */
   /* ... */
-  animation: fadeIn 2s ease-in-out infinite;
+  animation: fadeIn 1.3s ease-in-out infinite;
 }
 
 @keyframes fadeIn {
