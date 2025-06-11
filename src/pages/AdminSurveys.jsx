@@ -8,6 +8,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DotLoader from "../components/DotLoader";
 import { DateTime } from "luxon";
 import Swal from "sweetalert2";
+import Grade from "./AdminSurveysComponents/Grade";
+import GradingIcon from '@mui/icons-material/Grading';
 
 function AdminSurveys() {
 
@@ -64,6 +66,11 @@ function AdminSurveys() {
       setView('form');
     }
 
+    function gradeSurvey(surveyId) {
+      setEditingSurveyId(surveyId);
+      setView('grade');
+    }
+
     function deleteSurvey(surveyId) {
       Swal.fire({
           title: "Delete Survey?",
@@ -109,6 +116,7 @@ function AdminSurveys() {
               <th>Questions</th>
               <th>Submissions</th>
               <th>Edit</th>
+              <th>Grade</th>
               <th>Delete</th>
             </tr>
           </thead>
@@ -118,11 +126,16 @@ function AdminSurveys() {
                 <tr key={s.surveyId}>
                   <td>{s.episode.title}</td>
                   <td>{DateTime.fromISO(s.episode.airDate).toLocaleString(DateTime.DATETIME_SHORT)}</td>
-                  <td>{s.questions.length}</td>
-                  <td>0</td>
+                  <td>{s.questionCount}</td>
+                  <td>{s.submissionCount}</td>
                   <td>
                     <button className="btn" onClick={() => editSurvey(s.surveyId)}>
                       <ModeEditIcon></ModeEditIcon>
+                    </button>
+                  </td>
+                  <td>
+                    <button className="btn" onClick={() => gradeSurvey(s.surveyId)}>
+                      <GradingIcon></GradingIcon>
                     </button>
                   </td>
                   <td>
@@ -370,11 +383,13 @@ function AdminSurveys() {
         return <Table></Table>
       case 'form':
         return <Form surveyId={editingSurveyId}></Form>
+      case 'grade':
+        return <Grade surveyId={editingSurveyId} setView={setView}></Grade>
     }
   }
 
   return (
-    <AdminMain page={'admin-survey'}>
+    <AdminMain page={'admin-polls'}>
       <Content></Content>
     </AdminMain>
   )

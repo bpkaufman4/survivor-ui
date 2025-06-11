@@ -23,8 +23,8 @@ const adminPages = [
     link: 'admin-scoring'
   },
   {
-    display: 'Surveys',
-    link: 'admin-surveys'
+    display: 'Polls',
+    link: 'admin-polls'
   },
   
   {

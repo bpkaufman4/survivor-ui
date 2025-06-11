@@ -33,7 +33,7 @@ export default function App() {
             <AdminPlayers />
           </RequireAdmin>
         } />
-        <Route path="admin-surveys" element={
+        <Route path="admin-polls" element={
           <RequireAdmin>
             <AdminSurveys />
           </RequireAdmin>
