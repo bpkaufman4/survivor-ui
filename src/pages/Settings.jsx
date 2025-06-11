@@ -4,6 +4,7 @@ export default function Settings() {
 
   function logOut() {
     localStorage.removeItem('jwt');
+    localStorage.removeItem('homeTarget');
     window.location.assign('login');
   }
   return (

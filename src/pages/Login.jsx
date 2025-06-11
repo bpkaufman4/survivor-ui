@@ -35,6 +35,7 @@ function Login() {
       console.log(res);
       localStorage.setItem('jwt', res.token);
       if(res.token) {
+        localStorage.setItem('homeTarget', res.target);
         window.location.assign(res.target)
       }
     })
