@@ -7,6 +7,9 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import Main from "../components/Main";
 import TeamStandings from "./LeagueComponents/TeamStandings";
 import PlayerStandings from "./LeagueComponents/PlayerStandings";
+import MyTeam from "./LeagueComponents/MyTeam";
+import Survey from "./LeagueComponents/Survey";
+import Note from "./LeagueComponents/Note";
 
 export default function League() {
   const { leagueId } = useParams();
@@ -58,6 +61,8 @@ export default function League() {
         return <TeamStandings leagueId={leagueId} />
       case 'players':
         return <PlayerStandings leagueId={leagueId}></PlayerStandings>
+      case 'my-team':
+        return <MyTeam leagueId={leagueId}></MyTeam>
     }
 
   }
@@ -69,7 +74,7 @@ export default function League() {
         view: 'standings'
       },
       {
-        display: 'Players',
+        display: 'Contestants',
         view: 'players'
       },
       {
@@ -88,7 +93,7 @@ export default function League() {
       }
 
       return (
-        <button onClick={menuOptionOnClick} className={`btn ${o.view === view ? 'active' : ''}`}>{o.display}</button>
+        <button key={o.view} style={{fontSize: '12px'}} onClick={menuOptionOnClick} className={`btn ${o.view === view ? 'btn-primary' : 'btn-outline-primary'}`}>{o.display}</button>
       )
     })
   }
@@ -96,11 +101,15 @@ export default function League() {
   return (
     <Main page="home">
       <Content>
-        <div className="container-fluid d-flex align-items-center">
-          <button className="btn ps-0" onClick={() => window.location.assign('../../')}>
-            <ArrowBackIosIcon></ArrowBackIosIcon>
-          </button>
-          <h3 className="w-auto mb-0">{league && league.name}</h3>
+        <div className="container-fluid d-flex align-items-center justify-content-between">
+          <div className=" d-flex align-items-center">
+            <button className="btn ps-0" onClick={() => window.location.assign('../../')}>
+              <ArrowBackIosIcon></ArrowBackIosIcon>
+            </button>
+            <h3 className="w-auto mb-0">{league && league.name}</h3>
+          </div>
+          <Survey leagueId={league && league.leagueId} />
+          <Note />
         </div>
         <div className="container-fluid d-flex justify-content-between my-3">
           <MenuOptions />

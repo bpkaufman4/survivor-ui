@@ -187,6 +187,7 @@ function AdminSurveys() {
         .then(reply => {
           if(reply.status === 'success') {
             setEpisodes(reply.data);
+            if(!episodeId) setEpisodeId(reply.data[0].episodeId);
             if(surveyId) {
               fetchSurvey();
             }
@@ -273,6 +274,7 @@ function AdminSurveys() {
       .finally(() => {
         setTimeout(() => {
           setSubmitting(false);
+          setView('table');
         }, 500)
       })
     }
@@ -305,18 +307,26 @@ function AdminSurveys() {
               </div>
               <div className="form-group col-2">
                 <label htmlFor={`type${i}`}>Options Type</label>
-                <select className="form-control" name={`type${i}`} id={`type${i}`} value={q.type} onChange={(e) => changeType(q.questionId, e.target.value)}>
-                  <option value=""></option>
-                  <option value={'players'}>Players</option>
-                  <option value={'tribes'}>Tribes</option>
-                </select>
+                {(() => {
+                  if(isNaN(q.questionId)) {
+                    return <input type="text" className="form-control" disabled={true} value={q.type.charAt(0).toUpperCase() + q.type.slice(1)}></input>
+                  } else {
+                    return (
+                      <select className="form-control" name={`type${i}`} id={`type${i}`} value={q.type} onChange={(e) => changeType(q.questionId, e.target.value)}>
+                        <option value=""></option>
+                        <option value={'players'}>Players</option>
+                        <option value={'tribes'}>Tribes</option>
+                      </select>
+                    )
+                  }
+                })()}
               </div>
               {(() => {
                 if(i !== 0 || questions.length > 1) {
                   return (
                     <div className="col-1">
                       <button type="button" className="btn" onClick={() => deleteQuestion(q.questionId)}>
-                        {/* <MaterialSymbol icon="delete"></MaterialSymbol> */}
+                        <DeleteIcon />
                       </button>
                     </div>
                   )
@@ -327,7 +337,6 @@ function AdminSurveys() {
         })}
         <button type="button" className="btn" onClick={addQuestion}>
           <AddIcon></AddIcon>
-          {/* <MaterialSymbol icon="add"></MaterialSymbol> */}
         </button>
         <div className="d-flex justify-content-between">
           {(() => {

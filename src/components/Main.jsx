@@ -16,9 +16,9 @@ const Main = ({ children, page }) => {
         <img src={icon} className="h-100" />
       </nav>
       <main className="container py-3" style={{height: mainHeight, overflowY: 'overlay'}}>{children}</main>
-      <nav className='fixed-bottom' style={{height: footerHeight}}>
+      <nav className='fixed-bottom border-top border-black' style={{height: footerHeight}}>
         <div className="row text-center">
-          <div className="col-3 py-3">
+          <div className="col-3 py-3" onClick={() => window.location.assign('../')}>
             <HomeIcon color={page === 'home' ? 'primary' : ''}></HomeIcon>
           </div>
           <div className="col-3 py-3">
@@ -27,7 +27,7 @@ const Main = ({ children, page }) => {
           <div className="col-3 py-3">
             <EmailIcon color={page === 'messages' ? 'primary' : ''}></EmailIcon>
           </div>
-          <div className="col-3 py-3">
+          <div className="col-3 py-3" onClick={() => window.location.assign('../settings')}>
             <SettingsIcon color={page === 'settings' ? 'primary' : ''}></SettingsIcon>
           </div>
         </div>

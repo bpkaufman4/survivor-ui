@@ -5,3 +5,29 @@
     border-radius: 100%;
     border: 2px solid #000;
 }
+
+.unread::after {
+  content: "•"; /* Or an icon font character, or url('path/to/your/icon.png') */
+  color: red;  /* Or another color to indicate "unread" */
+  margin-left: 5px; /* Adjust spacing as needed */
+  /* Additional styling as needed */
+  display: inline-block; /* Or block, etc. */
+  /* Positioning if needed */
+  /* ... */
+}
+
+.live::after {
+  content: "•"; /* Or an icon font character, or url('path/to/your/icon.png') */
+  color: green;  /* Or another color to indicate "unread" */
+  margin-left: 5px; /* Adjust spacing as needed */
+  /* Additional styling as needed */
+  display: inline-block; /* Or block, etc. */
+  /* Positioning if needed */
+  /* ... */
+  animation: fadeIn 2s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  0%,100% { opacity: 0 }
+  25%, 75% { opacity: 1 }
+}
