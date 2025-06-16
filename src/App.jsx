@@ -11,12 +11,17 @@ import AdminSurveys from "./pages/AdminSurveys";
 import League from "./pages/League";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
+import AdminLeagues from "./pages/AdminLeagues"
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route index element={<Home />} />
+        <Route index element={
+          <RequireUser>
+            <Home />
+          </RequireUser>
+        } />
         <Route path="login" element={<Login />} />
         <Route path="admin-episodes" element={
           <RequireAdmin>
@@ -46,6 +51,11 @@ export default function App() {
         <Route path="settings" element={
           <RequireUser>
             <Settings />
+          </RequireUser>
+        } />
+        <Route path="admin-leagues" element={
+          <RequireUser>
+            <AdminLeagues />
           </RequireUser>
         } />
       </Routes>
