@@ -20,7 +20,6 @@ export default function Survey({ leagueId }) {
     })
     .then(response => response.json())
     .then(reply => {
-      console.log(reply);
       if(reply.status === 'success') {
         setLatestSurvey(reply.data.survey)
         setTeamSurvey(reply.data.teamSurvey)

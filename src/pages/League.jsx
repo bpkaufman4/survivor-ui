@@ -4,6 +4,7 @@ import apiUrl from "../apiUrls";
 import '../assets/league.css'
 import WaterLoader from "../components/WaterLoader";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import SettingsIcon from '@mui/icons-material/Settings';
 import Main from "../components/Main";
 import TeamStandings from "./LeagueComponents/TeamStandings";
 import PlayerStandings from "./LeagueComponents/PlayerStandings";
@@ -11,6 +12,7 @@ import MyTeam from "./LeagueComponents/MyTeam";
 import Survey from "./LeagueComponents/Survey";
 import Note from "./LeagueComponents/Note";
 import MyPolls from "./LeagueComponents/MyPolls";
+import Settings from "./LeagueComponents/Settings";
 
 export default function League() {
   const { leagueId } = useParams();
@@ -19,6 +21,7 @@ export default function League() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [view, setView] = useState('standings');
+  const [ownerAccess, setOwnerAccess] = useState(false);
 
   useEffect(() => {
     function fetchLeague() {
@@ -45,7 +48,24 @@ export default function League() {
       })
     }
 
+    function checkOwnerAccess() {
+      fetch(`${apiUrl}league/ownerAccess/${leagueId}`, {
+        headers: {
+          authorization: localStorage.getItem('jwt')
+        }
+      })
+      .then(response => response.json())
+      .then(reply => {
+        setOwnerAccess(reply.access);
+      })
+      .catch(err => {
+        setOwnerAccess(false);
+      })
+    }
+
     fetchLeague();
+    checkOwnerAccess();
+
   }, [leagueId])
 
   function Content({ children }) {
@@ -66,6 +86,8 @@ export default function League() {
         return <MyTeam leagueId={leagueId}></MyTeam>
       case 'polls':
         return <MyPolls leagueId={leagueId}></MyPolls>
+      case 'settings':
+        return <Settings leagueId={leagueId} leagueName={league.name || ''}></Settings>
     }
 
   }
@@ -104,16 +126,21 @@ export default function League() {
   return (
     <Main page="home">
       <Content>
-        <div className="d-flex align-items-center justify-content-between">
-          <div className=" d-flex align-items-center">
-            <button className="btn ps-0" onClick={() => window.location.assign('../../')}>
-              <ArrowBackIosIcon></ArrowBackIosIcon>
-            </button>
-            <h3 className="w-auto mb-0">{league && league.name}</h3>
-          </div>
+        <div className="d-flex align-items-center justify-content-between pb-3 border-bottom">
+          <button className="btn ps-0" onClick={() => window.location.assign('../../')}>
+            <ArrowBackIosIcon></ArrowBackIosIcon>
+          </button>
           <Survey leagueId={league && league.leagueId} />
           <Note />
+          {ownerAccess && (
+            <div>
+              <button className="btn" onClick={() => setView('settings')}>
+                <SettingsIcon color={view === 'settings' && 'primary' || ''} />
+              </button>
+            </div>
+          )}
         </div>
+        <h3 className="w-auto mb-0 mt-3">{league && league.name}</h3>
         <div className="d-flex justify-content-between my-3">
           <MenuOptions />
         </div>

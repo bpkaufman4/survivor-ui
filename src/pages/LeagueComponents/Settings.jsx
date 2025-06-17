@@ -1,0 +1,113 @@
+import { useEffect, useState } from "react"
+import apiUrl from "../../apiUrls";
+import WaterLoader from "../../components/WaterLoader";
+import { DateTime } from "luxon";
+import { Reorder } from "motion/react"
+
+export default function Settings({ leagueId, leagueName }) {
+  const jsDate = new Date;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [draftDate, setDraftDate] = useState(DateTime.fromJSDate(jsDate).toFormat("yyyy-MM-dd'T'HH:mm"));
+  const [leagueNameEdit, setLeagueName] = useState(leagueName);
+  const [draftOrder, setDraftOrder] = useState([]);
+
+  useEffect(() => {
+    async function fetchDraft() {
+      try {
+        const draftFetch = await fetch(`${apiUrl}draft/byLeague/${leagueId}`, {
+          headers: {
+            authorization: localStorage.getItem('jwt')
+          }
+        });
+
+        const draftData = await draftFetch.json();
+  
+        
+        if(draftData.data) {
+          console.log(draftData);
+        } else {
+
+          const teamFetch = await fetch(`${apiUrl}team/forDraft/${leagueId}`, {
+            headers: {
+              authorization: localStorage.getItem('jwt')
+            }
+          });
+  
+          const teamData = await teamFetch.json();
+
+          if(teamData.status !== 'success') throw new Error("Team fetch error");;
+
+          setDraftOrder(teamData.data);
+
+        }
+
+      } catch (err) {
+        console.log(err);
+        setError(true);
+      } finally {
+        setTimeout(() => {
+          setLoading(false);
+        }, 300);
+      }
+
+    }
+
+    fetchDraft();
+  }, [leagueId])
+
+  if(loading) return <WaterLoader />
+  if(error) return <p>Something went wrong</p>
+
+  function saveDraft() {
+    // save draft
+  }
+
+  function changeStartDate(e) {
+    setDraftDate(e.target.value);
+  }
+
+  function changeLeagueName(e) {
+    setLeagueName(e.target.value);
+  }
+
+  function changeDraftOrder(data) {
+    console.log(data);
+    setDraftOrder(data);
+  }
+  
+  function randomizeDraftOrder(e) {
+    let array = [...draftOrder];
+
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+    }
+
+    setDraftOrder(array);
+  }
+
+  return (
+    <>
+      <h5>League Settings</h5>
+      <label htmlFor="leagueName" className="form-label">Name</label>
+      <input type="text" className="form-control mb-3" value={leagueNameEdit} onChange={changeLeagueName} />
+      <h5>Draft Settings</h5>
+      <label htmlFor="startDate" className="form-label">Start Time</label>
+      <input type="datetime-local" className="form-control mb-3" value={draftDate} onChange={changeStartDate}/>
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <p className="form-label w-auto m-0">Draft Order (Drag and drop or <span onClick={randomizeDraftOrder} className="text-primary text-decoration-underline">randomize</span>)</p>
+      </div>
+      <Reorder.Group as="div" axis="y" values={draftOrder} onReorder={changeDraftOrder}>
+        {draftOrder.map((team, i) => (
+          <Reorder.Item as="div" key={team.teamId} value={team} className="btn btn-outline-dark text-dark bg-white mb-1 w-100 text-start align-items-center d-flex">
+            <span className="border-end border-dark pe-2 me-2">{i + 1}</span>
+            <span>{team.owner.firstName} {team.owner.lastName} ({team.name})</span>
+          </Reorder.Item>
+        ))}
+      </Reorder.Group>
+    </>
+  )
+
+  return <></>
+}
