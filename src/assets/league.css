@@ -1,33 +1,53 @@
 .player-image {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 100%;
-    border: 2px solid #000;
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 100%;
+  border: 2px solid #000;
 }
 
-.unread::after {
-  content: "•"; /* Or an icon font character, or url('path/to/your/icon.png') */
-  color: red;  /* Or another color to indicate "unread" */
-  margin-left: 5px; /* Adjust spacing as needed */
-  /* Additional styling as needed */
-  display: inline-block; /* Or block, etc. */
-  /* Positioning if needed */
-  /* ... */
+.unread:after {
+  content: "";
+  background-color: red;
+  margin-left: 0px;
+  display: block;
+  width: 7px;
+  height: 7px;
+  position: relative;
+  top: -25px;
+  left: 18px;
+  box-sizing: border-box;
+  border-radius: 100%;
+  border: 1px solid white;
+  margin-bottom: -8px;
 }
 
 .live::after {
-  content: "•"; /* Or an icon font character, or url('path/to/your/icon.png') */
-  color: green;  /* Or another color to indicate "unread" */
-  margin-left: 5px; /* Adjust spacing as needed */
-  /* Additional styling as needed */
-  display: inline-block; /* Or block, etc. */
-  /* Positioning if needed */
-  /* ... */
+  content: "";
+  background-color: green;
+  margin-left: 0px;
+  display: block;
+  width: 7px;
+  height: 7px;
+  position: relative;
+  top: -25px;
+  left: 18px;
+  box-sizing: border-box;
+  border-radius: 100%;
+  border: 1px solid white;
   animation: fadeIn 1.3s ease-in-out infinite;
+  margin-bottom: -8px;
 }
 
 @keyframes fadeIn {
-  0%,100% { opacity: 0 }
-  25%, 75% { opacity: 1 }
+
+  0%,
+  100% {
+    opacity: 0
+  }
+
+  25%,
+  75% {
+    opacity: 1
+  }
 }

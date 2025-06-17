@@ -9,29 +9,32 @@ const headerHeight = '64px';
 const footerHeight = '58px';
 const mainHeight = `calc(100vh - ${headerHeight} - ${footerHeight})`;
 
-const Main = ({ children, page }) => {
+const Main = ({ children, page, additionalClasses }) => {
+  let contentClasses = "container py-3";
+  if(additionalClasses) contentClasses += (" " + additionalClasses);
+
   return (
     <>
       <nav className="navbar bg-dark d-flex justify-content-around" style={{height: headerHeight}} data-bs-theme="dark">
         <img src={icon} className="h-100" onClick={() => window.location.assign(localStorage.getItem('homeTarget') || '/')} />
       </nav>
       <main style={{height: mainHeight, overflowY: 'overlay'}}>
-        <div className="container py-3">
+        <div className={contentClasses}>
           {children}
         </div>
       </main>
       <nav className='fixed-bottom border-top border-black' style={{height: footerHeight}}>
         <div className="row text-center">
-          <div className="col-3 py-3" onClick={() => window.location.assign('../')}>
+          <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../')}>
             <HomeIcon color={page === 'home' ? 'primary' : ''}></HomeIcon>
           </div>
-          <div className="col-3 py-3">
+          <div className="col-3 pb-4 pt-2">
             <PoolIcon color={page === 'players' ? 'primary' : ''}></PoolIcon>
           </div>
-          <div className="col-3 py-3">
-            <EmailIcon color={page === 'messages' ? 'primary' : ''}></EmailIcon>
+          <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../notes')}>
+            <EmailIcon color={page === 'notes' ? 'primary' : ''}></EmailIcon>
           </div>
-          <div className="col-3 py-3" onClick={() => window.location.assign('../settings')}>
+          <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../settings')}>
             <SettingsIcon color={page === 'settings' ? 'primary' : ''}></SettingsIcon>
           </div>
         </div>

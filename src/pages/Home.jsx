@@ -45,7 +45,7 @@ function Home() {
     const redirect = () => window.location.assign(`league/${leagueId}`);
 
     return (
-      <button onClick={redirect} variant="outline-primary" className="w-100 btn btn-primary">
+      <button onClick={redirect} variant="outline-primary" className="w-100 btn btn-primary d-flex mb-2">
         <div className="col-6">{name}</div>
         <div className="col-6">{league.name}</div>
       </button>

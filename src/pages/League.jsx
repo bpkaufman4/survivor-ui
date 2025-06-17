@@ -104,7 +104,7 @@ export default function League() {
   return (
     <Main page="home">
       <Content>
-        <div className="container-fluid d-flex align-items-center justify-content-between">
+        <div className="d-flex align-items-center justify-content-between">
           <div className=" d-flex align-items-center">
             <button className="btn ps-0" onClick={() => window.location.assign('../../')}>
               <ArrowBackIosIcon></ArrowBackIosIcon>
@@ -114,10 +114,10 @@ export default function League() {
           <Survey leagueId={league && league.leagueId} />
           <Note />
         </div>
-        <div className="container-fluid d-flex justify-content-between my-3">
+        <div className="d-flex justify-content-between my-3">
           <MenuOptions />
         </div>
-        <div className="container-fluid">
+        <div>
           <View />
         </div>
       </Content>

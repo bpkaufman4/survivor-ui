@@ -105,7 +105,7 @@ function AdminSurveys() {
     return (
       <>
         <div className="d-flex justify-content-between py-3">
-          <h2 className="w-auto">Surveys</h2>
+          <h2 className="w-auto">Polls</h2>
           <button className="btn btn-primary" onClick={addSurvey}>Add Survey</button>
         </div>
         <table>

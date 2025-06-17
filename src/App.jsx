@@ -12,6 +12,7 @@ import League from "./pages/League";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import AdminLeagues from "./pages/AdminLeagues"
+import Notes from "./pages/Notes";
 
 export default function App() {
   return (
@@ -54,8 +55,13 @@ export default function App() {
           </RequireUser>
         } />
         <Route path="admin-leagues" element={
-          <RequireUser>
+          <RequireAdmin>
             <AdminLeagues />
+          </RequireAdmin>
+        } />
+        <Route path="notes" element={
+          <RequireUser>
+            <Notes></Notes>
           </RequireUser>
         } />
       </Routes>
