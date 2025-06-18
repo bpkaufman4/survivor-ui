@@ -96,8 +96,9 @@ export default function Survey({ leagueId }) {
       html: <Form/>,
       icon,
       showConfirmButton: !lockDown,
-      showCancelButton: lockDown,
+      showCancelButton: true,
       cancelButtonText: 'Close',
+      confirmButtonText: 'Submit',
       preConfirm: () => {
 
         let body = {

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import apiUrl from "../apiUrls";
 import Main from "../components/Main";
+import Swal from "sweetalert2";
 
 function Login() {
 
@@ -31,13 +32,33 @@ function Login() {
     .then(response => {
       return response.json();
     })
-    .then(res => {
-      console.log(res);
-      localStorage.setItem('jwt', res.token);
-      if(res.token) {
-        localStorage.setItem('homeTarget', res.target);
-        window.location.assign(res.target)
+    .then(reply => {
+      if(reply.status === 'success') {
+        localStorage.setItem('jwt', reply.token);
+        localStorage.setItem('homeTarget', reply.target);
+        window.location.assign(reply.target);
+      } else {
+        Swal.fire({
+          text: 'User not found',
+          toast: true,
+          icon: 'error',
+          timer: 3000,
+          showConfirmButton: false,
+          position: 'top'
+        })
       }
+    })
+    .catch(err => {
+      console.log(err);
+      Swal.fire({
+        text: 'Something went wrong',
+        icon: 'error',
+        toast: true,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 3000,
+        position: 'top'
+      })
     })
   }
 

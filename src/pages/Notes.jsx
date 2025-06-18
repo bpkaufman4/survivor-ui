@@ -61,7 +61,7 @@ export default function Notes() {
     return (
       <>
         <h3>Updates</h3>
-        {notes && notes.map(n => <Note note={n}></Note>)}
+        {notes && notes.map(n => <Note key={n.adminNoteId} note={n}></Note>)}
       </>
     )
 

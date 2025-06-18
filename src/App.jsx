@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import AdminLeagues from "./pages/AdminLeagues"
 import Notes from "./pages/Notes";
+import Draft from "./pages/Draft";
 
 export default function App() {
   return (
@@ -47,6 +48,11 @@ export default function App() {
         <Route path="league/:leagueId" element={
           <RequireUser>
             <League />
+          </RequireUser>
+        } />
+        <Route path="draft/:leagueId" element={
+          <RequireUser>
+            <Draft />
           </RequireUser>
         } />
         <Route path="settings" element={

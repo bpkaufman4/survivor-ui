@@ -3,6 +3,9 @@ import apiUrl from "../../apiUrls";
 import WaterLoader from "../../components/WaterLoader";
 import { DateTime } from "luxon";
 import { Reorder } from "motion/react"
+import { Save } from "@mui/icons-material";
+import Swal from "sweetalert2";
+import { handlePatch, handlePost } from "../../helpers/helpers";
 
 export default function Settings({ leagueId, leagueName }) {
   const jsDate = new Date;
@@ -25,6 +28,12 @@ export default function Settings({ leagueId, leagueName }) {
   
         
         if(draftData.data) {
+
+          const draftOrderTeams = draftData.data.draftOrder.map(o => o.team);
+          setDraftOrder(draftOrderTeams);
+
+          const startJsDate = new Date(draftData.data.startDate);
+          setDraftDate(DateTime.fromJSDate(startJsDate).toFormat("yyyy-MM-dd'T'HH:mm"));
           console.log(draftData);
         } else {
 
@@ -87,12 +96,85 @@ export default function Settings({ leagueId, leagueName }) {
     setDraftOrder(array);
   }
 
+  function setDraftError(bool) {
+    if(bool) {
+      Swal.fire({
+        text: 'Error saving draft',
+        toast: true,
+        timer: 3000,
+        showCancelButton: false,
+        showConfirmButton: false,
+        position: 'top',
+        icon: 'error'
+      });
+    }
+  }
+
+  function setLeagueError(bool) {
+    if(bool) {
+      Swal.fire({
+        text: 'Error saving league',
+        toast: true,
+        timer: 3000,
+        showCancelButton: false,
+        showConfirmButton: false,
+        position: 'top',
+        icon: 'error'
+      });
+    }
+  }
+
+  async function saveLeagueSettings() {
+    const save = await handlePatch(`league/${leagueId}`, {name: leagueNameEdit}, setLeagueError);
+    console.log(save);
+    if(save.status === 'success') {
+      Swal.fire({
+        text: 'League Saved',
+        toast: true,
+        timer: 3000,
+        showCancelButton: false,
+        showConfirmButton: false,
+        position: 'top',
+        icon: 'success'
+      })
+    }
+    return;
+  }
+
+  async function saveDraftSettings() {
+
+    const draftJsDate = new Date(draftDate);
+    const startDate = DateTime.fromJSDate(draftJsDate).setZone('utc').toFormat("yyyy-MM-dd'T'HH:mm");
+
+    const order = draftOrder.map(t => t.teamId);
+    const save = await handlePost(`draft/generate/${leagueId}`, {draftOrder: order, draftDate: startDate, setDraftError});
+    console.log(save);
+    if(save.status === 'success') {
+      Swal.fire({
+        text: 'League Saved',
+        toast: true,
+        timer: 3000,
+        showCancelButton: false,
+        showConfirmButton: false,
+        position: 'top',
+        icon: 'success'
+      })
+    }
+    return;
+  }
+
   return (
     <>
-      <h5>League Settings</h5>
+      <h5 className="d-flex align-items-center justify-content-between">
+        <span>League Settings</span>
+        <button onClick={saveLeagueSettings} className="btn"><Save></Save></button>
+        </h5>
       <label htmlFor="leagueName" className="form-label">Name</label>
       <input type="text" className="form-control mb-3" value={leagueNameEdit} onChange={changeLeagueName} />
-      <h5>Draft Settings</h5>
+      <h5 className="d-flex align-items-center justify-content-between">
+        <span>Draft Settings</span>
+        <button onClick={saveDraftSettings} className="btn"><Save></Save></button>
+      </h5>
       <label htmlFor="startDate" className="form-label">Start Time</label>
       <input type="datetime-local" className="form-control mb-3" value={draftDate} onChange={changeStartDate}/>
       <div className="d-flex justify-content-between align-items-center mb-2">
