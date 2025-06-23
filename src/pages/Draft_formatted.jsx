@@ -5,7 +5,6 @@ import { handleGet } from "../helpers/helpers";
 import Main from "../components/Main";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import "../assets/draft.css"
-import chimeSound from "../assets/nfl-draft-chime.mp3"
 
 export default function Draft() {
   const { leagueId } = useParams();
@@ -20,14 +19,10 @@ export default function Draft() {
   const [timerStart, setTimerStart] = useState(null);
   const [timerDuration, setTimerDuration] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
-  const [timeUntilStart, setTimeUntilStart] = useState(null);
-  const [draftStartTime, setDraftStartTime] = useState(null);
-  const [draftComplete, setDraftComplete] = useState(false);
   const [splitRatio, setSplitRatio] = useState(30); // Draft order section percentage
   const [isDragging, setIsDragging] = useState(false);
   const socketRef = useRef(null);
   const containerRef = useRef(null);
-  const prevCanPickRef = useRef(false);
 
   useEffect(() => {
     const ws = new WebSocket(websocketUrl);
@@ -69,12 +64,9 @@ export default function Draft() {
                 setCurrentPickingTeam(null);
                 console.log('No current pick found');
               }
-            }            if (payload.availablePlayers) setAvailablePlayers(payload.availablePlayers);
-            if (payload.myTeam) setMyTeamId(payload.myTeam.teamId);
-            if (payload.draft) {
-              setDraftStartTime(payload.draft.startDate);
-              setDraftComplete(payload.draft.complete);
             }
+            if (payload.availablePlayers) setAvailablePlayers(payload.availablePlayers);
+            if (payload.myTeam) setMyTeamId(payload.myTeam.teamId);
             break;
           case 'draft-timer-started':
             setTimerStart(payload.startTime);
@@ -92,12 +84,9 @@ export default function Draft() {
               } else {
                 setCurrentPick(null);
                 setCurrentPickingTeam(null);
-              }            }
-            if (payload.availablePlayers) setAvailablePlayers(payload.availablePlayers);
-            if (payload.draft) {
-              setDraftStartTime(payload.draft.startDate);
-              setDraftComplete(payload.draft.complete);
+              }
             }
+            if (payload.availablePlayers) setAvailablePlayers(payload.availablePlayers);
             break;
           case 'auto-pick-made':
             // Handle auto picks the same way as manual picks
@@ -135,112 +124,9 @@ export default function Draft() {
     return () => clearInterval(interval);
   }, [timerStart, timerDuration]);
 
-  // Countdown timer for draft start
-  useEffect(() => {
-    if (!draftStartTime) {
-      setTimeUntilStart(null);
-      return;
-    }
-    
-    const updateCountdown = () => {
-      const now = Date.now();
-      const startTime = new Date(draftStartTime).getTime();
-      const remaining = Math.max(0, Math.floor((startTime - now) / 1000));
-      setTimeUntilStart(remaining);
-    };
-    
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);  }, [draftStartTime]);
-
   if (error) return <p>Something went wrong</p>
-  const currentPicker = !currentPickingTeam ? '' : currentPickingTeam.teamId === myTeamId ? 'You' : `${currentPickingTeam.owner.firstName} ${currentPickingTeam.owner.lastName}`;
-  const isMyTurn = currentPickingTeam && currentPickingTeam.teamId === myTeamId;
-  
-  // Check if draft has started
-  const now = new Date();
-  const draftStarted = draftStartTime ? now >= new Date(draftStartTime) : false;
-  const canPick = isMyTurn && draftStarted && !draftComplete;
-  
-  // Play sound when it becomes user's turn
-  useEffect(() => {
-    // Only play sound if it just became the user's turn (canPick changed from false to true)
-    if (canPick && !prevCanPickRef.current) {
-      // It just became the user's turn - play the chime
-      try {
-        const audio = new Audio(chimeSound);
-        audio.volume = 0.7; // Set volume to 70%
-        audio.play().catch(err => {
-          console.log('Could not play audio:', err);
-          // Browser might block autoplay - this is normal
-        });
-      } catch (err) {
-        console.log('Audio not supported or failed to load:', err);
-      }
-    }
-    
-    prevCanPickRef.current = canPick;
-  }, [canPick]);
-  
-    // Get status message
-  const getStatusMessage = () => {
-    if (draftComplete) {
-      return <small className="text-muted">Draft Complete</small>;
-    }
-    if (!draftStarted && draftStartTime) {
-      if (timeUntilStart !== null && timeUntilStart > 0) {
-        const hours = Math.floor(timeUntilStart / 3600);
-        const minutes = Math.floor((timeUntilStart % 3600) / 60);
-        const seconds = timeUntilStart % 60;
-        
-        let countdownText = '';
-        if (hours > 0) {
-          countdownText = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        } else {
-          countdownText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }
-        
-        return <small className="text-info">Draft starts in: <strong>{countdownText}</strong></small>;
-      } else if (timeUntilStart === 0) {
-        return <small className="text-success">Draft starting now...</small>;
-      }
-      const startTime = new Date(draftStartTime).toLocaleString();
-      return <small className="text-muted">Draft starts: {startTime}</small>;
-    }
-    if (currentPick) {
-      if (isMyTurn && !draftStarted) {
-        return <small className="text-muted">Waiting for draft to start...</small>;
-      }
-      if (canPick) {
-        return <small><span className={`fw-bold ${getTextColor()}`}>Your Turn to Pick</span></small>;
-      }
-      return <small>On the clock: <strong className="text-primary">{currentPicker}</strong></small>;
-    }
-    return <small className="text-muted">Draft Inactive</small>;
-  };// Determine header background class based on time remaining
-  const getHeaderClass = () => {
-    if (!canPick) return 'bg-white';
-    if (timeLeft === null) return 'bg-white';
-    if (timeLeft <= 10) return 'on-clock-header-danger';
-    if (timeLeft <= 30) return 'on-clock-header-warning';
-    return 'on-clock-header-success';
-  };
-  // Determine text color for "Your Turn to Pick" based on time remaining
-  const getTextColor = () => {
-    if (!canPick) return 'text-primary';
-    if (timeLeft === null) return 'text-dark';
-    if (timeLeft <= 10) return 'text-danger';
-    if (timeLeft <= 30) return 'text-dark';
-    return 'text-success';
-  };
 
-  // Determine timer badge color based on time remaining
-  const getTimerClass = () => {
-    if (timeLeft === null) return 'bg-secondary text-white';
-    if (timeLeft <= 10) return 'bg-danger text-white';
-    if (timeLeft <= 30) return 'bg-warning text-dark';
-    return 'bg-success text-white';
-  };
+  const currentPicker = !currentPickingTeam ? '' : currentPickingTeam.teamId === myTeamId ? 'You' : `${currentPickingTeam.owner.firstName} ${currentPickingTeam.owner.lastName}`;
   
   // Handle resize dragging
   const handleMouseDown = (e) => {
@@ -303,15 +189,17 @@ export default function Draft() {
         document.body.style.touchAction = '';
       };
     }
-  }, [isDragging]);  return (
+  }, [isDragging]);
+
+  return (
     <Main page="draft" additionalClasses="p-0 d-flex flex-column h-100">
       {/* Ultra-compact single row header */}
-      <div className={`border-bottom ${getHeaderClass()}`}>
+      <div className="bg-white border-bottom">
         <div className="d-flex align-items-center justify-content-between px-2 py-1">
           {/* Left side: Back button and title */}
           <div className="d-flex align-items-center">
             <button 
-              className="btn btn-sm me-2 p-1"
+              className="btn btn-sm me-2 p-1" 
               onClick={() => navigate(`/league/${leagueId}`)}
               style={{lineHeight: 1}}
             >
@@ -319,17 +207,25 @@ export default function Draft() {
             </button>
             <h6 className="mb-0">Draft</h6>
           </div>
-            {/* Center: Current picker status */}          
+          
+          {/* Center: Current picker status */}
           <div className="flex-grow-1 text-center mx-3">
-            {getStatusMessage()}
-          </div>{/* Right side: Timer */}
+            {currentPick ? (
+              <small>On the clock: <strong className="text-primary">{currentPicker}</strong></small>
+            ) : (
+              <small className="text-muted">Draft Inactive</small>
+            )}
+          </div>
+
+          {/* Right side: Timer */}
           <div>
-            {currentPick && (              <span className={`badge ${canPick ? getTimerClass() : (
+            {currentPick && (
+              <span className={`badge ${
                 timeLeft === null ? 'bg-secondary' :
                 timeLeft <= 10 ? 'bg-danger' :
-                timeLeft <= 30 ? 'bg-warning text-dark' :
+                timeLeft <= 30 ? 'bg-warning' :
                 'bg-success'
-              )} ${!canPick ? 'text-white' : ''}`}>
+              } text-white`}>
                 {timeLeft !== null
                   ? `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`
                   : '--:--'}
@@ -430,7 +326,8 @@ export default function Draft() {
                       </td>
                       <td className="align-middle py-1 px-2">
                         <strong>{ap.firstName} {ap.lastName}</strong>
-                      </td>                      {canPick && 
+                      </td>
+                      {(currentPickingTeam && currentPickingTeam.teamId === myTeamId) && 
                         <td className="align-middle py-1 px-2">
                           <button 
                             className="btn btn-primary btn-sm" 

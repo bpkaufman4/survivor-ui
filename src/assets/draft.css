@@ -1,0 +1,56 @@
+.current {
+  background-color: lightgreen;
+}
+
+.mine {
+  background-color: yellow;
+}
+
+/* Pulsing animations for when user is on the clock - matching timer colors */
+@keyframes pulse-success {
+  0% {
+    background-color: #d1e7dd;
+  }
+  50% {
+    background-color: #a3d9a4;
+  }
+  100% {
+    background-color: #d1e7dd;
+  }
+}
+
+@keyframes pulse-warning {
+  0% {
+    background-color: #fff3cd;
+  }
+  50% {
+    background-color: #ffeaa7;
+  }
+  100% {
+    background-color: #fff3cd;
+  }
+}
+
+@keyframes pulse-danger {
+  0% {
+    background-color: #f8d7da;
+  }
+  50% {
+    background-color: #f5c6cb;
+  }
+  100% {
+    background-color: #f8d7da;
+  }
+}
+
+.on-clock-header-success {
+  animation: pulse-success 3s infinite;
+}
+
+.on-clock-header-warning {
+  animation: pulse-warning 2s infinite;
+}
+
+.on-clock-header-danger {
+  animation: pulse-danger 1s infinite;
+}

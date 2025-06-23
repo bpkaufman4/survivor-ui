@@ -10,8 +10,9 @@ const footerHeight = '58px';
 const mainHeight = `calc(100vh - ${headerHeight} - ${footerHeight})`;
 
 const Main = ({ children, page, additionalClasses }) => {
-  let contentClasses = "container py-3";
-  if(additionalClasses) contentClasses += (" " + additionalClasses);
+  // For draft page, use full width without container padding
+  let contentClasses = page === 'draft' ? "" : "container py-3";
+  if(additionalClasses) contentClasses += (contentClasses ? " " : "") + additionalClasses;
 
   return (
     <>

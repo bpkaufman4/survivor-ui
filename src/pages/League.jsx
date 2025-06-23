@@ -13,6 +13,7 @@ import Survey from "./LeagueComponents/Survey";
 import Note from "./LeagueComponents/Note";
 import MyPolls from "./LeagueComponents/MyPolls";
 import Settings from "./LeagueComponents/Settings";
+import Draft from "./LeagueComponents/Draft";
 
 export default function League() {
   const { leagueId } = useParams();
@@ -22,6 +23,7 @@ export default function League() {
   const [error, setError] = useState(false);
   const [view, setView] = useState('standings');
   const [ownerAccess, setOwnerAccess] = useState(false);
+  const [draft, setDraft] = useState(null);
 
   useEffect(() => {
     function fetchLeague() {
@@ -34,6 +36,7 @@ export default function League() {
       .then(reply => {
         if(reply.status === 'success') {
           setLeague(reply.data);
+          if(reply.data.drafts[0]) setDraft(reply.data.drafts[0]);
         } else {
           console.log(reply);
           setError(true);
@@ -140,6 +143,7 @@ export default function League() {
             </div>
           )}
         </div>
+        {draft && <Draft draftStartTime={draft.startDate} onJoinDraft={() => window.location.assign(`/draft/${leagueId}`)} />}
         <h3 className="w-auto mb-0 mt-3">{league && league.name}</h3>
         <div className="d-flex justify-content-between my-3">
           <MenuOptions />
