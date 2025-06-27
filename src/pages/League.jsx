@@ -17,14 +17,13 @@ import Draft from "./LeagueComponents/Draft";
 
 export default function League() {
   const { leagueId } = useParams();
-
   const [league, setLeague] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [view, setView] = useState('standings');
   const [ownerAccess, setOwnerAccess] = useState(false);
   const [draft, setDraft] = useState(null);
-
+  const [isDraftComplete, setIsDraftComplete] = useState(false);
   useEffect(() => {
     function fetchLeague() {
       fetch(`${apiUrl}league/${leagueId}`, {
@@ -36,7 +35,25 @@ export default function League() {
       .then(reply => {
         if(reply.status === 'success') {
           setLeague(reply.data);
-          if(reply.data.drafts[0]) setDraft(reply.data.drafts[0]);
+          if(reply.data.drafts[0]) {
+            setDraft(reply.data.drafts[0]);
+          } else {
+            // Check if there's a completed draft for this season
+            fetch(`${apiUrl}draft/byLeague/${leagueId}`, {
+              headers: {
+                authorization: localStorage.getItem('jwt')
+              }
+            })
+            .then(response => response.json())
+            .then(draftReply => {
+              if(draftReply.data && draftReply.data.complete) {
+                setIsDraftComplete(true);
+              }
+            })
+            .catch(err => {
+              console.log('Draft check error:', err);
+            });
+          }
         } else {
           console.log(reply);
           setError(true);
@@ -76,7 +93,6 @@ export default function League() {
     if(error) return <p>Something went wrong</p>
     return children;
   }
-
   function View() {
 
     switch(view) {
@@ -90,7 +106,7 @@ export default function League() {
       case 'polls':
         return <MyPolls leagueId={leagueId}></MyPolls>
       case 'settings':
-        return <Settings leagueId={leagueId} leagueName={league.name || ''}></Settings>
+        return <Settings leagueId={leagueId} leagueName={league.name || ''} isDraftComplete={isDraftComplete}></Settings>
     }
 
   }
@@ -142,9 +158,14 @@ export default function League() {
               </button>
             </div>
           )}
-        </div>
+        </div>        
         {draft && <Draft draftStartTime={draft.startDate} onJoinDraft={() => window.location.assign(`/draft/${leagueId}`)} />}
         <h3 className="w-auto mb-0 mt-3">{league && league.name}</h3>
+        {ownerAccess && !draft && !isDraftComplete && (
+          <div className="alert alert-warning mt-3 mb-2" role="alert">
+            <strong>Action needed:</strong> Your league draft date hasn't been set yet. Visit the settings to schedule your draft.
+          </div>
+        )}
         <div className="d-flex justify-content-between my-3">
           <MenuOptions />
         </div>

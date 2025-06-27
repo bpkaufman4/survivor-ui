@@ -6,6 +6,7 @@ import Main from "../components/Main";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import "../assets/draft.css"
 import chimeSound from "../assets/nfl-draft-chime.mp3"
+import Swal from "sweetalert2"
 
 export default function Draft() {
   const { leagueId } = useParams();
@@ -405,17 +406,54 @@ export default function Draft() {
           <div className="flex-grow-1 overflow-auto">
             <table className="table table-hover mb-0">
               <tbody>
-                {availablePlayers && availablePlayers.map(ap => {
-                  function pickPlayer() {
-                    socketRef.current?.send(JSON.stringify({ 
-                      type: "pick", 
-                      payload: { 
-                        player: ap, 
-                        token: localStorage.getItem('jwt'), 
-                        leagueId, 
-                        pick: currentPick 
-                      } 
-                    }));
+                {availablePlayers && availablePlayers.map(ap => {                  function pickPlayer() {
+                    // If 10 seconds or less remaining, pick immediately without confirmation
+                    if (timeLeft !== null && timeLeft <= 10) {
+                      socketRef.current?.send(JSON.stringify({ 
+                        type: "pick", 
+                        payload: { 
+                          player: ap, 
+                          token: localStorage.getItem('jwt'), 
+                          leagueId, 
+                          pick: currentPick 
+                        } 
+                      }));
+                      return;
+                    }
+
+                    // Show confirmation dialog when there's more than 10 seconds left
+                    Swal.fire({
+                      title: 'Confirm Your Pick',
+                      html: `
+                        <div style="text-align: center;">
+                          <img 
+                            src="${ap.photoUrl || '/island.png'}" 
+                            alt="${ap.firstName} ${ap.lastName}" 
+                            style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;" 
+                          />
+                          <h4 style="margin: 0;">${ap.firstName} ${ap.lastName}</h4>
+                          <p style="margin: 8px 0 0 0; color: #666;">Are you sure you want to pick this player?</p>
+                        </div>
+                      `,
+                      showCancelButton: true,
+                      confirmButtonText: 'Yes, Pick Player',
+                      cancelButtonText: 'Cancel',
+                      confirmButtonColor: '#0d6efd',
+                      cancelButtonColor: '#6c757d',
+                      focusConfirm: false
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        socketRef.current?.send(JSON.stringify({ 
+                          type: "pick", 
+                          payload: { 
+                            player: ap, 
+                            token: localStorage.getItem('jwt'), 
+                            leagueId, 
+                            pick: currentPick 
+                          } 
+                        }));
+                      }
+                    });
                   }
 
                   return (

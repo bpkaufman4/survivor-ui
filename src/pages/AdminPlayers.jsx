@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AdminMain from "../components/AdminMain";
 import WaterLoader from "../components/WaterLoader";
 import icon from "../assets/island.png"
@@ -7,6 +7,7 @@ import "../assets/admin-players.css"
 import DotLoader from "../components/DotLoader";
 import { Alert, Snackbar } from "@mui/material";
 import { getFormValues, sanitizeFormValues } from "../helpers/helpers";
+import Dropzone, { useDropzone } from "react-dropzone";
 
 function AdminPlayers() {
 
@@ -131,10 +132,9 @@ function AdminPlayers() {
         photoUrl: '',
         tribeId: ''
       }
-    }
-
-    const [tribes, setTribes] = useState([]);
+    }    const [tribes, setTribes] = useState([]);
     const [photoChanged, setPhotoChanged] = useState(false);
+    const [photoUploading, setPhotoUploading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
@@ -163,9 +163,9 @@ function AdminPlayers() {
       }
 
       fetchTribes();  
-    }, []);
-
-    function TribeSelect({ tribes, tribeId }) {
+    }, []);    
+    
+    function TribeSelect({ tribes, tribeId, disabled }) {
       const [selectedTribe, setSelectedTribe] = useState('');
 
       useEffect(() => {
@@ -177,7 +177,14 @@ function AdminPlayers() {
       }
 
       return (
-        <select name="tribeId" id="tribeId" className="form-select" value={selectedTribe} onChange={setValue}>
+        <select 
+          name="tribeId" 
+          id="tribeId" 
+          className="form-select" 
+          value={selectedTribe} 
+          onChange={setValue}
+          disabled={disabled}
+        >
           <option value=""></option>
           {tribes && tribes.map(tribe => {
             return <option key={tribe.tribeId} value={tribe.tribeId}>{tribe.name}</option>
@@ -185,17 +192,23 @@ function AdminPlayers() {
         </select>
       )
     }
-
+    
     function handlePlayerSubmit(e) {
 
       e.preventDefault();
       const idArray = ['playerId', 'firstName', 'lastName', 'tribeId'];
 
+      // Always include photoUrl if it exists (either from upload or existing)
+      const photoUrlValue = document.getElementById('photoUrl').value;
+      if(photoUrlValue && photoUrlValue.trim() !== '') {
+        idArray.push('photoUrl');
+      }
       
-      if(photoChanged) idArray.push('photoUrl');
       const bodyJSON = getFormValues(idArray);
       const bodySanitized = sanitizeFormValues(bodyJSON);
       const body = JSON.stringify(bodySanitized);
+
+      console.log('Form submission data:', bodySanitized); // Debug log
 
       setEditingPlayer(prev => ({
         ...prev,
@@ -263,37 +276,131 @@ function AdminPlayers() {
       setEditingPlayer(null);
       setAlertOpen(false);
       setFormOpen(false);
+    }    function MyDropzone() {
+      const onDrop = useCallback((acceptedFiles) => {
+        acceptedFiles.forEach((file) => {
+          console.log(file);
+          
+          // Set uploading state
+          setPhotoUploading(true);
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          // Upload to server
+          fetch(`${apiUrl}uploadImage`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              authorization: localStorage.getItem('jwt')
+            }
+          })
+          .then(response => response.json())
+          .then(reply => {
+            if (reply.status === 'success') {
+              // Update the photo URL and mark as changed
+              const photoUrl = reply.data.result.variants[0];
+              setEditingPlayer(prev => ({
+                ...prev,
+                photoUrl: photoUrl
+              }));
+              setPhotoChanged(true);
+              
+              // Update hidden form field
+              document.getElementById('photoUrl').value = photoUrl;
+              
+              setAlertOptions({
+                message: 'Photo uploaded successfully',
+                severity: 'success'
+              });
+              setAlertOpen(true);
+            } else {
+              setAlertOptions({
+                message: 'Error uploading photo',
+                severity: 'error'
+              });
+              setAlertOpen(true);
+            }
+          })
+          .catch(err => {
+            console.log(err);
+            setAlertOptions({
+              message: 'Error uploading photo',
+              severity: 'error'
+            });
+            setAlertOpen(true);
+          })
+          .finally(() => {
+            // Always reset uploading state
+            setPhotoUploading(false);
+          });
+        })
+      }, [])
+      const {getInputProps} = useDropzone({
+        onDrop,
+        disabled: photoUploading // Disable dropzone while uploading
+      })
+
+      return (
+        <input id="dropzone" {...getInputProps()} />
+      )
     }
 
     return (
       <>
+        <MyDropzone></MyDropzone>
         <Snackbar open={alertOpen} autoHideDuration={2000} onClose={closeAlert} anchorOrigin={{vertical: 'top', horizontal: 'center'}}>
           <Alert severity={alertOptions.severity} sx={{width: '100%'}} onClose={closeAlert}>{alertOptions.message}</Alert>
         </Snackbar>
         <h2 className="mt-3">{heading}</h2>
         <form onSubmit={handlePlayerSubmit}>
           <input type="hidden" name="playerId" id="playerId" defaultValue={editingPlayer.playerId}/>
-          <input type="hidden" name="photoUrl" id="photoUrl" defaultValue={editingPlayer.photoUrl}/>
-          <div className="d-flex justify-content-center">
-              <div className="player-head-shot" id="playerHeadShot" style={{backgroundImage: editingPlayer.photoUrl ? `url('${editingPlayer.photoUrl}')` : '', backgroundPosition: 'center center'}}>{!editingPlayer.photoUrl && 'Add Image'}</div>
-          </div>
-          <div className="row">
+          <input type="hidden" name="photoUrl" id="photoUrl" defaultValue={editingPlayer.photoUrl}/>          <div className="d-flex justify-content-center">
+              <div 
+                className="player-head-shot" 
+                id="playerHeadShot" 
+                style={{
+                  backgroundImage: editingPlayer.photoUrl ? `url('${editingPlayer.photoUrl}')` : '', 
+                  backgroundPosition: 'center center',
+                  cursor: photoUploading ? 'not-allowed' : 'pointer',
+                  opacity: photoUploading ? 0.6 : 1
+                }} 
+                onClick={() => !photoUploading && document.getElementById('dropzone').click()}
+              >
+                {photoUploading ? (
+                  <DotLoader color={"#007bff"}></DotLoader>
+                ) : (
+                  !editingPlayer.photoUrl && 'Add Image'
+                )}
+              </div>
+          </div>          <div className="row">
               <div className="mb-3 col-6">
                   <label htmlFor="firstName" className="col-form-label">First Name:*</label>
-                  <input type="text" className="form-control" id="firstName" defaultValue={editingPlayer.firstName}/>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    id="firstName" 
+                    defaultValue={editingPlayer.firstName}
+                    disabled={photoUploading || submitting}
+                  />
               </div>
               <div className="mb-3 col-6">
                   <label htmlFor="lastName" className="col-form-label">Last Name:*</label>
-                  <input type="text" className="form-control" id="lastName" defaultValue={editingPlayer.lastName}/>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    id="lastName" 
+                    defaultValue={editingPlayer.lastName}
+                    disabled={photoUploading || submitting}
+                  />
               </div>
               <div className="mb-3 col-12">
                   <label htmlFor="lastName" className="col-form-label">Tribe:*</label>
-                  <TribeSelect tribes={tribes} tribeId={editingPlayer.tribeId || ''}></TribeSelect>
+                  <TribeSelect tribes={tribes} tribeId={editingPlayer.tribeId || ''} disabled={photoUploading || submitting}></TribeSelect>
               </div>
-          </div>
-          <div className="d-flex justify-content-between">
+          </div>          <div className="d-flex justify-content-between">
             {(() => {
-              if(submitting) {
+              if(submitting || photoUploading) {
                 return (
                   <>
                     <button disabled={true} type="button" className="btn btn-outline-primary">Back</button>

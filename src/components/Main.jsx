@@ -29,7 +29,7 @@ const Main = ({ children, page, additionalClasses }) => {
           <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../')}>
             <HomeIcon color={page === 'home' ? 'primary' : ''}></HomeIcon>
           </div>
-          <div className="col-3 pb-4 pt-2">
+          <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../players')}>
             <PoolIcon color={page === 'players' ? 'primary' : ''}></PoolIcon>
           </div>
           <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../notes')}>

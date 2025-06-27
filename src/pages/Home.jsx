@@ -69,13 +69,21 @@ function Home() {
     )
   }
   
+  function joinLeagues() {
+    window.location.assign('/leagues');
+  }
   return(
     <>
       <Main page="home">
         <div className="container">
-          {teams && teams.map(team => {
-            return <Team name={team.name} league={team.league} leagueId={team.league.leagueId} key={team.league.leagueId}/>
-          })}
+          {teams.length > 0 && teams.map(team => <Team name={team.name} league={team.league} leagueId={team.league.leagueId} key={team.league.leagueId}/>)}
+          {teams.length === 0 && (
+              <div>
+                <p>You haven't joined any leagues yet!</p>
+              </div>
+            )
+          }
+          <button className="btn btn-outline-primary" onClick={joinLeagues}>Join a league</button>
         </div>
       </Main>
     </>

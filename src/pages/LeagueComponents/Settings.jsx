@@ -7,7 +7,7 @@ import { Save } from "@mui/icons-material";
 import Swal from "sweetalert2";
 import { handlePatch, handlePost } from "../../helpers/helpers";
 
-export default function Settings({ leagueId, leagueName }) {
+export default function Settings({ leagueId, leagueName, isDraftComplete }) {
   const jsDate = new Date;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -162,7 +162,6 @@ export default function Settings({ leagueId, leagueName }) {
     }
     return;
   }
-
   return (
     <>
       <h5 className="d-flex align-items-center justify-content-between">
@@ -171,23 +170,32 @@ export default function Settings({ leagueId, leagueName }) {
         </h5>
       <label htmlFor="leagueName" className="form-label">Name</label>
       <input type="text" className="form-control mb-3" value={leagueNameEdit} onChange={changeLeagueName} />
-      <h5 className="d-flex align-items-center justify-content-between">
-        <span>Draft Settings</span>
-        <button onClick={saveDraftSettings} className="btn"><Save></Save></button>
-      </h5>
-      <label htmlFor="startDate" className="form-label">Start Time</label>
-      <input type="datetime-local" className="form-control mb-3" value={draftDate} onChange={changeStartDate}/>
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <p className="form-label w-auto m-0">Draft Order (Drag and drop or <span onClick={randomizeDraftOrder} className="text-primary text-decoration-underline">randomize</span>)</p>
-      </div>
-      <Reorder.Group as="div" axis="y" values={draftOrder} onReorder={changeDraftOrder}>
-        {draftOrder.map((team, i) => (
-          <Reorder.Item as="div" key={team.teamId} value={team} className="btn btn-outline-dark text-dark bg-white mb-1 w-100 text-start align-items-center d-flex">
-            <span className="border-end border-dark pe-2 me-2">{i + 1}</span>
-            <span>{team.owner.firstName} {team.owner.lastName} ({team.name})</span>
-          </Reorder.Item>
-        ))}
-      </Reorder.Group>
+      {!isDraftComplete && (
+        <>
+          <h5 className="d-flex align-items-center justify-content-between">
+            <span>Draft Settings</span>
+            <button onClick={saveDraftSettings} className="btn"><Save></Save></button>
+          </h5>
+          <label htmlFor="startDate" className="form-label">Start Time</label>
+          <input type="datetime-local" className="form-control mb-3" value={draftDate} onChange={changeStartDate}/>
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <p className="form-label w-auto m-0">Draft Order (Drag and drop or <span onClick={randomizeDraftOrder} className="text-primary text-decoration-underline">randomize</span>)</p>
+          </div>
+          <Reorder.Group as="div" axis="y" values={draftOrder} onReorder={changeDraftOrder}>
+            {draftOrder.map((team, i) => (
+              <Reorder.Item as="div" key={team.teamId} value={team} className="btn btn-outline-dark text-dark bg-white mb-1 w-100 text-start align-items-center d-flex">
+                <span className="border-end border-dark pe-2 me-2">{i + 1}</span>
+                <span>{team.owner.firstName} {team.owner.lastName} ({team.name})</span>
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        </>
+      )}
+      {isDraftComplete && (
+        <div className="alert alert-info mt-3" role="alert">
+          <strong>Draft Complete:</strong> The draft for this league has been completed. Draft settings are no longer available.
+        </div>
+      )}
     </>
   )
 

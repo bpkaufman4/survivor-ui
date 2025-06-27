@@ -14,6 +14,9 @@ import Settings from "./pages/Settings";
 import AdminLeagues from "./pages/AdminLeagues"
 import Notes from "./pages/Notes";
 import Draft from "./pages/Draft";
+import Register from "./pages/Register";
+import Leagues from "./pages/Leagues";
+import Players from "./pages/Players";
 
 export default function App() {
   return (
@@ -25,6 +28,7 @@ export default function App() {
           </RequireUser>
         } />
         <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
         <Route path="admin-episodes" element={
           <RequireAdmin>
             <AdminEpisodes />
@@ -68,6 +72,16 @@ export default function App() {
         <Route path="notes" element={
           <RequireUser>
             <Notes></Notes>
+          </RequireUser>
+        } />
+        <Route path="leagues" element={
+          <RequireUser>
+            <Leagues></Leagues>
+          </RequireUser>
+        } />
+        <Route path="players" element={
+          <RequireUser>
+            <Players></Players>
           </RequireUser>
         } />
       </Routes>
