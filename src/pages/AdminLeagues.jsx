@@ -1,16 +1,20 @@
 import { useState } from "react";
 import AdminMain from "../components/AdminMain";
 import Table from "./AdminLeaguesComponents/Table";
+import SetPlayers from "./AdminLeaguesComponents/SetPlayers";
 
 export default function AdminLeagues() {
 
   const [view, setView] = useState('table')
+  const [setPlayersLeagueId, setSetPlayersLeagueId] = useState(null);
 
   function Content() {
     switch(view) {
       default:
       case 'table':
-        return <Table />;
+        return <Table setView={setView} setSetPlayersLeagueId={setSetPlayersLeagueId}/>;
+      case 'set-players':
+        return <SetPlayers setView={setView} leagueId={setPlayersLeagueId} setSetPlayersLeagueId={setSetPlayersLeagueId}/>;
     }
   }
 

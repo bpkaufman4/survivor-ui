@@ -27,7 +27,7 @@ const Main = ({ children, page, additionalClasses }) => {
       <nav className='fixed-bottom border-top border-black' style={{height: footerHeight}}>
         <div className="row text-center">
           <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../')}>
-            <HomeIcon color={page === 'home' ? 'primary' : ''}></HomeIcon>
+            <HomeIcon color={page === 'home' || page === 'draft' ? 'primary' : ''}></HomeIcon>
           </div>
           <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../players')}>
             <PoolIcon color={page === 'players' ? 'primary' : ''}></PoolIcon>

@@ -6,6 +6,7 @@ import RequireAdmin from "./components/RequireAdmin";
 import RequireUser from "./components/RequireUser";
 import './assets/index.css'
 import AdminNotes from "./pages/AdminNotes";
+import AdminStatistics from "./pages/AdminStatistics";
 import AdminPlayers from "./pages/AdminPlayers";
 import AdminSurveys from "./pages/AdminSurveys";
 import League from "./pages/League";
@@ -42,6 +43,11 @@ export default function App() {
         <Route path="admin-players" element={
           <RequireAdmin>
             <AdminPlayers />
+          </RequireAdmin>
+        } />
+        <Route path="admin-scoring" element={
+          <RequireAdmin>
+            <AdminStatistics />
           </RequireAdmin>
         } />
         <Route path="admin-polls" element={

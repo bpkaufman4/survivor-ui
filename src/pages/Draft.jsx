@@ -76,7 +76,7 @@ export default function Draft() {
               setDraftStartTime(payload.draft.startDate);
               setDraftComplete(payload.draft.complete);
             }
-            break;
+            break;          
           case 'draft-timer-started':
             setTimerStart(payload.startTime);
             setTimerDuration(payload.timeoutMs);
@@ -325,15 +325,25 @@ export default function Draft() {
             {getStatusMessage()}
           </div>{/* Right side: Timer */}
           <div>
-            {currentPick && (              <span className={`badge ${canPick ? getTimerClass() : (
+            {currentPick && (              
+              <span className={`badge ${canPick ? getTimerClass() : (
                 timeLeft === null ? 'bg-secondary' :
                 timeLeft <= 10 ? 'bg-danger' :
                 timeLeft <= 30 ? 'bg-warning text-dark' :
                 'bg-success'
-              )} ${!canPick ? 'text-white' : ''}`}>
-                {timeLeft !== null
-                  ? `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`
-                  : '--:--'}
+              )} ${!canPick ? 'text-white' : ''}`}>                
+              {timeLeft !== null ? (() => {
+                    const hours = Math.floor(timeLeft / 3600);
+                    const minutes = Math.floor((timeLeft % 3600) / 60);
+                    const seconds = timeLeft % 60;
+                    if (hours > 0) {
+                      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    } else {
+                      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                  })()
+                : '--:--'
+              }
               </span>
             )}
           </div>

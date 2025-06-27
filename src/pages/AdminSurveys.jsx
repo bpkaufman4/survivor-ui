@@ -327,8 +327,9 @@ function AdminSurveys() {
                     return (
                       <select className="form-control" name={`type${i}`} id={`type${i}`} value={q.type} onChange={(e) => changeType(q.questionId, e.target.value)}>
                         <option value=""></option>
-                        <option value={'players'}>Players</option>
                         <option value={'tribes'}>Tribes</option>
+                        <option value={'remaining-players'}>Remaining Players</option>
+                        <option value={'all-players'}>All Players</option>
                       </select>
                     )
                   }

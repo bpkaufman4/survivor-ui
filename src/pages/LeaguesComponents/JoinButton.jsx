@@ -1,10 +1,12 @@
 import LockOutlineIcon from '@mui/icons-material/LockOutline';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import apiUrl from '../../apiUrls';
 
-export default function JoinButton({ league, refreshLeagues }) {
+export default function JoinButton({ league }) {
+  const navigate = useNavigate();
 
   function joinLeagueSwal() {
 
@@ -75,12 +77,12 @@ export default function JoinButton({ league, refreshLeagues }) {
           })
         })
       }
-    })
+    })    
     .then(reply => {
       if(reply.value.status === 'fail') {
         Swal.fire("", reply.value.message, 'error');
       } else {
-        refreshLeagues();
+        navigate(`/league/${league.leagueId}`);
       }
     })
   }

@@ -357,17 +357,15 @@ function AdminEpisode() {
         </td>
       }
 
-      const [eliminated, setEliminated] = useState(player.eliminated === 1);
-
-      function setPlayerEliminated(e) {
-        setEliminated(e.target.checked);
+      const [eliminated, setEliminated] = useState(player.eliminated === 1);      function setPlayerEliminated(e) {
+        const isEliminated = e.target.checked;
+        setEliminated(isEliminated);
 
         const body = {
-          episodeId: (eliminated ? episode.episodeId : null),
-          playerId: player.playerId
+          episodeId: (isEliminated ? episode.episodeId : null)
         }
 
-        fetch(`${apiUrl}player/setEliminated`, {
+        fetch(`${apiUrl}player/setEliminated/${player.playerId}`, {
           body: JSON.stringify(body),
           method: 'POST',
           headers: {
@@ -406,8 +404,7 @@ function AdminEpisode() {
         <div className="d-flex justify-content-between my-3">
           <h2>{episode.title || '(No Title)'}</h2>
           <button className="btn btn-primary" onClick={goBack}>Go Back</button>
-        </div>
-        <table>
+        </div>        <table>
           <thead>
             <tr>
               <th></th>
@@ -415,6 +412,19 @@ function AdminEpisode() {
               {labels.map((label, i) => {
                 return <th key={`${label}${i}`}>{label}</th>
               })}
+            </tr>
+            <tr className="text-muted small">
+              <td></td>
+              <td></td>
+              {(() => {
+                // Get default points for each statistic from the first player's stats
+                const firstPlayer = Object.values(players)[0];
+                if (!firstPlayer) return null;
+                  return firstPlayer.stats.map((stat, i) => {
+                  const pointText = stat.defaultPoints === 1 ? 'point' : 'points';
+                  return <td key={`default-${stat.statisticId}-${i}`}>{stat.defaultPoints} {pointText}</td>
+                });
+              })()}
             </tr>
           </thead>
           <tbody>

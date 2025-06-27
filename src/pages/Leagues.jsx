@@ -56,9 +56,8 @@ export default function Leagues() {
 
   return (
     <Main page="home">
-      <AddButton></AddButton>
-      {leagues && leagues.length > 0 ? (
-        leagues.map(league => <JoinButton key={league.leagueId} league={league} refreshLeagues={fetchLeagues} />)
+      <AddButton></AddButton>      {leagues && leagues.length > 0 ? (
+        leagues.map(league => <JoinButton key={league.leagueId} league={league} />)
       ) : (
         <div className="alert alert-info">No leagues found</div>
       )}

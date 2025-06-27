@@ -106,7 +106,7 @@ export default function League() {
       case 'polls':
         return <MyPolls leagueId={leagueId}></MyPolls>
       case 'settings':
-        return <Settings leagueId={leagueId} leagueName={league.name || ''} isDraftComplete={isDraftComplete}></Settings>
+        return <Settings leagueId={leagueId} leagueName={league.name || ''} password={league.password || ''} privateInd={league.privateInd} isDraftComplete={isDraftComplete}></Settings>
     }
 
   }
