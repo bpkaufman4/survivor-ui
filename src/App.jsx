@@ -13,6 +13,7 @@ import League from "./pages/League";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import AdminLeagues from "./pages/AdminLeagues"
+import AdminDraft from "./pages/AdminDraft";
 import Notes from "./pages/Notes";
 import Draft from "./pages/Draft";
 import Register from "./pages/Register";
@@ -73,6 +74,11 @@ export default function App() {
         <Route path="admin-leagues" element={
           <RequireAdmin>
             <AdminLeagues />
+          </RequireAdmin>
+        } />
+        <Route path="admin-draft/:leagueId" element={
+          <RequireAdmin>
+            <AdminDraft />
           </RequireAdmin>
         } />
         <Route path="notes" element={

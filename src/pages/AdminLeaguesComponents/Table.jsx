@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import apiUrl from "../../apiUrls";
 import WaterLoader from "../../components/WaterLoader";
 import AccessibilityIcon from '@mui/icons-material/Accessibility';
@@ -8,42 +9,106 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { handleDelete } from "../../helpers/helpers";
 import Swal from "sweetalert2";
+import DraftSettingsModal from "./DraftSettingsModal";
 
 export default function Table({ setView, setSetPlayersLeagueId }) {
-
+  const navigate = useNavigate();
   const [leagues, setLeagues] = useState(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showDraftModal, setShowDraftModal] = useState(false);
+  const [selectedLeague, setSelectedLeague] = useState(null);
 
-  useEffect(() => {
-    function fetchTeams() {
-      fetch(`${apiUrl}league`, {
-        headers: {
-          authorization: localStorage.getItem('jwt')
+  function fetchTeams() {
+    fetch(`${apiUrl}league`, {
+      headers: {
+        authorization: localStorage.getItem('jwt')
+      }
+    })
+      .then(response => response.json())
+      .then(reply => {
+        if (reply.status === 'success') {
+          setLeagues(reply.data);
+        } else {
+          console.log(reply);
+          setError(true);
         }
       })
-        .then(response => response.json())
-        .then(reply => {
-          if (reply.status === 'success') {
-            setLeagues(reply.data);
-          } else {
-            console.log(reply);
-            setError(true);
-          }
-        })
-        .catch(err => {
-          console.log(err);
-          setError(true);
-        })
-        .finally(() => {
-          setTimeout(() => {
-            setLoading(false);
-          }, 300)
-        })
-    }
+      .catch(err => {
+        console.log(err);
+        setError(true);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 300)
+      })
+  }
 
+  useEffect(() => {
     fetchTeams();
+    
+    // Set up interval to refresh data every minute to update draft statuses
+    const interval = setInterval(() => {
+      // Only refresh if we have leagues and any have draft dates
+      if (leagues && leagues.some(league => league.draftDate)) {
+        fetchTeams();
+      }
+    }, 60000); // 60 seconds
+
+    return () => clearInterval(interval);
   }, [])
+
+  function openDraftModal(league) {
+    setSelectedLeague(league);
+    setShowDraftModal(true);
+  }
+
+  function closeDraftModal() {
+    setShowDraftModal(false);
+    setSelectedLeague(null);
+  }
+
+  function handleDraftSave() {
+    // Refresh the leagues data
+    fetchTeams();
+  }
+
+  function isDraftImminent(draftDate) {
+    if (!draftDate) return false;
+    
+    const now = new Date();
+    const draftTime = new Date(draftDate);
+    const timeDifferenceMs = draftTime.getTime() - now.getTime();
+    const fiveMinutesMs = 5 * 60 * 1000; // 5 minutes in milliseconds
+    
+    // Return true if draft is within 5 minutes or has already started
+    return timeDifferenceMs <= fiveMinutesMs;
+  }
+
+  function getDraftStatus(draftDate) {
+    if (!draftDate) return { status: 'not-set', text: 'Not Set' };
+    
+    const now = new Date();
+    const draftTime = new Date(draftDate);
+    const timeDifferenceMs = draftTime.getTime() - now.getTime();
+    
+    if (timeDifferenceMs < 0) {
+      return { status: 'ongoing', text: 'Draft Ongoing' };
+    } else if (timeDifferenceMs <= 5 * 60 * 1000) { // 5 minutes
+      const minutesLeft = Math.ceil(timeDifferenceMs / (60 * 1000));
+      return { status: 'starting-soon', text: `Starting in ${minutesLeft}m` };
+    } else {
+      return { 
+        status: 'scheduled', 
+        text: DateTime.fromISO(draftDate).toLocaleString(DateTime.DATETIME_SHORT) 
+      };
+    }
+  }
+
+  function goToDraft(leagueId) {
+    navigate(`/admin-draft/${leagueId}`);
+  }
 
   if (loading) return <WaterLoader></WaterLoader>
   if (error) return <p>Something went wrong</p>
@@ -187,7 +252,40 @@ export default function Table({ setView, setSetPlayersLeagueId }) {
           <td>{league.name}</td>
           <td>{league.owner.firstName} {league.owner.lastName}</td>
           <td>{league.teamsCount}</td>
-          <td>{league.draftDate ? DateTime.fromISO(league.draftDate).toLocaleString(DateTime.DATETIME_SHORT) : 'Not Set'}</td>
+          <td>
+            {(() => {
+              const draftStatus = getDraftStatus(league.draftDate);
+              
+              if (draftStatus.status === 'ongoing' || draftStatus.status === 'starting-soon') {
+                return (
+                  <div className="d-flex flex-column align-items-start">
+                    <button 
+                      className="btn btn-success btn-sm mb-1"
+                      onClick={() => goToDraft(league.leagueId)}
+                    >
+                      Go to Draft
+                    </button>
+                    <small className="text-muted">{draftStatus.text}</small>
+                  </div>
+                );
+              } else {
+                return (
+                  <button 
+                    className="btn btn-link p-0 text-decoration-underline text-primary"
+                    onClick={() => openDraftModal(league)}
+                    style={{ 
+                      border: 'none', 
+                      background: 'none',
+                      fontSize: 'inherit',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {draftStatus.text}
+                  </button>
+                );
+              }
+            })()}
+          </td>
           <td>
             <button className="btn" onClick={() => setPlayers(league.leagueId)}>
               <AccessibilityIcon></AccessibilityIcon>
@@ -246,5 +344,23 @@ export default function Table({ setView, setSetPlayersLeagueId }) {
         {leagues && leagues.map(l => <LeagueRow key={l.leagueId} league={l} />)}
       </tbody>
     </table>
+
+    {/* Draft Settings Modal */}
+    {showDraftModal && selectedLeague && (
+      <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal-dialog modal-lg">
+          <div className="modal-content">
+            <div className="modal-body">
+              <DraftSettingsModal
+                leagueId={selectedLeague.leagueId}
+                leagueName={selectedLeague.name}
+                onClose={closeDraftModal}
+                onSave={handleDraftSave}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   </>;
 }
