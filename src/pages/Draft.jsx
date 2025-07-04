@@ -478,7 +478,8 @@ export default function Draft() {
                       </td>
                       <td className="align-middle py-1 px-2">
                         <strong>{ap.firstName} {ap.lastName}</strong>
-                      </td>                      {canPick && 
+                      </td>
+                      {canPick && 
                         <td className="align-middle py-1 px-2">
                           <button 
                             className="btn btn-primary btn-sm" 

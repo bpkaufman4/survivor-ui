@@ -46,22 +46,64 @@ export default function PlayerStandings({ leagueId }) {
   if(error) return <p>Something went wrong</p>;
 
   return (
-    <table className="w-100">
-      <tbody>
-        {standings && standings.map(player => {
-          const image = player.photoUrl || icon;
-          const teamName = player.teamName ? `(${player.teamName})` : '';
-          return (
-            <tr key={player.playerId}>
-              <td>{player.place}</td>
-              <td><img src={image} alt="" className="player-image"></img></td>
-              <td><a href={`../../player/${player.playerId}`}>{player.firstName} {player.lastName}</a><br></br> {teamName}</td>
-              <td>{player.totalPoints}</td>
-            </tr>
-          )
-        })}
-      </tbody>
-    </table>
+    <div className="card shadow-sm">
+      <div className="card-header bg-success text-white">
+        <h5 className="card-title mb-0">Player Standings</h5>
+      </div>
+      <div className="card-body p-0">
+        <div className="table-responsive">
+          <table className="table table-hover mb-0">
+            <thead className="table-light">
+              <tr>
+                <th className="text-center" style={{ width: '60px' }}>Rank</th>
+                <th style={{ width: '80px' }}>Photo</th>
+                <th>Player</th>
+                <th className="text-center">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {standings && standings.map(player => {
+                const image = player.photoUrl || '/island.png';
+                const teamName = player.teamName ? `(${player.teamName})` : '';
+                const rankClass = player.place === 1 ? 'text-warning fw-bold' : player.place === 2 ? 'text-secondary fw-bold' : player.place === 3 ? 'text-dark fw-bold' : '';
+                
+                return (
+                  <tr key={player.playerId}>
+                    <td className={`text-center ${rankClass}`}>
+                      {player.place <= 3 && <span className="me-1">🏆</span>}
+                      {player.place}
+                    </td>
+                    <td>
+                      <img 
+                        src={image} 
+                        alt={`${player.firstName} ${player.lastName}`} 
+                        className="rounded-circle" 
+                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                      />
+                    </td>
+                    <td>
+                      <div>
+                        <a href={`../../player/${player.playerId}`} className="text-decoration-none fw-semibold">
+                          {player.firstName} {player.lastName}
+                        </a>
+                        {teamName && (
+                          <div className="text-muted small">
+                            {teamName}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="text-center">
+                      <span className="badge bg-success fs-6">{player.totalPoints}</span>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   )
 
 }

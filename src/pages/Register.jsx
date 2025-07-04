@@ -8,13 +8,14 @@ function Register() {
     e.preventDefault();
 
     const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
     const pwd = document.getElementById('password').value;
     const firstName = document.getElementById('firstName').value.trim();
     const lastName = document.getElementById('lastName').value.trim();
     const confirmPassword = document.getElementById('confirmPassword').value;
 
     // Validate all fields are present
-    if (!username || !pwd || !firstName || !lastName || !confirmPassword) {
+    if (!username || !email || !pwd || !firstName || !lastName || !confirmPassword) {
       Swal.fire({
         text: 'All fields are required',
         icon: 'error',
@@ -42,7 +43,7 @@ function Register() {
     }
 
 
-    const request = { username, pwd, firstName, lastName };
+    const request = { username, email, pwd, firstName, lastName };
     
     fetch(`${apiUrl}user/register`, {
       method: 'POST',
@@ -56,16 +57,17 @@ function Register() {
     })    
     .then(reply => {
       if (reply.status === 'success') {
+        // Store user data for verification process
+        localStorage.setItem('pendingVerification', JSON.stringify(reply.data));
+        
         Swal.fire({
           title: 'Registration Successful!',
-          text: 'Welcome to Fantasy Survivor!',
+          text: 'Please check your email for a verification code to complete your registration.',
           icon: 'success',
           showCancelButton: false,
           showConfirmButton: false,
-          timer: 2000
+          timer: 3000
         }).then(() => {
-          localStorage.setItem('jwt', reply.token);
-          localStorage.setItem('homeTarget', reply.target);
           window.location.assign(reply.target);
         });
       } else {
@@ -100,6 +102,9 @@ function Register() {
         <form id="loginForm" onSubmit={register}>
           <div className="input-group mb-3">
             <input type="text" className="form-control" name="username" id="username" placeholder="Username" aria-label="Username" aria-describedby="Username"/>
+          </div>
+          <div className="input-group mb-3">
+            <input type="email" className="form-control" name="email" id="email" placeholder="Email" aria-label="Email"/>
           </div>
           <div className="input-group mb-3">
             <input type="text" className="form-control" name="firstName" id="firstName" placeholder="First Name" aria-label="First Name"/>

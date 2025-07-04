@@ -4,12 +4,15 @@ import PoolIcon from '@mui/icons-material/Pool';
 import EmailIcon from '@mui/icons-material/Email';
 import SettingsIcon from '@mui/icons-material/Settings';
 import icon from '../assets/island-white.png'
+import { useUser } from '../contexts/UserContext';
 
 const headerHeight = '64px';
 const footerHeight = '58px';
 const mainHeight = `calc(100vh - ${headerHeight} - ${footerHeight})`;
 
 const Main = ({ children, page, additionalClasses }) => {
+  const { needsEmailVerification } = useUser();
+  
   // For draft page, use full width without container padding
   let contentClasses = page === 'draft' ? "" : "container py-3";
   if(additionalClasses) contentClasses += (contentClasses ? " " : "") + additionalClasses;
@@ -35,8 +38,16 @@ const Main = ({ children, page, additionalClasses }) => {
           <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../notes')}>
             <EmailIcon color={page === 'notes' ? 'primary' : ''}></EmailIcon>
           </div>
-          <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../settings')}>
+          <div className="col-3 pb-4 pt-2 position-relative" onClick={() => window.location.assign('../settings')}>
             <SettingsIcon color={page === 'settings' ? 'primary' : ''}></SettingsIcon>
+            {needsEmailVerification && (
+              <span 
+                className="position-absolute top-0 start-50 translate-middle p-1 bg-danger border border-light rounded-circle"
+                style={{ width: '8px', height: '8px', marginTop: '8px' }}
+              >
+                <span className="visually-hidden">Email verification needed</span>
+              </span>
+            )}
           </div>
         </div>
       </nav>

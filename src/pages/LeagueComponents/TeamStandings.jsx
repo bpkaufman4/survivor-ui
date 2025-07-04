@@ -49,30 +49,59 @@ export default function TeamStandings({ leagueId }) {
   if(error) return <p>Something went wrong</p>
 
   return (
-    <table className="w-100">
-      <thead>
-        <tr>
-          <th colSpan={2}>Team Rank</th>
-          <th>Players</th>
-          <th>Bonus</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        {standings && standings.map((team, i) => {
-
-          return (
-            <tr key={team.teamId}>
-              <td>{(i+1)}</td>
-              <td><a href={`../../team/${team.teamId}`}>{team.name}<br></br>{team.firstName} {team.lastName}</a></td>
-              <td dangerouslySetInnerHTML={{__html: team.playersHTML}}></td>
-              <td>{team.bonus}</td>
-              <td>{team.totalPoints}</td>
-            </tr>
-          )
-        })}
-      </tbody>
-    </table>
+    <div className="card shadow-sm">
+      <div className="card-header bg-primary text-white">
+        <h5 className="card-title mb-0">Team Standings</h5>
+      </div>
+      <div className="card-body p-0">
+        <div className="table-responsive">
+          <table className="table table-hover mb-0">
+            <thead className="table-light">
+              <tr>
+                <th className="text-center" style={{ width: '60px' }}>Rank</th>
+                <th>Team</th>
+                <th>Players</th>
+                <th className="text-center">Bonus</th>
+                <th className="text-center">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {standings && standings.map((team, i) => {
+                const rankClass = i === 0 ? 'text-warning fw-bold' : i === 1 ? 'text-secondary fw-bold' : i === 2 ? 'text-dark fw-bold' : '';
+                
+                return (
+                  <tr key={team.teamId}>
+                    <td className={`text-center ${rankClass}`}>
+                      {i < 3 && <span className="me-1">🏆</span>}
+                      {(i+1)}
+                    </td>
+                    <td>
+                      <div>
+                        <a href={`../../team/${team.teamId}`} className="text-decoration-none fw-semibold">
+                          {team.name}
+                        </a>
+                        <div className="text-muted small">
+                          {team.firstName} {team.lastName}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div dangerouslySetInnerHTML={{__html: team.playersHTML}} className="small"></div>
+                    </td>
+                    <td className="text-center">
+                      <span className="badge bg-secondary">{team.bonus}</span>
+                    </td>
+                    <td className="text-center">
+                      <span className="badge bg-primary fs-6">{team.totalPoints}</span>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   )
 
 }

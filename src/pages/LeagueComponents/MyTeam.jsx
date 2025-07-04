@@ -50,27 +50,38 @@ export default function MyTeam({ leagueId }) {
     }
 
     return (
-      <div className="player-box my-3 p-3">
-        <div className="d-flex justify-content-around">
-          <img src={player.photoUrl || icon} alt={`${player.firstName} ${player.lastName} from photoshoot`} className="my-player-image" />
+      <div className="card mb-3 shadow-sm">
+        <div className="card-body">
+          <div className="row align-items-center">
+            <div className="col-auto">
+              <img 
+                src={player.photoUrl || icon} 
+                alt={`${player.firstName} ${player.lastName} from photoshoot`} 
+                className="rounded-circle" 
+                style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+              />
+            </div>
+            <div className="col">
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 className="mb-1 fw-semibold">{player.firstName} {player.lastName}</h6>
+                  <span className="badge bg-info fs-6">{player.totalPoints} points</span>
+                </div>
+                <button className="btn btn-outline-secondary btn-sm" onClick={toggleExpanded}>
+                  {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                  <span className="ms-1 d-none d-sm-inline">
+                    {expanded ? 'Hide Details' : 'Show Details'}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          {expanded && (
+            <div className="mt-3 pt-3 border-top">
+              <PlayerEpisodeScores playerId={player.playerId}></PlayerEpisodeScores>
+            </div>
+          )}
         </div>
-        <div className="d-flex justify-content-between align-items-center mt-3">
-          <p className="m-0">{player.firstName} {player.lastName} - {player.totalPoints} points</p>
-          <button className="btn" onClick={toggleExpanded}>
-            {(() => {
-              if(expanded) {
-                return <ExpandLessIcon></ExpandLessIcon>
-              } else {
-                return <ExpandMoreIcon></ExpandMoreIcon>
-              }
-            })()}
-          </button>
-        </div>
-        {(() => {
-          if(expanded) {
-            return <PlayerEpisodeScores playerId={player.playerId}></PlayerEpisodeScores>
-          }
-        })()}
       </div>
     )
   }
@@ -79,14 +90,24 @@ export default function MyTeam({ leagueId }) {
   if(error) return <p>Something went wrong</p>
 
   return (
-    <>
-      <h5>{team.name}</h5>
-      <p>Score: {team.totalPoints}</p>
-      {
-        team && team.players.map(p => {
-          return <ScoreExpand key={p.playerId} player={p}></ScoreExpand>
-        })
-      }
-    </>
+    <div className="card shadow-sm">
+      <div className="card-header bg-info text-white">
+        <div className="d-flex justify-content-between align-items-center">
+          <h5 className="card-title mb-0">{team.name}</h5>
+          <span className="badge bg-light text-dark fs-6">Total: {team.totalPoints} points</span>
+        </div>
+      </div>
+      <div className="card-body">
+        {team && team.players && team.players.length > 0 ? (
+          team.players.map(p => {
+            return <ScoreExpand key={p.playerId} player={p}></ScoreExpand>
+          })
+        ) : (
+          <div className="text-center text-muted py-4">
+            <p>No players on your team yet.</p>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

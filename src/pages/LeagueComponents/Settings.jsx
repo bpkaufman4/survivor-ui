@@ -282,112 +282,171 @@ export default function Settings({ leagueId, leagueName, isDraftComplete, passwo
     return;
   }
   return (
-    <>
-      <h5 className="d-flex align-items-center justify-content-between">
-        <span>League Settings</span>
-        <button onClick={saveLeagueSettings} className="btn"><Save></Save></button>
-        </h5>      <label htmlFor="leagueName" className="form-label">Name</label>
-      <input type="text" className="form-control mb-3" value={leagueNameEdit} onChange={changeLeagueName} />
-      
-      <div className="form-check mb-3">
-        <input 
-          className="form-check-input" 
-          type="checkbox" 
-          id="privateToggle"
-          checked={isPrivate}
-          onChange={changePrivateToggle}
-        />
-        <label className="form-check-label" htmlFor="privateToggle">
-          Private League
-        </label>
-      </div>
-      
-      {isPrivate && (        <div className="mb-3">
-          <label htmlFor="leaguePassword" className="form-label">League Password</label>
-          <input 
-            type="text" 
-            className="form-control" 
-            id="leaguePassword"
-            value={leaguePassword}
-            onChange={changePassword}
-            placeholder="Enter a password for your league"
-          />
-          <div className="form-text">
-            Players will need this password to join your private league.
+    <div className="settings-container">
+      {/* League Settings Card */}
+      <div className="card shadow-sm mb-4">
+        <div className="card-header bg-dark text-white">
+          <div className="d-flex align-items-center justify-content-between">
+            <h5 className="card-title mb-0">League Settings</h5>
+            <button onClick={saveLeagueSettings} className="btn btn-outline-light btn-sm">
+              <Save fontSize="small" className="me-1" />
+              Save
+            </button>
           </div>
         </div>
-      )}
-
-      {!isDraftComplete && (
-        <>
-          <h5 className="d-flex align-items-center justify-content-between">
-            <span>Draft Settings</span>
-            <button onClick={saveDraftSettings} className="btn" disabled={isDraftStarted}><Save></Save></button>
-          </h5>          {isDraftStarted && hasDraft && (
-            <div className="alert alert-warning mb-3" role="alert">
-              <strong>Draft Started:</strong> Draft settings cannot be modified once the draft has begun.
+        <div className="card-body">
+          <div className="mb-3">
+            <label htmlFor="leagueName" className="form-label fw-semibold">League Name</label>
+            <input 
+              type="text" 
+              className="form-control" 
+              id="leagueName"
+              value={leagueNameEdit} 
+              onChange={changeLeagueName} 
+            />
+          </div>
+          
+          <div className="form-check mb-3">
+            <input 
+              className="form-check-input" 
+              type="checkbox" 
+              id="privateToggle"
+              checked={isPrivate}
+              onChange={changePrivateToggle}
+            />
+            <label className="form-check-label fw-semibold" htmlFor="privateToggle">
+              Private League
+            </label>
+          </div>
+          
+          {isPrivate && (
+            <div className="mb-3">
+              <label htmlFor="leaguePassword" className="form-label fw-semibold">League Password</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                id="leaguePassword"
+                value={leaguePassword}
+                onChange={changePassword}
+                placeholder="Enter a password for your league"
+              />
+              <div className="form-text">
+                Players will need this password to join your private league.
+              </div>
             </div>
           )}
-          <label htmlFor="startDate" className="form-label">Start Time</label>
-          <input 
-            type="datetime-local" 
-            className="form-control mb-3" 
-            value={draftDate} 
-            onChange={changeStartDate}
-            disabled={isDraftStarted}
-          />          <label className="form-label">Time Per Pick</label>
-          <div className="d-flex align-items-center gap-2 mb-2">
-            <div className="d-flex align-items-center">
-              <input 
-                type="number" 
-                className="form-control" 
-                style={{width: '80px'}} 
-                value={pickTimeHours} 
-                onChange={changePickTimeHours}
-                min="0"
-                max="23"
+        </div>
+      </div>
+
+      {/* Draft Settings Card */}
+      {!isDraftComplete && (
+        <div className="card shadow-sm">
+          <div className="card-header bg-primary text-white">
+            <div className="d-flex align-items-center justify-content-between">
+              <h5 className="card-title mb-0">Draft Settings</h5>
+              <button 
+                onClick={saveDraftSettings} 
+                className="btn btn-outline-light btn-sm" 
                 disabled={isDraftStarted}
-              />
-              <small className="text-muted ms-1">hrs</small>
-            </div>
-            <div className="d-flex align-items-center">
-              <input 
-                type="number" 
-                className="form-control" 
-                style={{width: '80px'}} 
-                value={pickTimeMinutes} 
-                onChange={changePickTimeMinutes}
-                min="0"
-                max="59"
-                disabled={isDraftStarted}
-              />
-              <small className="text-muted ms-1">min</small>
-            </div>
-            <div className="d-flex align-items-center">
-              <input 
-                type="number" 
-                className="form-control" 
-                style={{width: '80px'}} 
-                value={pickTimeSeconds} 
-                onChange={changePickTimeSeconds}
-                min="0"
-                max="59"
-                disabled={isDraftStarted}
-              />
-              <small className="text-muted ms-1">sec</small>
+              >
+                <Save fontSize="small" className="me-1" />
+                Save
+              </button>
             </div>
           </div>
-          <small className="text-muted mb-3 d-block">
-            Total: {(pickTimeHours * 3600) + (pickTimeMinutes * 60) + pickTimeSeconds} seconds
-          </small>          <div className="d-flex justify-content-between align-items-center mb-2">
-            <p className="form-label w-auto m-0">
-              Draft Order 
+          <div className="card-body">
+            {isDraftStarted && hasDraft && (
+              <div className="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                <span className="me-2">⚠️</span>
+                <div>
+                  <strong>Draft Started:</strong> Draft settings cannot be modified once the draft has begun.
+                </div>
+              </div>
+            )}
+
+            <div className="mb-3">
+              <label htmlFor="startDate" className="form-label fw-semibold">Draft Start Time</label>
+              <input 
+                type="datetime-local" 
+                className="form-control" 
+                id="startDate"
+                value={draftDate} 
+                onChange={changeStartDate}
+                disabled={isDraftStarted}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label fw-semibold">Time Per Pick</label>
+              <div className="row g-2 mb-2">
+                <div className="col-auto">
+                  <div className="input-group input-group-sm">
+                    <input 
+                      type="number" 
+                      className="form-control" 
+                      style={{width: '80px'}} 
+                      value={pickTimeHours} 
+                      onChange={changePickTimeHours}
+                      min="0"
+                      max="23"
+                      disabled={isDraftStarted}
+                    />
+                    <span className="input-group-text">hrs</span>
+                  </div>
+                </div>
+                <div className="col-auto">
+                  <div className="input-group input-group-sm">
+                    <input 
+                      type="number" 
+                      className="form-control" 
+                      style={{width: '80px'}} 
+                      value={pickTimeMinutes} 
+                      onChange={changePickTimeMinutes}
+                      min="0"
+                      max="59"
+                      disabled={isDraftStarted}
+                    />
+                    <span className="input-group-text">min</span>
+                  </div>
+                </div>
+                <div className="col-auto">
+                  <div className="input-group input-group-sm">
+                    <input 
+                      type="number" 
+                      className="form-control" 
+                      style={{width: '80px'}} 
+                      value={pickTimeSeconds} 
+                      onChange={changePickTimeSeconds}
+                      min="0"
+                      max="59"
+                      disabled={isDraftStarted}
+                    />
+                    <span className="input-group-text">sec</span>
+                  </div>
+                </div>
+              </div>
+              <small className="text-muted">
+                Total: <span className="fw-semibold">{(pickTimeHours * 3600) + (pickTimeMinutes * 60) + pickTimeSeconds}</span> seconds per pick
+              </small>
+            </div>
+
+            <div className="mb-3">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <label className="form-label fw-semibold mb-0">Draft Order</label>
+                {!isDraftStarted && (
+                  <button 
+                    onClick={randomizeDraftOrder} 
+                    className="btn btn-outline-secondary btn-sm"
+                  >
+                    🎲 Randomize
+                  </button>
+                )}
+              </div>
               {!isDraftStarted && (
-                <>
-                  (Drag and drop or <span onClick={randomizeDraftOrder} className="text-primary text-decoration-underline">randomize</span>)
-                </>
+                <small className="text-muted mb-3 d-block">
+                  Drag and drop teams to reorder, or use the randomize button
+                </small>
               )}
-            </p>
           </div>
           <Reorder.Group as="div" axis="y" values={draftOrder} onReorder={isDraftStarted ? () => {} : changeDraftOrder}>
             {draftOrder.map((team, i) => (
@@ -403,14 +462,24 @@ export default function Settings({ leagueId, leagueName, isDraftComplete, passwo
               </Reorder.Item>
             ))}
           </Reorder.Group>
-        </>
+        </div>
+      </div>
       )}
+
+      {/* Draft Complete Alert */}
       {isDraftComplete && (
-        <div className="alert alert-info mt-3" role="alert">
-          <strong>Draft Complete:</strong> The draft for this league has been completed. Draft settings are no longer available.
+        <div className="card shadow-sm border-success">
+          <div className="card-body">
+            <div className="alert alert-success mb-0 d-flex align-items-center" role="alert">
+              <span className="me-2">✅</span>
+              <div>
+                <strong>Draft Complete:</strong> The draft for this league has been completed. Draft settings are no longer available.
+              </div>
+            </div>
+          </div>
         </div>
       )}
-    </>
+    </div>
   )
 
   return <></>

@@ -39,7 +39,7 @@ function Login() {
         window.location.assign(reply.target);
       } else {
         Swal.fire({
-          text: 'User not found',
+          text: 'Invalid username/email or password',
           toast: true,
           icon: 'error',
           timer: 3000,
@@ -67,7 +67,7 @@ function Login() {
       <div className="d-flex flex-column justify-content-center h-100">
         <form id="loginForm" onSubmit={login}>
           <div className="input-group mb-3">
-            <input type="text" className="form-control" name="username" id="username" placeholder="Username" aria-label="Username" aria-describedby="Username"/>
+            <input type="text" className="form-control" name="username" id="username" placeholder="Username or Email" aria-label="Username or Email" aria-describedby="Username"/>
           </div>
           <div className="input-group mb-3">
             <input type="password" className="form-control" name="password" id="password" placeholder="Password" aria-label="Password"/>

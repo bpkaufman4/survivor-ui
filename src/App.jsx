@@ -17,12 +17,15 @@ import AdminDraft from "./pages/AdminDraft";
 import Notes from "./pages/Notes";
 import Draft from "./pages/Draft";
 import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
 import Leagues from "./pages/Leagues";
 import Players from "./pages/Players";
+import { UserProvider } from "./contexts/UserContext";
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <UserProvider>
+      <BrowserRouter>
       <Routes>
         <Route index element={
           <RequireUser>
@@ -31,6 +34,7 @@ export default function App() {
         } />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="verify-email" element={<VerifyEmail />} />
         <Route path="admin-episodes" element={
           <RequireAdmin>
             <AdminEpisodes />
@@ -98,5 +102,6 @@ export default function App() {
         } />
       </Routes>
     </BrowserRouter>
+    </UserProvider>
   );
 }
