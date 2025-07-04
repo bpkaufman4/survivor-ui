@@ -12,18 +12,18 @@ export default function Notes() {
     const spanText = expanded ? 'Show Less' : 'Show More';
 
     return (
-      <div className="col-12 mb-3">
-        <div className="card">
-          <div className="card-body">
+      <div className="col-12 col-md-6 col-lg-4 mb-3">
+        <div className="card h-100 shadow-sm">
+          <div className="card-body d-flex flex-column">
             <div className="d-flex justify-content-between align-items-start mb-2">
-              <h6 className="text-muted mb-0">
+              <h6 className="text-muted mb-0 small">
                 {DateTime.fromISO(note.createdAt).toLocaleString(DateTime.DATETIME_SHORT)}
               </h6>
             </div>
-            <p className="mb-2">{message}</p>
+            <p className="mb-2 flex-grow-1">{message}</p>
             {note.note.length > 100 && (
               <button 
-                className="btn btn-link p-0 text-primary" 
+                className="btn btn-link p-0 text-primary align-self-start" 
                 onClick={() => setExpanded(!expanded)}
               >
                 {spanText}

@@ -88,11 +88,24 @@ export default function JoinButton({ league }) {
   }
 
   return (
-    <button key={league.leagueId} className="w-100 btn btn-outline-primary d-flex mb-2 justify-content-between align-items-center" onClick={joinLeagueSwal}>
-      <div>{league.name} - {league.owner.userName}</div>
-      <div>
-        {league.privateInd && <LockOutlineIcon />}
+    <div className="card h-100 shadow-sm">
+      <div className="card-body d-flex flex-column">
+        <div className="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h5 className="card-title mb-1">{league.name}</h5>
+            <p className="card-text text-muted mb-0">by {league.owner.userName}</p>
+          </div>
+          <div>
+            {league.privateInd && <LockOutlineIcon color="action" fontSize="small" />}
+          </div>
+        </div>
+        <button 
+          className="btn btn-primary mt-auto" 
+          onClick={joinLeagueSwal}
+        >
+          Join League
+        </button>
       </div>
-    </button>
+    </div>
   )
 }

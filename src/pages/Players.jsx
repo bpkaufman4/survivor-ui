@@ -68,11 +68,11 @@ function Players() {
         
         <div className="row g-3">
           {players.map((player, index) => (
-            <div key={player.playerId} className="col-12">
-              <div className="card">
-                <div className="card-body">
+            <div key={player.playerId} className="col-12 col-md-6 col-lg-4">
+              <div className="card h-100 shadow-sm">
+                <div className="card-body d-flex flex-column">
                   {/* Top Row: Photo and Info */}
-                  <div className="d-flex align-items-start mb-2">
+                  <div className="d-flex align-items-start mb-3">
                     {/* Player Photo */}
                     <div className="me-3">
                       <img 
@@ -80,8 +80,8 @@ function Players() {
                         alt={`${player.firstName} ${player.lastName}`}
                         className="rounded-circle"
                         style={{
-                          width: '50px',
-                          height: '50px',
+                          width: '60px',
+                          height: '60px',
                           objectFit: 'cover'
                         }}
                       />
@@ -90,8 +90,8 @@ function Players() {
                     {/* Player Info */}
                     <div className="flex-grow-1">
                       {/* Name and Rank */}
-                      <div className="d-flex justify-content-between align-items-center mb-1">
-                        <h5 className="mb-0" style={{ fontSize: '1.1rem' }}>
+                      <div className="d-flex justify-content-between align-items-start mb-1">
+                        <h5 className="mb-0" style={{ fontSize: '1.1rem', lineHeight: '1.2' }}>
                           {player.firstName} {player.lastName}
                         </h5>
                         <span className="badge bg-primary">
@@ -99,43 +99,47 @@ function Players() {
                         </span>
                       </div>
                       
-                      {/* Tribe and Points */}
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <small className="text-muted">
-                          {player.tribe ? player.tribe.name : 'No Tribe'}
-                        </small>
-                        <div className="text-end">
-                          <div className="fw-bold text-primary fs-4">
-                            {player.totalPoints}
-                          </div>
-                          <small className="text-muted">points</small>
-                        </div>
+                      {/* Tribe */}
+                      <small className="text-muted">
+                        {player.tribe ? player.tribe.name : 'No Tribe'}
+                      </small>
+                    </div>
+                  </div>
+                  
+                  {/* Points Section */}
+                  <div className="text-center mb-3">
+                    <div className="fw-bold text-primary" style={{ fontSize: '2rem' }}>
+                      {player.totalPoints}
+                    </div>
+                    <small className="text-muted">Total Points</small>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="progress mb-3" style={{ height: '8px' }}>
+                    <div 
+                      className="progress-bar bg-primary" 
+                      role="progressbar" 
+                      style={{ 
+                        width: players.length > 0 ? 
+                          `${(player.totalPoints / Math.max(...players.map(p => p.totalPoints))) * 100}%` : 
+                          '0%'
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Stats */}
+                  <div className="row text-center mt-auto">
+                    <div className="col-6">
+                      <div className="fw-bold">{player.episodeCount}</div>
+                      <small className="text-muted">Episodes</small>
+                    </div>
+                    <div className="col-6">
+                      <div className="fw-bold">
+                        {player.episodeCount > 0 ? 
+                          (player.totalPoints / player.episodeCount).toFixed(1) : 
+                          '0.0'}
                       </div>
-                      
-                      {/* Progress Bar */}
-                      <div className="progress mb-2" style={{ height: '6px' }}>
-                        <div 
-                          className="progress-bar bg-primary" 
-                          role="progressbar" 
-                          style={{ 
-                            width: players.length > 0 ? 
-                              `${(player.totalPoints / Math.max(...players.map(p => p.totalPoints))) * 100}%` : 
-                              '0%'
-                          }}
-                        />
-                      </div>
-                      
-                      {/* Stats */}
-                      <div className="d-flex justify-content-between">
-                        <small className="text-muted">
-                          {player.episodeCount} episodes
-                        </small>
-                        <small className="text-muted">
-                          Avg: {player.episodeCount > 0 ? 
-                            (player.totalPoints / player.episodeCount).toFixed(1) : 
-                            '0.0'} pts/ep
-                        </small>
-                      </div>
+                      <small className="text-muted">Avg/Episode</small>
                     </div>
                   </div>
                 </div>

@@ -98,33 +98,104 @@ function Register() {
 
   return(
     <Main page={"home"}>
-      <div className="d-flex flex-column justify-content-center h-100">
-        <form id="loginForm" onSubmit={register}>
-          <div className="input-group mb-3">
-            <input type="text" className="form-control" name="username" id="username" placeholder="Username" aria-label="Username" aria-describedby="Username"/>
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <div className="col-12 col-sm-8 col-md-6 col-lg-4">
+          <div className="card shadow">
+            <div className="card-body p-4">
+              <div className="text-center mb-4">
+                <h2 className="card-title">Create Account</h2>
+                <p className="text-muted">Join Fantasy Survivor</p>
+              </div>
+              
+              <form id="loginForm" onSubmit={register}>
+                <div className="row">
+                  <div className="col-6 mb-3">
+                    <label htmlFor="firstName" className="form-label">First Name</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      name="firstName" 
+                      id="firstName" 
+                      placeholder="First Name" 
+                      aria-label="First Name"
+                    />
+                  </div>
+                  <div className="col-6 mb-3">
+                    <label htmlFor="lastName" className="form-label">Last Name</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      name="lastName" 
+                      id="lastName" 
+                      placeholder="Last Name" 
+                      aria-label="Last Name"
+                    />
+                  </div>
+                </div>
+                
+                <div className="mb-3">
+                  <label htmlFor="username" className="form-label">Username</label>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    name="username" 
+                    id="username" 
+                    placeholder="Choose a username" 
+                    aria-label="Username"
+                  />
+                </div>
+                
+                <div className="mb-3">
+                  <label htmlFor="email" className="form-label">Email</label>
+                  <input 
+                    type="email" 
+                    className="form-control" 
+                    name="email" 
+                    id="email" 
+                    placeholder="Enter your email" 
+                    aria-label="Email"
+                  />
+                </div>
+                
+                <div className="mb-3">
+                  <label htmlFor="password" className="form-label">Password</label>
+                  <input 
+                    type="password" 
+                    className="form-control" 
+                    name="password" 
+                    id="password" 
+                    placeholder="Create a password" 
+                    aria-label="Password"
+                  />
+                </div>
+                
+                <div className="mb-3">
+                  <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                  <input 
+                    type="password" 
+                    className="form-control" 
+                    name="confirmPassword" 
+                    id="confirmPassword" 
+                    placeholder="Confirm your password" 
+                    aria-label="Confirm Password"
+                  />
+                </div>
+                
+                <div className="mb-3">
+                  <button className="btn btn-primary w-100" type="submit">
+                    Sign Up
+                  </button>
+                </div>
+                
+                <div className="text-center">
+                  <p className="mb-0">
+                    Already have an account? <a href="login" className="text-decoration-none">Log In</a>
+                  </p>
+                </div>
+              </form>
+            </div>
           </div>
-          <div className="input-group mb-3">
-            <input type="email" className="form-control" name="email" id="email" placeholder="Email" aria-label="Email"/>
-          </div>
-          <div className="input-group mb-3">
-            <input type="text" className="form-control" name="firstName" id="firstName" placeholder="First Name" aria-label="First Name"/>
-          </div>
-          <div className="input-group mb-3">
-            <input type="text" className="form-control" name="lastName" id="lastName" placeholder="Last Name" aria-label="Last Name"/>
-          </div>
-          <div className="input-group mb-3">
-            <input type="password" className="form-control" name="password" id="password" placeholder="Password" aria-label="Password"/>
-          </div>
-          <div className="input-group mb-3">
-            <input type="password" className="form-control" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" aria-label="Confirm Password"/>
-          </div>
-          <div>
-            <button className="btn btn-primary w-100" type="submit">Sign Up</button>
-          </div>
-          <div>
-            <p>Already have an account? <a href="login">Log In</a></p>
-          </div>
-        </form>
+        </div>
       </div>
     </Main>
   )

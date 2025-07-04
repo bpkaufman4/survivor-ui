@@ -14,6 +14,7 @@ import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import AdminLeagues from "./pages/AdminLeagues"
 import AdminDraft from "./pages/AdminDraft";
+import AdminJobs from "./pages/AdminJobs";
 import Notes from "./pages/Notes";
 import Draft from "./pages/Draft";
 import Register from "./pages/Register";
@@ -58,6 +59,11 @@ export default function App() {
         <Route path="admin-polls" element={
           <RequireAdmin>
             <AdminSurveys />
+          </RequireAdmin>
+        } />
+        <Route path="admin-jobs" element={
+          <RequireAdmin>
+            <AdminJobs />
           </RequireAdmin>
         } />
         <Route path="league/:leagueId" element={

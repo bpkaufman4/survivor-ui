@@ -26,7 +26,10 @@ const adminPages = [
     display: 'Polls',
     link: 'admin-polls'
   },
-  
+  {
+    display: 'Jobs',
+    link: 'admin-jobs'
+  },
   {
     display: 'Tribes',
     link: 'admin-tribes'

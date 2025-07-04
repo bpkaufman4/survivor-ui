@@ -134,12 +134,14 @@ export default function AddButton() {
   }
 
   return (
-    <button 
-      className="w-100 btn btn-success d-flex mb-2 justify-content-center align-items-center" 
-      onClick={createLeagueSwal}
-    >
-      <AddIcon className="me-2" />
-      Create New League
-    </button>
+    <div className="text-center">
+      <button 
+        className="btn btn-success btn-lg" 
+        onClick={createLeagueSwal}
+      >
+        <AddIcon className="me-2" />
+        Create New League
+      </button>
+    </div>
   )
 }

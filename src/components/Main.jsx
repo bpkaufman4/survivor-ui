@@ -9,6 +9,7 @@ import { useUser } from '../contexts/UserContext';
 const headerHeight = '64px';
 const footerHeight = '58px';
 const mainHeight = `calc(100vh - ${headerHeight} - ${footerHeight})`;
+const desktopMainHeight = `calc(100vh - ${headerHeight})`;
 
 const Main = ({ children, page, additionalClasses }) => {
   const { needsEmailVerification } = useUser();
@@ -18,17 +19,89 @@ const Main = ({ children, page, additionalClasses }) => {
   if(additionalClasses) contentClasses += (contentClasses ? " " : "") + additionalClasses;
 
   return (
-    <>
-      <nav className="navbar bg-dark d-flex justify-content-around" style={{height: headerHeight}} data-bs-theme="dark">
+    <div className="d-flex flex-column min-vh-100">
+      {/* Desktop Header Navigation - Only visible on desktop */}
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark d-none d-lg-flex" style={{height: headerHeight}}>
+        <div className="container-fluid">
+          {/* Brand */}
+          <div 
+            className="navbar-brand d-flex align-items-center"
+            style={{cursor: 'pointer'}}
+            onClick={() => window.location.assign(localStorage.getItem('homeTarget') || '/')}
+          >
+            <img 
+              src={icon} 
+              alt="Fantasy Survivor" 
+              height="32"
+              className="me-2"
+            />
+            <span>Fantasy Survivor</span>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="navbar-nav flex-row ms-auto">
+            <div 
+              className={`nav-link text-white px-3 py-2 mx-1 rounded d-flex align-items-center ${page === 'home' || page === 'draft' ? 'bg-primary' : ''}`}
+              style={{cursor: 'pointer'}}
+              onClick={() => window.location.assign('../')}
+            >
+              <HomeIcon className="me-1" fontSize="small" />
+              Home
+            </div>
+            <div 
+              className={`nav-link text-white px-3 py-2 mx-1 rounded d-flex align-items-center ${page === 'players' ? 'bg-primary' : ''}`}
+              style={{cursor: 'pointer'}}
+              onClick={() => window.location.assign('../players')}
+            >
+              <PoolIcon className="me-1" fontSize="small" />
+              Players
+            </div>
+            <div 
+              className={`nav-link text-white px-3 py-2 mx-1 rounded d-flex align-items-center ${page === 'notes' ? 'bg-primary' : ''}`}
+              style={{cursor: 'pointer'}}
+              onClick={() => window.location.assign('../notes')}
+            >
+              <EmailIcon className="me-1" fontSize="small" />
+              Notes
+            </div>
+            <div 
+              className={`nav-link text-white px-3 py-2 mx-1 rounded d-flex align-items-center position-relative ${page === 'settings' ? 'bg-primary' : ''}`}
+              style={{cursor: 'pointer'}}
+              onClick={() => window.location.assign('../settings')}
+            >
+              <SettingsIcon className="me-1" fontSize="small" />
+              Settings
+              {needsEmailVerification && (
+                <span 
+                  className="position-absolute top-0 start-100 translate-middle bg-danger rounded-circle"
+                  style={{ width: '8px', height: '8px', marginLeft: '-4px', marginTop: '4px' }}
+                >
+                  <span className="visually-hidden">Email verification needed</span>
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Header - Only visible on mobile */}
+      <nav className="navbar bg-dark d-lg-none d-flex justify-content-around" style={{height: headerHeight}} data-bs-theme="dark">
         <img src={icon} className="h-100" onClick={() => window.location.assign(localStorage.getItem('homeTarget') || '/')} />
       </nav>
-      <main style={{height: mainHeight, overflowY: 'overlay'}}>
-        <div className={contentClasses}>
+
+      {/* Main Content Area */}
+      <main className="flex-grow-1" style={{
+        height: window.innerWidth >= 992 ? desktopMainHeight : mainHeight,
+        overflowY: 'auto'
+      }}>
+        <div className={`${contentClasses} ${window.innerWidth >= 992 && page !== 'draft' ? 'py-4' : ''}`}>
           {children}
         </div>
       </main>
-      <nav className='fixed-bottom border-top border-black' style={{height: footerHeight}}>
-        <div className="row text-center">
+
+      {/* Mobile Bottom Navigation - Only visible on mobile */}
+      <nav className='d-lg-none fixed-bottom border-top border-black' style={{height: footerHeight}}>
+        <div className="row text-center bg-white">
           <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../')}>
             <HomeIcon color={page === 'home' || page === 'draft' ? 'primary' : ''}></HomeIcon>
           </div>
@@ -51,7 +124,7 @@ const Main = ({ children, page, additionalClasses }) => {
           </div>
         </div>
       </nav>
-    </>
+    </div>
   )
 }
 
