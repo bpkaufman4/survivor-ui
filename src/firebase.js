@@ -48,37 +48,62 @@ export const registerServiceWorker = async () => {
 // Function to request notification permission and get FCM token
 export const requestNotificationPermission = async () => {
   try {
+    console.log('[Firebase] Starting requestNotificationPermission...');
+    
     if (!isNotificationSupported()) {
-      console.log('Notifications not supported in this browser');
+      console.log('[Firebase] Notifications not supported in this browser');
       return null;
     }
 
     // Register service worker first
+    console.log('[Firebase] Registering service worker...');
     await registerServiceWorker();
+    console.log('[Firebase] Service worker registered successfully');
+
+    // Check current permission
+    console.log('[Firebase] Current permission:', Notification.permission);
 
     const permission = await Notification.requestPermission();
+    console.log('[Firebase] Permission request result:', permission);
     
     if (permission === 'granted') {
-      console.log('Notification permission granted.');
+      console.log('[Firebase] Notification permission granted, getting FCM token...');
       
-      // Get the FCM token
-      const token = await getToken(messaging, {
-        vapidKey: VAPID_KEY
-      });
+      // Add a small delay for iOS
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      if (token) {
-        console.log('FCM Token:', token);
-        return token;
-      } else {
-        console.log('No registration token available.');
+      try {
+        // Get the FCM token
+        const token = await getToken(messaging, {
+          vapidKey: VAPID_KEY
+        });
+        
+        if (token) {
+          console.log('[Firebase] FCM Token received:', token.substring(0, 20) + '...');
+          
+          // Automatically send to server
+          const success = await sendTokenToServer(token);
+          if (success) {
+            console.log('[Firebase] Token sent to server successfully');
+            return token;
+          } else {
+            console.error('[Firebase] Failed to send token to server');
+            return token; // Return token anyway, server issue is separate
+          }
+        } else {
+          console.log('[Firebase] No registration token available.');
+          return null;
+        }
+      } catch (tokenError) {
+        console.error('[Firebase] Error getting FCM token:', tokenError);
         return null;
       }
     } else {
-      console.log('Notification permission denied.');
+      console.log('[Firebase] Notification permission denied:', permission);
       return null;
     }
   } catch (error) {
-    console.error('Error getting notification permission:', error);
+    console.error('[Firebase] Error in requestNotificationPermission:', error);
     return null;
   }
 };
@@ -86,6 +111,8 @@ export const requestNotificationPermission = async () => {
 // Function to send FCM token to your backend
 export const sendTokenToServer = async (token) => {
   try {
+    console.log('[Firebase] Sending token to server...');
+    
     // Collect device information
     const deviceInfo = {
       userAgent: navigator.userAgent,
@@ -93,8 +120,12 @@ export const sendTokenToServer = async (token) => {
       language: navigator.language,
       screenResolution: `${screen.width}x${screen.height}`,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      lastSeen: new Date().toISOString()
+      lastSeen: new Date().toISOString(),
+      isPWA: window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches,
+      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
     };
+
+    console.log('[Firebase] Device info:', deviceInfo);
 
     const response = await fetch(`${apiUrl}user/fcm-token`, {
       method: 'POST',
@@ -110,14 +141,15 @@ export const sendTokenToServer = async (token) => {
 
     if (response.ok) {
       const result = await response.json();
-      console.log('FCM token sent to server successfully:', result);
+      console.log('[Firebase] FCM token sent to server successfully:', result);
       return true;
     } else {
-      console.error('Failed to send FCM token to server');
+      const errorText = await response.text();
+      console.error('[Firebase] Failed to send FCM token to server:', response.status, errorText);
       return false;
     }
   } catch (error) {
-    console.error('Error sending FCM token to server:', error);
+    console.error('[Firebase] Error sending FCM token to server:', error);
     return false;
   }
 };

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   isNotificationSupported, 
   initializeFCM,
-  requestNotificationPermission 
+  requestNotificationPermission,
+  sendTokenToServer
 } from '../../firebase';
 
 const PushNotificationSettings = () => {
@@ -11,34 +12,73 @@ const PushNotificationSettings = () => {
     return Notification.permission;
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState([]);
 
-  const handleEnableNotifications = async () => {
-    setIsLoading(true);
-    try {
-      const token = await initializeFCM();
-      if (token) {
-        setNotificationStatus('granted');
-      } else {
-        setNotificationStatus('denied');
-      }
-    } catch (error) {
-      console.error('Failed to enable notifications:', error);
-      setNotificationStatus('denied');
-    } finally {
-      setIsLoading(false);
-    }
+  const addDebugInfo = (message) => {
+    console.log('[PushNotifications]', message);
+    setDebugInfo(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
   };
+
+  useEffect(() => {
+    // Check if we're in a PWA
+    const isPWA = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+    addDebugInfo(`Environment: ${isPWA ? 'PWA' : 'Browser'}`);
+    addDebugInfo(`Platform: ${navigator.platform}`);
+    addDebugInfo(`User Agent: ${navigator.userAgent.includes('iPhone') ? 'iPhone' : 'Other'}`);
+    addDebugInfo(`Notification support: ${isNotificationSupported()}`);
+    addDebugInfo(`Current permission: ${Notification.permission}`);
+  }, []);
 
   const handleRequestPermission = async () => {
     setIsLoading(true);
+    setDebugInfo([]); // Clear previous debug info
+    
     try {
+      addDebugInfo('Starting permission request...');
+      
+      // Check if notifications are supported
+      if (!isNotificationSupported()) {
+        addDebugInfo('❌ Notifications not supported');
+        setNotificationStatus('not-supported');
+        return;
+      }
+
+      addDebugInfo('✅ Notifications supported');
+      
+      // Request permission
+      addDebugInfo('Requesting notification permission...');
+      const permission = await Notification.requestPermission();
+      addDebugInfo(`Permission result: ${permission}`);
+      
+      if (permission !== 'granted') {
+        addDebugInfo('❌ Permission denied');
+        setNotificationStatus('denied');
+        return;
+      }
+
+      addDebugInfo('✅ Permission granted, getting FCM token...');
+      
+      // Get FCM token
       const token = await requestNotificationPermission();
+      addDebugInfo(`FCM Token received: ${token ? 'Yes' : 'No'}`);
+      
       if (token) {
-        setNotificationStatus('granted');
+        addDebugInfo('Sending token to server...');
+        const success = await sendTokenToServer(token);
+        addDebugInfo(`Server response: ${success ? 'Success' : 'Failed'}`);
+        
+        if (success) {
+          setNotificationStatus('granted');
+          addDebugInfo('✅ Push notifications enabled successfully!');
+        } else {
+          addDebugInfo('❌ Failed to save token to server');
+        }
       } else {
+        addDebugInfo('❌ Failed to get FCM token');
         setNotificationStatus('denied');
       }
     } catch (error) {
+      addDebugInfo(`❌ Error: ${error.message}`);
       console.error('Failed to request permission:', error);
       setNotificationStatus('denied');
     } finally {
@@ -94,14 +134,41 @@ const PushNotificationSettings = () => {
       
       case 'denied':
         return (
-          <div className="alert alert-danger">
-            <i className="fas fa-times-circle me-2"></i>
-            Push notifications are blocked. To enable them, please allow notifications in your browser settings and refresh the page.
+          <div>
+            <div className="alert alert-danger">
+              <i className="fas fa-times-circle me-2"></i>
+              Push notifications are blocked. To enable them, please allow notifications in your browser settings and refresh the page.
+            </div>
+            {debugInfo.length > 0 && (
+              <div className="mt-3">
+                <h6>Debug Information:</h6>
+                <div className="alert alert-secondary">
+                  <small>
+                    {debugInfo.map((info, index) => (
+                      <div key={index}>{info}</div>
+                    ))}
+                  </small>
+                </div>
+              </div>
+            )}
           </div>
         );
       
       default:
-        return null;
+        return (
+          <div>
+            {debugInfo.length > 0 && (
+              <div className="alert alert-info">
+                <h6>Debug Information:</h6>
+                <small>
+                  {debugInfo.map((info, index) => (
+                    <div key={index}>{info}</div>
+                  ))}
+                </small>
+              </div>
+            )}
+          </div>
+        );
     }
   };
 
@@ -122,6 +189,22 @@ const PushNotificationSettings = () => {
               <i className="fas fa-info-circle me-1"></i>
               You can manage notification types in the Email Preferences section above.
             </small>
+            {debugInfo.length > 0 && (
+              <div className="mt-2">
+                <details>
+                  <summary className="text-primary" style={{cursor: 'pointer'}}>
+                    <small>Show Debug Info</small>
+                  </summary>
+                  <div className="alert alert-secondary mt-2">
+                    <small>
+                      {debugInfo.map((info, index) => (
+                        <div key={index}>{info}</div>
+                      ))}
+                    </small>
+                  </div>
+                </details>
+              </div>
+            )}
           </div>
         )}
       </div>
