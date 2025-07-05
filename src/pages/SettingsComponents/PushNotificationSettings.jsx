@@ -310,6 +310,51 @@ const PushNotificationSettings = () => {
                   className="btn btn-outline-info btn-sm" 
                   onClick={async () => {
                     try {
+                      addDebugInfo('🔍 Checking foreground notification log...');
+                      
+                      const foregroundLog = JSON.parse(localStorage.getItem('foregroundNotifications') || '[]');
+                      addDebugInfo(`Found ${foregroundLog.length} foreground notification entries`);
+                      
+                      if (foregroundLog.length > 0) {
+                        addDebugInfo('📱 Recent foreground notifications:');
+                        foregroundLog.slice(0, 5).forEach((entry, index) => {
+                          const time = new Date(entry.timestamp).toLocaleTimeString();
+                          addDebugInfo(`  ${index + 1}. ${time}: ${entry.title} (Server ID: ${entry.serverNotificationId})`);
+                        });
+                        
+                        // Compare with service worker log to identify the issue
+                        await fetchServiceWorkerLog();
+                        const backgroundCount = swLog.filter(e => e.action === 'RECEIVED_BACKGROUND_MESSAGE').length;
+                        const foregroundCount = foregroundLog.length;
+                        
+                        addDebugInfo(`📊 Notification Summary:`);
+                        addDebugInfo(`  🔥 Foreground messages: ${foregroundCount}`);
+                        addDebugInfo(`  🔔 Background messages: ${backgroundCount}`);
+                        
+                        if (foregroundCount > 0 && backgroundCount > 0) {
+                          addDebugInfo('⚠️  Both foreground AND background notifications detected!');
+                          addDebugInfo('This explains the duplicates - iOS is showing notifications via both channels');
+                        } else if (foregroundCount > 0) {
+                          addDebugInfo('ℹ️  Only foreground notifications detected');
+                        } else if (backgroundCount > 0) {
+                          addDebugInfo('ℹ️  Only background notifications detected');
+                        }
+                      } else {
+                        addDebugInfo('No foreground notifications found');
+                      }
+                    } catch (error) {
+                      addDebugInfo(`❌ Error checking foreground log: ${error.message}`);
+                    }
+                  }}
+                >
+                  <i className="fas fa-fire me-1"></i>
+                  Check Foreground Log
+                </button>
+                
+                <button 
+                  className="btn btn-outline-info btn-sm" 
+                  onClick={async () => {
+                    try {
                       addDebugInfo('🔍 Checking service worker and FCM status...');
                       
                       if (!('serviceWorker' in navigator)) {
