@@ -27,13 +27,8 @@ const Main = ({ children, page, additionalClasses }) => {
   let contentClasses = page === 'draft' ? "" : "container py-3";
   if(additionalClasses) contentClasses += (contentClasses ? " " : "") + additionalClasses;
 
-  // Calculate main content height accounting for safe areas
-  const mainHeight = isDesktop 
-    ? `calc(100vh - ${headerHeight})` 
-    : `calc(100vh - ${headerHeight} - ${footerHeight} - env(safe-area-inset-top) - env(safe-area-inset-bottom))`;
-
   return (
-    <div className="d-flex flex-column" style={{ height: '100vh', overflow: 'hidden' }}>
+    <div className="d-flex flex-column h-100">
       {/* Desktop Header Navigation - Only visible on desktop */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark d-none d-lg-flex" style={{height: headerHeight, flexShrink: 0}}>
         <div className="container-fluid">
@@ -102,6 +97,7 @@ const Main = ({ children, page, additionalClasses }) => {
       <nav className="navbar bg-dark d-lg-none d-flex justify-content-around" style={{
         height: headerHeight,
         flexShrink: 0,
+        paddingTop: 'env(safe-area-inset-top, 0px)',
         paddingLeft: 'env(safe-area-inset-left, 0px)',
         paddingRight: 'env(safe-area-inset-right, 0px)'
       }} data-bs-theme="dark">
@@ -121,13 +117,14 @@ const Main = ({ children, page, additionalClasses }) => {
       </main>
 
       {/* Mobile Bottom Navigation - Only visible on mobile */}
-      <nav className='d-lg-none border-top border-black' style={{
+      <nav className='d-lg-none border-top border-black bg-white' style={{
         height: footerHeight,
         flexShrink: 0,
         paddingLeft: 'env(safe-area-inset-left, 0px)',
-        paddingRight: 'env(safe-area-inset-right, 0px)'
+        paddingRight: 'env(safe-area-inset-right, 0px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
       }}>
-        <div className="row text-center bg-white mx-0 h-100">
+        <div className="row text-center mx-0 h-100">
           <div className="col-3 d-flex flex-column justify-content-center align-items-center" onClick={() => window.location.assign('../')}>
             <HomeIcon color={page === 'home' || page === 'draft' ? 'primary' : ''}></HomeIcon>
           </div>
