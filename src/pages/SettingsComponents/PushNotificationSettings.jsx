@@ -287,6 +287,39 @@ const PushNotificationSettings = () => {
                   <i className="fas fa-cog me-1"></i>
                   Check SW Status
                 </button>
+                
+                <button 
+                  className="btn btn-outline-warning btn-sm" 
+                  onClick={async () => {
+                    try {
+                      addDebugInfo('Sending test notification to yourself...');
+                      const response = await fetch('/api/user/test-push', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'authorization': localStorage.getItem('jwt')
+                        },
+                        body: JSON.stringify({
+                          title: '🧪 Duplicate Test',
+                          body: `Test notification sent at ${new Date().toLocaleTimeString()}`,
+                          type: 'debug'
+                        })
+                      });
+                      
+                      if (response.ok) {
+                        addDebugInfo('✅ Test notification sent successfully');
+                        addDebugInfo('Wait a few seconds, then check the notification log to see if duplicates appear');
+                      } else {
+                        addDebugInfo('❌ Failed to send test notification');
+                      }
+                    } catch (error) {
+                      addDebugInfo(`❌ Test notification error: ${error.message}`);
+                    }
+                  }}
+                >
+                  <i className="fas fa-vial me-1"></i>
+                  Send Test Notification
+                </button>
               </div>
               
               {(swLog.length > 0 || debugInfo.some(info => info.includes('service worker'))) && (

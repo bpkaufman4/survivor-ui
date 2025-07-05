@@ -64,12 +64,20 @@ logNotification('SERVICE_WORKER_INITIALIZED', {
 // Service worker lifecycle events for debugging
 self.addEventListener('install', function(event) {
   console.log('[firebase-messaging-sw.js] Service worker installing...');
+  logNotification('SERVICE_WORKER_INSTALLING', {
+    timestamp: Date.now(),
+    message: 'Service worker install event triggered'
+  });
   // Immediately take control
   self.skipWaiting();
 });
 
 self.addEventListener('activate', function(event) {
   console.log('[firebase-messaging-sw.js] Service worker activating...');
+  logNotification('SERVICE_WORKER_ACTIVATING', {
+    timestamp: Date.now(),
+    message: 'Service worker activate event triggered'
+  });
   // Become available to all pages
   event.waitUntil(self.clients.claim());
 });
@@ -203,6 +211,13 @@ self.addEventListener('message', function(event) {
   
   if (event.data && event.data.type === 'get-notification-log') {
     console.log('[firebase-messaging-sw.js] Sending notification log, entries:', notificationLog.length);
+    
+    // Add a test entry when log is requested to verify logging is working
+    logNotification('LOG_REQUESTED', {
+      requestTime: new Date().toISOString(),
+      currentLogSize: notificationLog.length,
+      serviceWorkerActive: true
+    });
     
     // Send notification log back to main thread
     if (event.ports && event.ports[0]) {
