@@ -28,6 +28,10 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  /* Prevent rubber band scrolling on iOS */
+  overscroll-behavior: none;
+  /* Ensure touch scrolling works smoothly */
+  -webkit-overflow-scrolling: touch;
 }
 
 h1 {

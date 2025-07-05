@@ -5,6 +5,14 @@
   text-align: center;
 }
 
+/* iOS Safari specific styles */
+html {
+  /* Prevent iOS Safari from resizing text */
+  -webkit-text-size-adjust: 100%;
+  /* Prevent horizontal scrolling */
+  overflow-x: hidden;
+}
+
 /* Mobile PWA optimizations */
 @media (max-width: 991.98px) {
   #root {
@@ -21,6 +29,18 @@
   .container {
     padding-left: max(15px, env(safe-area-inset-left));
     padding-right: max(15px, env(safe-area-inset-right));
+  }
+  
+  /* Prevent content from going behind navigation on iOS */
+  .navbar {
+    position: relative;
+    z-index: 1030;
+  }
+  
+  /* Ensure scrollable content respects safe areas */
+  main {
+    position: relative;
+    z-index: 1;
   }
 }
 
@@ -58,4 +78,39 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Additional mobile optimizations for PWA */
+@supports(padding: max(0px)) {
+  /* iOS 11+ safe area support */
+  .mobile-safe-top {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
+  
+  .mobile-safe-bottom {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  
+  .mobile-safe-left {
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+  }
+  
+  .mobile-safe-right {
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+  }
+}
+
+/* Ensure fixed elements don't interfere with scrolling */
+.fixed-bottom {
+  z-index: 1020;
+}
+
+/* Improve touch scrolling on iOS */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent zoom on input focus on iOS */
+input, select, textarea {
+  font-size: 16px;
 }

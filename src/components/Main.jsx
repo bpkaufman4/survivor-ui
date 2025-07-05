@@ -27,10 +27,10 @@ const Main = ({ children, page, additionalClasses }) => {
   let contentClasses = page === 'draft' ? "" : "container py-3";
   if(additionalClasses) contentClasses += (contentClasses ? " " : "") + additionalClasses;
 
-  // Calculate main content height
+  // Calculate main content height accounting for safe areas
   const mainHeight = isDesktop 
     ? `calc(100vh - ${headerHeight})` 
-    : `calc(100vh - ${headerHeight} - ${footerHeight})`;
+    : `calc(100vh - ${headerHeight} - ${footerHeight} - env(safe-area-inset-top) - env(safe-area-inset-bottom))`;
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -99,7 +99,12 @@ const Main = ({ children, page, additionalClasses }) => {
       </nav>
 
       {/* Mobile Header - Only visible on mobile */}
-      <nav className="navbar bg-dark d-lg-none d-flex justify-content-around" style={{height: headerHeight}} data-bs-theme="dark">
+      <nav className="navbar bg-dark d-lg-none d-flex justify-content-around" style={{
+        height: headerHeight,
+        paddingTop: 'max(0.5rem, env(safe-area-inset-top))',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)'
+      }} data-bs-theme="dark">
         <img src={icon} className="h-100" onClick={() => window.location.assign(localStorage.getItem('homeTarget') || '/')} />
       </nav>
 
@@ -115,8 +120,13 @@ const Main = ({ children, page, additionalClasses }) => {
       </main>
 
       {/* Mobile Bottom Navigation - Only visible on mobile */}
-      <nav className='d-lg-none fixed-bottom border-top border-black' style={{height: footerHeight}}>
-        <div className="row text-center bg-white">
+      <nav className='d-lg-none fixed-bottom border-top border-black' style={{
+        height: footerHeight,
+        paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)'
+      }}>
+        <div className="row text-center bg-white mx-0">
           <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../')}>
             <HomeIcon color={page === 'home' || page === 'draft' ? 'primary' : ''}></HomeIcon>
           </div>

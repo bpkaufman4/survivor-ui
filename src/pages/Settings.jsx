@@ -15,13 +15,13 @@ export default function Settings() {
   }
 
   return (
-    <Main page={'settings'} additionalClasses={"h-100"}>
+    <Main page={'settings'}>
       {(() => {
         if (!user) return <WaterLoader></WaterLoader>;
         if (error) return <p>Something went wrong</p>;
 
         return (
-          <div className="h-100 d-flex flex-column">
+          <div className="d-flex flex-column">
             {/* Logout button at the top */}
             <div className="mb-3">
               <button className="btn btn-outline-danger w-100" onClick={logOut}>
@@ -31,7 +31,7 @@ export default function Settings() {
             </div>
 
             {/* Settings components with proper spacing */}
-            <div className="flex-grow-1 d-flex flex-column gap-3" style={{paddingBottom: '1rem'}}>
+            <div className="d-flex flex-column gap-3" style={{paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'}}>
               <NameEdit user={user} />
               <EmailPreferences user={user} />
               <PushNotificationSettings />
