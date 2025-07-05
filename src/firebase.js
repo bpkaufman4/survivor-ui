@@ -48,27 +48,16 @@ export const registerServiceWorker = async () => {
 // Function to request notification permission and get FCM token
 export const requestNotificationPermission = async () => {
   try {
-    console.log('[Firebase] Starting requestNotificationPermission...');
-    
     if (!isNotificationSupported()) {
-      console.log('[Firebase] Notifications not supported in this browser');
       return null;
     }
 
     // Register service worker first
-    console.log('[Firebase] Registering service worker...');
     await registerServiceWorker();
-    console.log('[Firebase] Service worker registered successfully');
-
-    // Check current permission
-    console.log('[Firebase] Current permission:', Notification.permission);
 
     const permission = await Notification.requestPermission();
-    console.log('[Firebase] Permission request result:', permission);
     
     if (permission === 'granted') {
-      console.log('[Firebase] Notification permission granted, getting FCM token...');
-      
       // Add a small delay for iOS
       await new Promise(resolve => setTimeout(resolve, 500));
       
@@ -79,31 +68,25 @@ export const requestNotificationPermission = async () => {
         });
         
         if (token) {
-          console.log('[Firebase] FCM Token received:', token.substring(0, 20) + '...');
-          
           // Automatically send to server
           const success = await sendTokenToServer(token);
           if (success) {
-            console.log('[Firebase] Token sent to server successfully');
             return token;
           } else {
-            console.error('[Firebase] Failed to send token to server');
             return token; // Return token anyway, server issue is separate
           }
         } else {
-          console.log('[Firebase] No registration token available.');
           return null;
         }
       } catch (tokenError) {
-        console.error('[Firebase] Error getting FCM token:', tokenError);
+        console.error('Error getting FCM token:', tokenError);
         return null;
       }
     } else {
-      console.log('[Firebase] Notification permission denied:', permission);
       return null;
     }
   } catch (error) {
-    console.error('[Firebase] Error in requestNotificationPermission:', error);
+    console.error('Error in requestNotificationPermission:', error);
     return null;
   }
 };
@@ -111,8 +94,6 @@ export const requestNotificationPermission = async () => {
 // Function to send FCM token to your backend
 export const sendTokenToServer = async (token) => {
   try {
-    console.log('[Firebase] Sending token to server...');
-    
     // Collect device information
     const deviceInfo = {
       userAgent: navigator.userAgent,
@@ -124,8 +105,6 @@ export const sendTokenToServer = async (token) => {
       isPWA: window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches,
       isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
     };
-
-    console.log('[Firebase] Device info:', deviceInfo);
 
     const response = await fetch(`${apiUrl}user/fcm-token`, {
       method: 'POST',
@@ -141,15 +120,14 @@ export const sendTokenToServer = async (token) => {
 
     if (response.ok) {
       const result = await response.json();
-      console.log('[Firebase] FCM token sent to server successfully:', result);
       return true;
     } else {
       const errorText = await response.text();
-      console.error('[Firebase] Failed to send FCM token to server:', response.status, errorText);
+      console.error('Failed to send FCM token to server:', response.status, errorText);
       return false;
     }
   } catch (error) {
-    console.error('[Firebase] Error sending FCM token to server:', error);
+    console.error('Error sending FCM token to server:', error);
     return false;
   }
 };
@@ -172,17 +150,12 @@ export const initializeFCM = async () => {
 // Function to check and register token if permission already granted
 export const checkExistingPermissionAndRegisterToken = async () => {
   try {
-    console.log('[Firebase] Checking existing notification permission...');
-    
     if (!isNotificationSupported()) {
-      console.log('[Firebase] Notifications not supported');
       return null;
     }
 
     // Check if permission is already granted
     if (Notification.permission === 'granted') {
-      console.log('[Firebase] Permission already granted, checking for existing token...');
-      
       try {
         // Register service worker if needed
         await registerServiceWorker();
@@ -193,30 +166,21 @@ export const checkExistingPermissionAndRegisterToken = async () => {
         });
         
         if (token) {
-          console.log('[Firebase] Found existing FCM token:', token.substring(0, 20) + '...');
-          
           // Send to server (this will update if token already exists)
           const success = await sendTokenToServer(token);
-          if (success) {
-            console.log('[Firebase] Existing token registered with server');
-          } else {
-            console.log('[Firebase] Failed to register existing token with server');
-          }
           return token;
         } else {
-          console.log('[Firebase] No existing token found despite granted permission');
           return null;
         }
       } catch (error) {
-        console.error('[Firebase] Error getting existing token:', error);
+        console.error('Error getting existing token:', error);
         return null;
       }
     } else {
-      console.log('[Firebase] Permission not granted:', Notification.permission);
       return null;
     }
   } catch (error) {
-    console.error('[Firebase] Error checking existing permission:', error);
+    console.error('Error checking existing permission:', error);
     return null;
   }
 };
@@ -225,73 +189,54 @@ export const checkExistingPermissionAndRegisterToken = async () => {
 export const onMessageListener = () =>
   new Promise((resolve) => {
     onMessage(messaging, (payload) => {
-      console.log('Message received in foreground handler:', payload);
-      
       // Check if the page is currently visible (app in foreground)
       const isPageVisible = !document.hidden;
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       
-      console.log(`[Firebase] Page visibility: ${isPageVisible ? 'visible' : 'hidden'}`);
-      console.log(`[Firebase] iOS: ${isIOS}`);
-      console.log(`[Firebase] Payload has notification:`, !!payload.notification);
-      
-      if (isIOS) {
-        if (!isPageVisible) {
-          // On iOS, when page is hidden, we need to show the notification manually
-          // because the service worker isn't getting background messages
-          console.log('[Firebase] 📱 iOS background notification - showing via foreground handler');
+      if (isIOS && !isPageVisible) {
+        // On iOS, when page is hidden, we need to show the notification manually
+        // because the service worker isn't getting background messages
+        const notificationTitle = payload.notification?.title || payload.data?.notificationTitle || 'React Survivor';
+        const notificationBody = payload.notification?.body || payload.data?.notificationBody || 'You have a new notification';
+        
+        // Show notification using the Notification API
+        if ('Notification' in window && Notification.permission === 'granted') {
+          const notification = new Notification(notificationTitle, {
+            body: notificationBody,
+            icon: '/android/android-launchericon-192-192.png',
+            badge: '/android/android-launchericon-96-96.png',
+            tag: payload.data?.serverNotificationId || `notification_${Date.now()}`,
+            data: payload.data,
+            requireInteraction: false
+          });
           
-          const notificationTitle = payload.notification?.title || 'React Survivor';
-          const notificationBody = payload.notification?.body || 'You have a new notification';
-          
-          // Show notification using the Notification API
-          if ('Notification' in window && Notification.permission === 'granted') {
-            const notification = new Notification(notificationTitle, {
-              body: notificationBody,
-              icon: '/android/android-launchericon-192-192.png',
-              badge: '/android/android-launchericon-96-96.png',
-              tag: payload.data?.serverNotificationId || `notification_${Date.now()}`,
-              data: payload.data,
-              requireInteraction: false
-            });
+          notification.onclick = function() {
+            window.focus();
+            notification.close();
             
-            notification.onclick = function() {
-              console.log('[Firebase] iOS background notification clicked');
-              window.focus();
-              notification.close();
-              
-              // Handle navigation based on notification type
-              if (payload.data?.url) {
-                window.location.href = payload.data.url;
-              } else if (payload.data?.type) {
-                switch (payload.data.type) {
-                  case 'draft':
-                    window.location.href = '/draft';
-                    break;
-                  case 'survey':
-                    window.location.href = '/surveys';
-                    break;
-                  case 'admin_note':
-                    window.location.href = '/notes';
-                    break;
-                  case 'league':
-                    window.location.href = '/leagues';
-                    break;
-                  default:
-                    window.location.href = '/';
-                }
+            // Handle navigation based on notification type
+            if (payload.data?.url) {
+              window.location.href = payload.data.url;
+            } else if (payload.data?.type) {
+              switch (payload.data.type) {
+                case 'draft':
+                  window.location.href = '/draft';
+                  break;
+                case 'survey':
+                  window.location.href = '/surveys';
+                  break;
+                case 'admin_note':
+                  window.location.href = '/notes';
+                  break;
+                case 'league':
+                  window.location.href = '/leagues';
+                  break;
+                default:
+                  window.location.href = '/';
               }
-            };
-          }
-        } else {
-          console.log('[Firebase] 📱 iOS foreground notification - preventing automatic display');
-          // App is in foreground on iOS
-          // Note: FCM might still show automatic notification - we can't prevent this easily
-          // The only way to prevent automatic notifications is to send data-only messages
+            }
+          };
         }
-      } else {
-        console.log('[Firebase] Non-iOS foreground notification - not showing system notification');
-        // Non-iOS: App is in foreground, don't show system notification
       }
       
       resolve(payload);

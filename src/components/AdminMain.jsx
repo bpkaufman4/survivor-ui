@@ -27,10 +27,6 @@ const adminPages = [
     link: 'admin-polls'
   },
   {
-    display: 'Push Notifications',
-    link: 'admin-push-notifications'
-  },
-  {
     display: 'Jobs',
     link: 'admin-jobs'
   },
