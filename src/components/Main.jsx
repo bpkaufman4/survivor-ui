@@ -5,18 +5,32 @@ import EmailIcon from '@mui/icons-material/Email';
 import SettingsIcon from '@mui/icons-material/Settings';
 import icon from '../assets/island-white.png'
 import { useUser } from '../contexts/UserContext';
+import { useState, useEffect } from 'react';
 
 const headerHeight = '64px';
 const footerHeight = '58px';
-const mainHeight = `calc(100vh - ${headerHeight} - ${footerHeight})`;
-const desktopMainHeight = `calc(100vh - ${headerHeight})`;
 
 const Main = ({ children, page, additionalClasses }) => {
   const { needsEmailVerification } = useUser();
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 992);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 992);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // For draft page, use full width without container padding
   let contentClasses = page === 'draft' ? "" : "container py-3";
   if(additionalClasses) contentClasses += (contentClasses ? " " : "") + additionalClasses;
+
+  // Calculate main content height
+  const mainHeight = isDesktop 
+    ? `calc(100vh - ${headerHeight})` 
+    : `calc(100vh - ${headerHeight} - ${footerHeight})`;
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -91,10 +105,11 @@ const Main = ({ children, page, additionalClasses }) => {
 
       {/* Main Content Area */}
       <main className="flex-grow-1" style={{
-        height: window.innerWidth >= 992 ? desktopMainHeight : mainHeight,
-        overflowY: 'auto'
+        height: mainHeight,
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch' // Smooth scrolling on iOS
       }}>
-        <div className={`${contentClasses} ${window.innerWidth >= 992 && page !== 'draft' ? 'py-4' : ''}`}>
+        <div className={`${contentClasses} ${isDesktop && page !== 'draft' ? 'py-4' : ''}`}>
           {children}
         </div>
       </main>

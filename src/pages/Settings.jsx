@@ -30,8 +30,8 @@ export default function Settings() {
               </button>
             </div>
 
-            {/* Settings components */}
-            <div className="flex-grow-1">
+            {/* Settings components with proper spacing */}
+            <div className="flex-grow-1 d-flex flex-column gap-3" style={{paddingBottom: '1rem'}}>
               <NameEdit user={user} />
               <EmailPreferences user={user} />
               <PushNotificationSettings />

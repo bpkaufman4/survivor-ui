@@ -59,26 +59,28 @@ const PushNotificationSettings = () => {
       case 'default':
         return (
           <div>
-            <p className="text-muted mb-3">
+            <p className="text-muted mb-3 small">
               Enable push notifications to get real-time updates about drafts, surveys, and admin notes.
             </p>
-            <button 
-              className="btn btn-primary" 
-              onClick={handleRequestPermission}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                  Enabling...
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-bell me-2"></i>
-                  Enable Push Notifications
-                </>
-              )}
-            </button>
+            <div className="d-grid">
+              <button 
+                className="btn btn-primary" 
+                onClick={handleRequestPermission}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                    Enabling...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-bell me-2"></i>
+                    Enable Push Notifications
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         );
       
@@ -104,7 +106,7 @@ const PushNotificationSettings = () => {
   };
 
   return (
-    <div className="card">
+    <div className="card mb-3">
       <div className="card-header">
         <h5 className="mb-0">
           <i className="fas fa-bell me-2"></i>
