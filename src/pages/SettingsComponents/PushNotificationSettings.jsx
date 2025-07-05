@@ -310,19 +310,101 @@ const PushNotificationSettings = () => {
                   className="btn btn-outline-info btn-sm" 
                   onClick={async () => {
                     try {
-                      const registration = await navigator.serviceWorker.getRegistration();
-                      addDebugInfo(`SW Registration: ${registration ? 'Found' : 'Not found'}`);
-                      if (registration) {
-                        addDebugInfo(`SW State: ${registration.active ? 'Active' : 'Not active'}`);
-                        addDebugInfo(`SW Scope: ${registration.scope}`);
+                      addDebugInfo('🔍 Checking service worker and FCM status...');
+                      
+                      if (!('serviceWorker' in navigator)) {
+                        addDebugInfo('❌ Service Worker not supported');
+                        return;
                       }
+                      
+                      // Check current registration
+                      const registration = await navigator.serviceWorker.getRegistration();
+                      if (registration) {
+                        addDebugInfo(`✅ SW Registration found: ${registration.scope}`);
+                        addDebugInfo(`SW State: ${registration.active?.state || 'none'}`);
+                        addDebugInfo(`SW Script URL: ${registration.active?.scriptURL || 'none'}`);
+                        
+                        // Check if it's the right service worker
+                        if (registration.active?.scriptURL.includes('firebase-messaging-sw.js')) {
+                          addDebugInfo('✅ Firebase messaging service worker is active');
+                        } else {
+                          addDebugInfo('⚠️  Different service worker is active');
+                        }
+                        
+                        // Check for waiting or installing workers
+                        if (registration.waiting) {
+                          addDebugInfo('⚠️  Service worker update waiting');
+                        }
+                        if (registration.installing) {
+                          addDebugInfo('⚠️  Service worker installing');
+                        }
+                      } else {
+                        addDebugInfo('❌ No service worker registration found');
+                      }
+                      
+                      // Try to register the service worker if missing
+                      if (!registration) {
+                        addDebugInfo('Attempting to register firebase-messaging-sw.js...');
+                        try {
+                          const newReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                          addDebugInfo(`✅ Service worker registered: ${newReg.scope}`);
+                        } catch (regError) {
+                          addDebugInfo(`❌ Failed to register: ${regError.message}`);
+                        }
+                      }
+                      
                     } catch (error) {
-                      addDebugInfo(`SW Check Error: ${error.message}`);
+                      addDebugInfo(`❌ SW check error: ${error.message}`);
                     }
                   }}
                 >
                   <i className="fas fa-cog me-1"></i>
-                  Check SW Status
+                  Check SW & FCM Status
+                </button>
+                
+                <button 
+                  className="btn btn-outline-warning btn-sm" 
+                  onClick={async () => {
+                    try {
+                      addDebugInfo('🔄 Force re-registering service worker...');
+                      
+                      // Unregister existing service worker first
+                      const registration = await navigator.serviceWorker.getRegistration();
+                      if (registration) {
+                        addDebugInfo('Unregistering existing service worker...');
+                        await registration.unregister();
+                        addDebugInfo('✅ Unregistered existing service worker');
+                        
+                        // Wait a moment
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                      }
+                      
+                      // Register fresh service worker
+                      addDebugInfo('Registering fresh service worker...');
+                      const newRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                      addDebugInfo(`✅ Fresh service worker registered: ${newRegistration.scope}`);
+                      
+                      // Wait for it to become active
+                      if (newRegistration.installing) {
+                        addDebugInfo('Waiting for service worker to activate...');
+                        await new Promise(resolve => {
+                          newRegistration.installing.addEventListener('statechange', () => {
+                            if (newRegistration.installing.state === 'activated') {
+                              resolve();
+                            }
+                          });
+                        });
+                      }
+                      
+                      addDebugInfo('✅ Service worker refresh complete - try sending another test notification');
+                      
+                    } catch (error) {
+                      addDebugInfo(`❌ SW refresh error: ${error.message}`);
+                    }
+                  }}
+                >
+                  <i className="fas fa-sync me-1"></i>
+                  Refresh Service Worker
                 </button>
                 
                 <button 

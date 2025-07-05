@@ -58,8 +58,68 @@ self.getNotificationLog = () => notificationLog;
 // Add initial test entries to verify logging is working
 logNotification('SERVICE_WORKER_INITIALIZED', {
   timestamp: Date.now(),
-  message: 'Service worker loaded and Firebase initialized'
+  message: 'Service worker loaded and Firebase initialized',
+  messagingInstance: !!messaging,
+  onBackgroundMessageRegistered: typeof messaging.onBackgroundMessage === 'function'
 });
+
+// Test if onBackgroundMessage is properly set up
+console.log('[firebase-messaging-sw.js] Messaging instance:', messaging);
+console.log('[firebase-messaging-sw.js] onBackgroundMessage function:', messaging.onBackgroundMessage);
+
+// Add a test to see if the background message handler is working
+setTimeout(() => {
+  logNotification('SERVICE_WORKER_READY_CHECK', {
+    timestamp: Date.now(),
+    message: 'Service worker ready for background messages',
+    messagingReady: !!messaging,
+    handlerRegistered: true
+  });  }, 1000);
+
+// Global error handlers to catch any FCM issues
+self.addEventListener('error', function(event) {
+  console.error('[firebase-messaging-sw.js] Service worker error:', event.error);
+  logNotification('SERVICE_WORKER_ERROR', {
+    error: event.error?.message || 'Unknown error',
+    filename: event.filename,
+    lineno: event.lineno,
+    timestamp: Date.now()
+  });
+});
+
+self.addEventListener('unhandledrejection', function(event) {
+  console.error('[firebase-messaging-sw.js] Unhandled promise rejection:', event.reason);
+  logNotification('UNHANDLED_PROMISE_REJECTION', {
+    reason: event.reason?.message || event.reason,
+    timestamp: Date.now()
+  });
+});
+
+// Check if FCM is working by listening to all messaging events
+try {
+  // Try to register a message handler with additional logging
+  console.log('[firebase-messaging-sw.js] Registering background message handler...');
+  
+  // Alternative approach - check if messages are coming through differently
+  self.addEventListener('push', function(event) {
+    console.log('[firebase-messaging-sw.js] 🔔 RAW PUSH EVENT RECEIVED!');
+    console.log('[firebase-messaging-sw.js] Push event data:', event.data ? event.data.text() : 'No data');
+    
+    logNotification('RAW_PUSH_EVENT_RECEIVED', {
+      hasData: !!event.data,
+      data: event.data ? event.data.text() : null,
+      timestamp: Date.now(),
+      message: 'Raw push event - bypassing FCM handler?'
+    });
+  });
+  
+} catch (error) {
+  console.error('[firebase-messaging-sw.js] Error setting up message handlers:', error);
+  logNotification('HANDLER_SETUP_ERROR', {
+    error: error.message,
+    timestamp: Date.now()
+  });
+}
 
 // Service worker lifecycle events for debugging
 self.addEventListener('install', function(event) {
@@ -84,6 +144,7 @@ self.addEventListener('activate', function(event) {
 
 // Handle background messages
 messaging.onBackgroundMessage(function(payload) {
+  console.log('[firebase-messaging-sw.js] ⚡ BACKGROUND MESSAGE HANDLER TRIGGERED!');
   console.log('[firebase-messaging-sw.js] Background message received:', payload);
   
   // Detect if we're on iOS
