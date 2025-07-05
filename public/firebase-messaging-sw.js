@@ -20,6 +20,41 @@ console.log('[firebase-messaging-sw.js] Firebase initialized in service worker')
 // Retrieve an instance of Firebase Messaging so that it can handle background messages
 const messaging = firebase.messaging();
 
+// Keep track of recent notifications to prevent duplicates
+const recentNotifications = new Map();
+const notificationLog = []; // Store detailed logs for debugging
+const DUPLICATE_WINDOW_MS = 5000; // 5 seconds
+const MAX_LOG_ENTRIES = 50; // Keep last 50 notifications
+
+// Function to add notification to log
+const logNotification = (action, data) => {
+  const logEntry = {
+    timestamp: Date.now(),
+    action: action,
+    data: data
+  };
+  
+  notificationLog.unshift(logEntry);
+  if (notificationLog.length > MAX_LOG_ENTRIES) {
+    notificationLog.pop();
+  }
+  
+  console.log(`[firebase-messaging-sw.js] ${action}:`, data);
+};
+
+// Clean up old entries periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of recentNotifications.entries()) {
+    if (now - timestamp > DUPLICATE_WINDOW_MS) {
+      recentNotifications.delete(key);
+    }
+  }
+}, 10000); // Clean up every 10 seconds
+
+// Expose notification log for debugging (can be accessed from main thread)
+self.getNotificationLog = () => notificationLog;
+
 // Service worker lifecycle events for debugging
 self.addEventListener('install', function(event) {
   console.log('[firebase-messaging-sw.js] Service worker installing...');
@@ -35,18 +70,48 @@ self.addEventListener('activate', function(event) {
 
 // Handle background messages
 messaging.onBackgroundMessage(function(payload) {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
+  logNotification('RECEIVED_BACKGROUND_MESSAGE', {
+    title: payload.notification?.title,
+    body: payload.notification?.body,
+    data: payload.data,
+    serverNotificationId: payload.data?.serverNotificationId
+  });
   
-  // Customize notification here
+  // Create a unique identifier for this notification to prevent duplicates
   const notificationTitle = payload.notification?.title || 'React Survivor';
-  
-  // Create a unique tag to prevent notification deduplication
+  const notificationBody = payload.notification?.body || 'You have a new notification';
+  const notificationType = payload.data?.type || 'general';
+  const serverNotificationId = payload.data?.serverNotificationId || 'unknown';
   const timestamp = Date.now();
+  
+  // Create deduplication key based on server notification ID (most reliable)
+  // Fallback to content-based deduplication if no server ID
+  const dedupeKey = serverNotificationId !== 'unknown' 
+    ? `server_${serverNotificationId}`
+    : `${notificationType}_${notificationTitle}_${notificationBody}`.replace(/\s+/g, '_');
+  
+  // Check if we've recently shown this notification
+  if (recentNotifications.has(dedupeKey)) {
+    const lastShown = recentNotifications.get(dedupeKey);
+    if (timestamp - lastShown < DUPLICATE_WINDOW_MS) {
+      logNotification('DUPLICATE_DETECTED_SKIPPED', {
+        dedupeKey,
+        serverNotificationId,
+        timeSinceLastShown: timestamp - lastShown
+      });
+      return;
+    }
+  }
+  
+  // Record this notification
+  recentNotifications.set(dedupeKey, timestamp);
+  
+  // Create a unique tag for the browser notification system
   const uniqueTag = payload.data?.notificationId || 
-                   `${payload.data?.type || 'general'}_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+                   `${notificationType}_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
   
   const notificationOptions = {
-    body: payload.notification?.body || 'You have a new notification',
+    body: notificationBody,
     icon: '/android/android-launchericon-192-192.png',
     badge: '/android/android-launchericon-96-96.png',
     tag: uniqueTag,
@@ -54,16 +119,22 @@ messaging.onBackgroundMessage(function(payload) {
       ...payload.data,
       timestamp: payload.data?.timestamp || timestamp.toString(),
       notificationId: uniqueTag,
-      source: 'service-worker' // Add source tracking
+      source: 'service-worker',
+      dedupeKey: dedupeKey,
+      receivedAt: timestamp
     },
     actions: payload.data?.actions ? JSON.parse(payload.data.actions) : undefined,
     requireInteraction: payload.data?.requireInteraction === 'true',
     silent: false,
-    renotify: true // Force showing notification even if similar ones exist
+    renotify: true
   };
 
-  console.log('[firebase-messaging-sw.js] Showing notification with tag:', uniqueTag);
-  console.log('[firebase-messaging-sw.js] Full notification options:', notificationOptions);
+  logNotification('SHOWING_NOTIFICATION', {
+    uniqueTag,
+    dedupeKey,
+    serverNotificationId,
+    notificationOptions
+  });
   
   return self.registration.showNotification(notificationTitle, notificationOptions);
 });
@@ -118,4 +189,15 @@ self.addEventListener('notificationclick', function(event) {
       }
     })
   );
+});
+
+// Handle messages from main thread
+self.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'get-notification-log') {
+    // Send notification log back to main thread
+    event.ports[0].postMessage({
+      type: 'notification-log',
+      log: notificationLog
+    });
+  }
 });

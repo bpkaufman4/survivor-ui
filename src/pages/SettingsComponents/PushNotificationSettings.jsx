@@ -13,10 +13,36 @@ const PushNotificationSettings = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState([]);
+  const [swLog, setSwLog] = useState([]);
 
   const addDebugInfo = (message) => {
     console.log('[PushNotifications]', message);
     setDebugInfo(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
+
+  // Function to get service worker notification log
+  const fetchServiceWorkerLog = async () => {
+    try {
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+        if (registration && registration.active) {
+          // Try to communicate with service worker to get log
+          const messageChannel = new MessageChannel();
+          
+          messageChannel.port1.onmessage = function(event) {
+            if (event.data && event.data.type === 'notification-log') {
+              setSwLog(event.data.log || []);
+            }
+          };
+          
+          registration.active.postMessage({
+            type: 'get-notification-log'
+          }, [messageChannel.port2]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching service worker log:', error);
+    }
   };
 
   useEffect(() => {
@@ -27,6 +53,9 @@ const PushNotificationSettings = () => {
     addDebugInfo(`User Agent: ${navigator.userAgent.includes('iPhone') ? 'iPhone' : 'Other'}`);
     addDebugInfo(`Notification support: ${isNotificationSupported()}`);
     addDebugInfo(`Current permission: ${Notification.permission}`);
+    
+    // Fetch service worker log on mount
+    fetchServiceWorkerLog();
   }, []);
 
   const handleRequestPermission = async () => {
@@ -189,6 +218,41 @@ const PushNotificationSettings = () => {
               <i className="fas fa-info-circle me-1"></i>
               You can manage notification types in the Email Preferences section above.
             </small>
+            
+            {/* Service Worker Debug Log */}
+            <div className="mt-3">
+              <button 
+                className="btn btn-outline-secondary btn-sm" 
+                onClick={fetchServiceWorkerLog}
+              >
+                <i className="fas fa-bug me-1"></i>
+                Check Notification Log
+              </button>
+              
+              {swLog.length > 0 && (
+                <div className="mt-2">
+                  <details>
+                    <summary className="text-primary" style={{cursor: 'pointer'}}>
+                      <small>Service Worker Notification Log ({swLog.length} entries)</small>
+                    </summary>
+                    <div className="alert alert-info mt-2" style={{maxHeight: '300px', overflowY: 'auto'}}>
+                      <small>
+                        {swLog.map((entry, index) => (
+                          <div key={index} className="mb-2 border-bottom pb-1">
+                            <strong>{new Date(entry.timestamp).toLocaleTimeString()}</strong> - {entry.action}
+                            <br />
+                            <code className="small text-muted">
+                              {JSON.stringify(entry.data, null, 2)}
+                            </code>
+                          </div>
+                        ))}
+                      </small>
+                    </div>
+                  </details>
+                </div>
+              )}
+            </div>
+            
             {debugInfo.length > 0 && (
               <div className="mt-2">
                 <details>
