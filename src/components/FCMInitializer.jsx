@@ -30,63 +30,19 @@ const FCMInitializer = () => {
       .then((payload) => {
         console.log('Received foreground message:', payload);
         
-        // Show a notification or update UI
+        // For foreground messages, we'll just log them and NOT show a notification
+        // The service worker will handle showing notifications to prevent duplicates
+        // In the future, you could show an in-app toast/banner here instead
+        
         if (payload.notification) {
-          // You can use a toast library or custom notification component here
-          if ('Notification' in window && Notification.permission === 'granted') {
-            // Create a unique tag to prevent notification deduplication
-            const timestamp = Date.now();
-            const uniqueTag = payload.data?.notificationId || 
-                             `${payload.data?.type || 'general'}_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
-            
-            const notification = new Notification(payload.notification.title || 'React Survivor', {
-              body: payload.notification.body,
-              icon: payload.notification.icon || '/android/android-launchericon-192-192.png',
-              tag: uniqueTag,
-              data: {
-                ...payload.data,
-                timestamp: payload.data?.timestamp || timestamp.toString(),
-                notificationId: uniqueTag
-              },
-              silent: false,
-              renotify: true
-            });
-            
-            // Handle notification click
-            notification.onclick = function(event) {
-              event.preventDefault();
-              window.focus();
-              
-              // Navigate to appropriate page
-              const data = payload.data;
-              let url = '/';
-              
-              if (data?.url) {
-                url = data.url;
-              } else if (data?.type) {
-                switch (data.type) {
-                  case 'draft':
-                    url = '/draft';
-                    break;
-                  case 'survey':
-                    // Default fallback if no specific URL provided
-                    url = '/surveys';
-                    break;
-                  case 'admin_note':
-                    url = '/notes';
-                    break;
-                  case 'league':
-                    url = '/leagues';
-                    break;
-                  default:
-                    url = '/';
-                }
-              }
-              
-              window.location.href = url;
-              notification.close();
-            };
-          }
+          console.log('[FCMInitializer] Foreground notification received:', {
+            title: payload.notification.title,
+            body: payload.notification.body,
+            data: payload.data
+          });
+          
+          // TODO: Show in-app notification banner/toast instead of system notification
+          // This prevents duplicate notifications when app is in foreground
         }
       })
       .catch((err) => console.log('Failed to listen for messages:', err));

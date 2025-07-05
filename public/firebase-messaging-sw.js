@@ -2,6 +2,8 @@
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
+console.log('[firebase-messaging-sw.js] Service worker script loaded');
+
 // Initialize the Firebase app in the service worker
 firebase.initializeApp({
   apiKey: "AIzaSyCy0bYLg-rvHlAbwp8f_3j7tHjpua04qz4",
@@ -13,8 +15,23 @@ firebase.initializeApp({
   measurementId: "G-8CE0K0GRF6"
 });
 
+console.log('[firebase-messaging-sw.js] Firebase initialized in service worker');
+
 // Retrieve an instance of Firebase Messaging so that it can handle background messages
 const messaging = firebase.messaging();
+
+// Service worker lifecycle events for debugging
+self.addEventListener('install', function(event) {
+  console.log('[firebase-messaging-sw.js] Service worker installing...');
+  // Immediately take control
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', function(event) {
+  console.log('[firebase-messaging-sw.js] Service worker activating...');
+  // Become available to all pages
+  event.waitUntil(self.clients.claim());
+});
 
 // Handle background messages
 messaging.onBackgroundMessage(function(payload) {
@@ -36,7 +53,8 @@ messaging.onBackgroundMessage(function(payload) {
     data: {
       ...payload.data,
       timestamp: payload.data?.timestamp || timestamp.toString(),
-      notificationId: uniqueTag
+      notificationId: uniqueTag,
+      source: 'service-worker' // Add source tracking
     },
     actions: payload.data?.actions ? JSON.parse(payload.data.actions) : undefined,
     requireInteraction: payload.data?.requireInteraction === 'true',
@@ -45,7 +63,9 @@ messaging.onBackgroundMessage(function(payload) {
   };
 
   console.log('[firebase-messaging-sw.js] Showing notification with tag:', uniqueTag);
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  console.log('[firebase-messaging-sw.js] Full notification options:', notificationOptions);
+  
+  return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 // Handle notification clicks
