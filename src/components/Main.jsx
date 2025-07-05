@@ -109,7 +109,8 @@ const Main = ({ children, page, additionalClasses }) => {
         overflowY: 'auto',
         overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
-        minHeight: 0 // Important: allows flex item to shrink below content size
+        minHeight: 0, // Important: allows flex item to shrink below content size
+        paddingBottom: isDesktop ? 0 : `calc(${footerHeight} + env(safe-area-inset-bottom, 0px))`
       }}>
         <div className={`${contentClasses} ${isDesktop && page !== 'draft' ? 'py-4' : ''}`}>
           {children}
@@ -117,12 +118,12 @@ const Main = ({ children, page, additionalClasses }) => {
       </main>
 
       {/* Mobile Bottom Navigation - Only visible on mobile */}
-      <nav className='d-lg-none border-top border-black bg-white' style={{
+      <nav className='d-lg-none fixed-bottom border-top border-black bg-white' style={{
         height: footerHeight,
-        flexShrink: 0,
         paddingLeft: 'env(safe-area-inset-left, 0px)',
         paddingRight: 'env(safe-area-inset-right, 0px)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        zIndex: 1030
       }}>
         <div className="row text-center mx-0 h-100">
           <div className="col-3 d-flex flex-column justify-content-center align-items-center" onClick={() => window.location.assign('../')}>
