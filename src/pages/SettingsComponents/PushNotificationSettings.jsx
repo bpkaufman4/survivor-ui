@@ -319,25 +319,33 @@ const PushNotificationSettings = () => {
                         addDebugInfo('📱 Recent foreground notifications:');
                         foregroundLog.slice(0, 5).forEach((entry, index) => {
                           const time = new Date(entry.timestamp).toLocaleTimeString();
-                          addDebugInfo(`  ${index + 1}. ${time}: ${entry.title} (Server ID: ${entry.serverNotificationId})`);
+                          const visibility = entry.isPageVisible ? 'Visible' : 'Hidden';
+                          const action = entry.action === 'BACKGROUND_VIA_FOREGROUND_HANDLER' ? 'Background' : 'Foreground';
+                          addDebugInfo(`  ${index + 1}. ${time}: ${entry.title} (${action}, Page: ${visibility}, Server ID: ${entry.serverNotificationId})`);
                         });
                         
-                        // Compare with service worker log to identify the issue
-                        await fetchServiceWorkerLog();
-                        const backgroundCount = swLog.filter(e => e.action === 'RECEIVED_BACKGROUND_MESSAGE').length;
-                        const foregroundCount = foregroundLog.length;
+                        // Analyze visibility patterns
+                        const visibleCount = foregroundLog.filter(e => e.isPageVisible).length;
+                        const hiddenCount = foregroundLog.filter(e => !e.isPageVisible).length;
                         
                         addDebugInfo(`📊 Notification Summary:`);
-                        addDebugInfo(`  🔥 Foreground messages: ${foregroundCount}`);
-                        addDebugInfo(`  🔔 Background messages: ${backgroundCount}`);
+                        addDebugInfo(`  �️  Page Visible (Foreground): ${visibleCount}`);
+                        addDebugInfo(`  🙈 Page Hidden (Background): ${hiddenCount}`);
+                        addDebugInfo(`  🔥 Total Foreground Handler: ${foregroundLog.length}`);
                         
-                        if (foregroundCount > 0 && backgroundCount > 0) {
-                          addDebugInfo('⚠️  Both foreground AND background notifications detected!');
-                          addDebugInfo('This explains the duplicates - iOS is showing notifications via both channels');
-                        } else if (foregroundCount > 0) {
-                          addDebugInfo('ℹ️  Only foreground notifications detected');
-                        } else if (backgroundCount > 0) {
-                          addDebugInfo('ℹ️  Only background notifications detected');
+                        // Compare with service worker log
+                        await fetchServiceWorkerLog();
+                        const backgroundCount = swLog.filter(e => e.action === 'RECEIVED_BACKGROUND_MESSAGE').length;
+                        addDebugInfo(`  🔔 Service Worker Background: ${backgroundCount}`);
+                        
+                        if (hiddenCount > 0 && backgroundCount === 0) {
+                          addDebugInfo('✅ iOS Workaround: Background notifications routed through foreground handler');
+                          addDebugInfo('This is normal for iOS - no duplicates should occur now');
+                        } else if (hiddenCount > 0 && backgroundCount > 0) {
+                          addDebugInfo('⚠️  Both foreground AND service worker handling notifications!');
+                          addDebugInfo('This could cause duplicates');
+                        } else if (visibleCount > 0 && backgroundCount === 0) {
+                          addDebugInfo('ℹ️  Only true foreground notifications detected');
                         }
                       } else {
                         addDebugInfo('No foreground notifications found');

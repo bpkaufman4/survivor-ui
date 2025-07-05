@@ -36,6 +36,7 @@ const FCMInitializer = () => {
         
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         const isPWA = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+        const isPageVisible = !document.hidden;
         
         // Enhanced logging for foreground messages
         console.log('[FCMInitializer] Foreground notification details:', {
@@ -45,6 +46,7 @@ const FCMInitializer = () => {
           serverNotificationId: payload.data?.serverNotificationId,
           isIOS: isIOS,
           isPWA: isPWA,
+          isPageVisible: isPageVisible,
           timestamp: Date.now(),
           userAgent: navigator.userAgent.substring(0, 100)
         });
@@ -53,13 +55,14 @@ const FCMInitializer = () => {
         const foregroundLog = JSON.parse(localStorage.getItem('foregroundNotifications') || '[]');
         foregroundLog.unshift({
           timestamp: Date.now(),
-          action: 'FOREGROUND_MESSAGE_RECEIVED',
+          action: isPageVisible ? 'FOREGROUND_MESSAGE_RECEIVED' : 'BACKGROUND_VIA_FOREGROUND_HANDLER',
           title: payload.notification?.title,
           body: payload.notification?.body,
           serverNotificationId: payload.data?.serverNotificationId,
           data: payload.data,
           isIOS: isIOS,
-          isPWA: isPWA
+          isPWA: isPWA,
+          isPageVisible: isPageVisible
         });
         
         // Keep only last 20 entries
@@ -69,12 +72,12 @@ const FCMInitializer = () => {
         
         localStorage.setItem('foregroundNotifications', JSON.stringify(foregroundLog));
         
-        // For iOS, we might need to explicitly prevent system notification
-        if (isIOS && payload.notification) {
-          console.log('[FCMInitializer] 📱 iOS foreground message - system might still show notification');
-          
-          // TODO: Show in-app notification banner/toast instead of system notification
-          // This prevents duplicate notifications when app is in foreground
+        if (isIOS) {
+          if (isPageVisible) {
+            console.log('[FCMInitializer] 📱 iOS foreground message - not showing system notification');
+          } else {
+            console.log('[FCMInitializer] 📱 iOS background message via foreground handler - notification should be shown');
+          }
         }
       })
       .catch((err) => {
