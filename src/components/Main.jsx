@@ -102,7 +102,6 @@ const Main = ({ children, page, additionalClasses }) => {
       <nav className="navbar bg-dark d-lg-none d-flex justify-content-around" style={{
         height: headerHeight,
         flexShrink: 0,
-        paddingTop: 'max(0.5rem, env(safe-area-inset-top))',
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)'
       }} data-bs-theme="dark">
@@ -116,9 +115,7 @@ const Main = ({ children, page, additionalClasses }) => {
         WebkitOverflowScrolling: 'touch',
         minHeight: 0 // Important: allows flex item to shrink below content size
       }}>
-        <div className={`${contentClasses} ${isDesktop && page !== 'draft' ? 'py-4' : ''}`} style={{
-          paddingBottom: isDesktop ? undefined : 'max(1rem, env(safe-area-inset-bottom))'
-        }}>
+        <div className={`${contentClasses} ${isDesktop && page !== 'draft' ? 'py-4' : ''}`}>
           {children}
         </div>
       </main>
@@ -127,7 +124,6 @@ const Main = ({ children, page, additionalClasses }) => {
       <nav className='d-lg-none border-top border-black' style={{
         height: footerHeight,
         flexShrink: 0,
-        paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)'
       }}>
