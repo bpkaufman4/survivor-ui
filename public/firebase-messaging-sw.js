@@ -108,10 +108,19 @@ messaging.onBackgroundMessage(function(payload) {
   const timestamp = Date.now();
   
   // Create deduplication key based on server notification ID (most reliable)
-  // Fallback to content-based deduplication if no server ID
+  // Use server notification ID as the deduplication key AND browser notification tag
   const dedupeKey = serverNotificationId !== 'unknown' 
-    ? `server_${serverNotificationId}`
+    ? serverNotificationId  // Use server ID directly
     : `${notificationType}_${notificationTitle}_${notificationBody}`.replace(/\s+/g, '_');
+  
+  // For browser notification tag, use the server notification ID to ensure
+  // multiple notifications from the same server event replace each other
+  const browserNotificationTag = serverNotificationId !== 'unknown' 
+    ? serverNotificationId 
+    : dedupeKey;
+  
+  console.log(`[firebase-messaging-sw.js] Deduplication key: ${dedupeKey}`);
+  console.log(`[firebase-messaging-sw.js] Browser notification tag: ${browserNotificationTag}`);
   
   // Check if we've recently shown this notification
   if (recentNotifications.has(dedupeKey)) {
@@ -119,6 +128,7 @@ messaging.onBackgroundMessage(function(payload) {
     if (timestamp - lastShown < DUPLICATE_WINDOW_MS) {
       logNotification('DUPLICATE_DETECTED_SKIPPED', {
         dedupeKey,
+        browserNotificationTag,
         serverNotificationId,
         timeSinceLastShown: timestamp - lastShown
       });
@@ -129,9 +139,8 @@ messaging.onBackgroundMessage(function(payload) {
   // Record this notification
   recentNotifications.set(dedupeKey, timestamp);
   
-  // Create a unique tag for the browser notification system
-  const uniqueTag = payload.data?.notificationId || 
-                   `${notificationType}_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+  // Use the server notification ID as the notification tag for browser-level deduplication
+  const uniqueTag = browserNotificationTag;
   
   // iOS-specific notification options (iOS has stricter requirements)
   const notificationOptions = {
@@ -161,10 +170,13 @@ messaging.onBackgroundMessage(function(payload) {
   logNotification('SHOWING_NOTIFICATION', {
     uniqueTag,
     dedupeKey,
+    browserNotificationTag,
     serverNotificationId,
     isIOS,
     isPWA,
-    notificationOptions
+    notificationTitle,
+    notificationBody,
+    message: `Using tag: ${uniqueTag} for deduplication`
   });
   
   // On iOS, sometimes we need to explicitly request notification display
