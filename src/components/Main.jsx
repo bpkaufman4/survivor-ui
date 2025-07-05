@@ -94,12 +94,12 @@ const Main = ({ children, page, additionalClasses }) => {
       </nav>
 
       {/* Mobile Header - Only visible on mobile */}
-      <nav className="navbar bg-dark d-lg-none d-flex justify-content-around" style={{
+      <nav className="navbar bg-dark d-lg-none d-flex justify-content-around fixed-top" style={{
         height: headerHeight,
-        flexShrink: 0,
         paddingTop: 'env(safe-area-inset-top, 0px)',
         paddingLeft: 'env(safe-area-inset-left, 0px)',
-        paddingRight: 'env(safe-area-inset-right, 0px)'
+        paddingRight: 'env(safe-area-inset-right, 0px)',
+        zIndex: 1030
       }} data-bs-theme="dark">
         <img src={icon} className="h-100" onClick={() => window.location.assign(localStorage.getItem('homeTarget') || '/')} />
       </nav>
@@ -110,6 +110,7 @@ const Main = ({ children, page, additionalClasses }) => {
         overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
         minHeight: 0, // Important: allows flex item to shrink below content size
+        paddingTop: isDesktop ? 0 : `calc(${headerHeight} + env(safe-area-inset-top, 0px))`,
         paddingBottom: isDesktop ? 0 : `calc(${footerHeight} + env(safe-area-inset-bottom, 0px))`
       }}>
         <div className={`${contentClasses} ${isDesktop && page !== 'draft' ? 'py-4' : ''}`}>
@@ -123,6 +124,7 @@ const Main = ({ children, page, additionalClasses }) => {
         paddingLeft: 'env(safe-area-inset-left, 0px)',
         paddingRight: 'env(safe-area-inset-right, 0px)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingTop: '8px',
         zIndex: 1030
       }}>
         <div className="row text-center mx-0 h-100">
