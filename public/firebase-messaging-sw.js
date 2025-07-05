@@ -152,8 +152,9 @@ messaging.onBackgroundMessage(function(payload) {
   const isPWA = self.location.protocol === 'https:' && self.location.hostname !== 'localhost';
   
   // Extract notification details
-  const notificationTitle = payload.notification?.title || 'React Survivor';
-  const notificationBody = payload.notification?.body || 'You have a new notification';
+  // For iOS data-only messages, title/body are in the data payload
+  const notificationTitle = payload.notification?.title || payload.data?.notificationTitle || 'React Survivor';
+  const notificationBody = payload.notification?.body || payload.data?.notificationBody || 'You have a new notification';
   const notificationType = payload.data?.type || 'general';
   const serverNotificationId = payload.data?.serverNotificationId || 'unknown';
   const timestamp = Date.now();
@@ -165,16 +166,21 @@ messaging.onBackgroundMessage(function(payload) {
     type: notificationType,
     serverNotificationId: serverNotificationId,
     timestamp: timestamp,
+    hasNotificationPayload: !!payload.notification,
+    payloadNotification: payload.notification,
     payloadData: payload.data
   });
   
   logNotification('RECEIVED_BACKGROUND_MESSAGE', {
-    title: payload.notification?.title,
-    body: payload.notification?.body,
+    title: notificationTitle,
+    body: notificationBody,
     data: payload.data,
+    notification: payload.notification,
     serverNotificationId: payload.data?.serverNotificationId,
     isIOS: isIOS,
     isPWA: isPWA,
+    hasNotificationPayload: !!payload.notification,
+    isDataOnlyMessage: !payload.notification,
     userAgent: navigator.userAgent.substring(0, 100),
     fullPayload: payload
   });

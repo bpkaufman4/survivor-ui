@@ -233,58 +233,65 @@ export const onMessageListener = () =>
       
       console.log(`[Firebase] Page visibility: ${isPageVisible ? 'visible' : 'hidden'}`);
       console.log(`[Firebase] iOS: ${isIOS}`);
+      console.log(`[Firebase] Payload has notification:`, !!payload.notification);
       
-      if (isIOS && !isPageVisible) {
-        // On iOS, when page is hidden, we need to show the notification manually
-        // because the service worker isn't getting background messages
-        console.log('[Firebase] 📱 iOS background notification - showing via foreground handler');
-        
-        const notificationTitle = payload.notification?.title || 'React Survivor';
-        const notificationBody = payload.notification?.body || 'You have a new notification';
-        
-        // Show notification using the Notification API
-        if ('Notification' in window && Notification.permission === 'granted') {
-          const notification = new Notification(notificationTitle, {
-            body: notificationBody,
-            icon: '/android/android-launchericon-192-192.png',
-            badge: '/android/android-launchericon-96-96.png',
-            tag: payload.data?.serverNotificationId || `notification_${Date.now()}`,
-            data: payload.data,
-            requireInteraction: false
-          });
+      if (isIOS) {
+        if (!isPageVisible) {
+          // On iOS, when page is hidden, we need to show the notification manually
+          // because the service worker isn't getting background messages
+          console.log('[Firebase] 📱 iOS background notification - showing via foreground handler');
           
-          notification.onclick = function() {
-            console.log('[Firebase] iOS background notification clicked');
-            window.focus();
-            notification.close();
+          const notificationTitle = payload.notification?.title || 'React Survivor';
+          const notificationBody = payload.notification?.body || 'You have a new notification';
+          
+          // Show notification using the Notification API
+          if ('Notification' in window && Notification.permission === 'granted') {
+            const notification = new Notification(notificationTitle, {
+              body: notificationBody,
+              icon: '/android/android-launchericon-192-192.png',
+              badge: '/android/android-launchericon-96-96.png',
+              tag: payload.data?.serverNotificationId || `notification_${Date.now()}`,
+              data: payload.data,
+              requireInteraction: false
+            });
             
-            // Handle navigation based on notification type
-            if (payload.data?.url) {
-              window.location.href = payload.data.url;
-            } else if (payload.data?.type) {
-              switch (payload.data.type) {
-                case 'draft':
-                  window.location.href = '/draft';
-                  break;
-                case 'survey':
-                  window.location.href = '/surveys';
-                  break;
-                case 'admin_note':
-                  window.location.href = '/notes';
-                  break;
-                case 'league':
-                  window.location.href = '/leagues';
-                  break;
-                default:
-                  window.location.href = '/';
+            notification.onclick = function() {
+              console.log('[Firebase] iOS background notification clicked');
+              window.focus();
+              notification.close();
+              
+              // Handle navigation based on notification type
+              if (payload.data?.url) {
+                window.location.href = payload.data.url;
+              } else if (payload.data?.type) {
+                switch (payload.data.type) {
+                  case 'draft':
+                    window.location.href = '/draft';
+                    break;
+                  case 'survey':
+                    window.location.href = '/surveys';
+                    break;
+                  case 'admin_note':
+                    window.location.href = '/notes';
+                    break;
+                  case 'league':
+                    window.location.href = '/leagues';
+                    break;
+                  default:
+                    window.location.href = '/';
+                }
               }
-            }
-          };
+            };
+          }
+        } else {
+          console.log('[Firebase] 📱 iOS foreground notification - preventing automatic display');
+          // App is in foreground on iOS
+          // Note: FCM might still show automatic notification - we can't prevent this easily
+          // The only way to prevent automatic notifications is to send data-only messages
         }
       } else {
-        console.log('[Firebase] Foreground notification - not showing system notification');
-        // App is in foreground, don't show system notification
-        // In the future, you could show an in-app toast/banner here instead
+        console.log('[Firebase] Non-iOS foreground notification - not showing system notification');
+        // Non-iOS: App is in foreground, don't show system notification
       }
       
       resolve(payload);
