@@ -169,6 +169,58 @@ export const initializeFCM = async () => {
   }
 };
 
+// Function to check and register token if permission already granted
+export const checkExistingPermissionAndRegisterToken = async () => {
+  try {
+    console.log('[Firebase] Checking existing notification permission...');
+    
+    if (!isNotificationSupported()) {
+      console.log('[Firebase] Notifications not supported');
+      return null;
+    }
+
+    // Check if permission is already granted
+    if (Notification.permission === 'granted') {
+      console.log('[Firebase] Permission already granted, checking for existing token...');
+      
+      try {
+        // Register service worker if needed
+        await registerServiceWorker();
+        
+        // Try to get existing token
+        const token = await getToken(messaging, {
+          vapidKey: VAPID_KEY
+        });
+        
+        if (token) {
+          console.log('[Firebase] Found existing FCM token:', token.substring(0, 20) + '...');
+          
+          // Send to server (this will update if token already exists)
+          const success = await sendTokenToServer(token);
+          if (success) {
+            console.log('[Firebase] Existing token registered with server');
+          } else {
+            console.log('[Firebase] Failed to register existing token with server');
+          }
+          return token;
+        } else {
+          console.log('[Firebase] No existing token found despite granted permission');
+          return null;
+        }
+      } catch (error) {
+        console.error('[Firebase] Error getting existing token:', error);
+        return null;
+      }
+    } else {
+      console.log('[Firebase] Permission not granted:', Notification.permission);
+      return null;
+    }
+  } catch (error) {
+    console.error('[Firebase] Error checking existing permission:', error);
+    return null;
+  }
+};
+
 // Function to handle foreground messages
 export const onMessageListener = () =>
   new Promise((resolve) => {

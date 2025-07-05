@@ -1,21 +1,25 @@
 import { useEffect } from 'react';
 import { useUser } from '../contexts/UserContext';
-import { initializeFCM, onMessageListener } from '../firebase';
+import { checkExistingPermissionAndRegisterToken, onMessageListener } from '../firebase';
 
 const FCMInitializer = () => {
   const { user } = useUser();
 
   useEffect(() => {
     if (user) {
-      // Initialize FCM when user is authenticated
-      initializeFCM()
+      console.log('[FCMInitializer] User authenticated, checking for existing FCM permission...');
+      
+      // Check for existing permission and register token if available
+      checkExistingPermissionAndRegisterToken()
         .then((token) => {
           if (token) {
-            console.log('FCM initialized successfully');
+            console.log('[FCMInitializer] FCM token found and registered');
+          } else {
+            console.log('[FCMInitializer] No existing FCM token found - user needs to enable notifications in settings');
           }
         })
         .catch((error) => {
-          console.error('Failed to initialize FCM:', error);
+          console.error('[FCMInitializer] Failed to check/register FCM token:', error);
         });
     }
   }, [user]);
