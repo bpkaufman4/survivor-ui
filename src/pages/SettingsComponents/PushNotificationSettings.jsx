@@ -293,7 +293,30 @@ const PushNotificationSettings = () => {
                   className="btn btn-outline-warning btn-sm" 
                   onClick={async () => {
                     try {
-                      addDebugInfo('Sending test notification to yourself...');
+                      addDebugInfo('🧪 Sending test notification to yourself...');
+                      
+                      // Add iOS-specific debugging
+                      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                      const isPWA = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+                      
+                      if (isIOS) {
+                        addDebugInfo(`📱 iOS device detected (PWA: ${isPWA})`);
+                        addDebugInfo(`Permission status: ${Notification.permission}`);
+                        
+                        // Check service worker registration
+                        if ('serviceWorker' in navigator) {
+                          try {
+                            const registration = await navigator.serviceWorker.getRegistration();
+                            if (registration) {
+                              addDebugInfo(`✅ Service worker: ${registration.active?.state || 'none'}`);
+                            } else {
+                              addDebugInfo('❌ No service worker registration found');
+                            }
+                          } catch (swError) {
+                            addDebugInfo(`❌ SW check error: ${swError.message}`);
+                          }
+                        }
+                      }
                       
                       const response = await fetch(`${apiUrl}user/test-push`, {
                         method: 'POST',
@@ -302,8 +325,8 @@ const PushNotificationSettings = () => {
                           'authorization': localStorage.getItem('jwt')
                         },
                         body: JSON.stringify({
-                          title: '🧪 Duplicate Test',
-                          body: `Test notification sent at ${new Date().toLocaleTimeString()}`,
+                          title: '🧪 Test Notification',
+                          body: `Test sent at ${new Date().toLocaleTimeString()} from ${isIOS ? 'iOS' : 'Desktop'}`,
                           type: 'debug'
                         })
                       });
@@ -314,7 +337,15 @@ const PushNotificationSettings = () => {
                       
                       if (response.ok && result.status === 'success') {
                         addDebugInfo('✅ Test notification sent successfully');
-                        addDebugInfo('Wait a few seconds, then check the notification log to see if duplicates appear');
+                        addDebugInfo(`Devices notified: ${result.devicesNotified || 0}`);
+                        
+                        if (isIOS) {
+                          addDebugInfo('📱 iOS: If no notification appeared:');
+                          addDebugInfo('  • Check Settings > Notifications > Safari');
+                          addDebugInfo('  • Disable Do Not Disturb');
+                          addDebugInfo('  • Pull down notification center');
+                          addDebugInfo('  • Try the "Check Notification Log" button');
+                        }
                       } else {
                         addDebugInfo(`❌ Failed to send test notification: ${result.message}`);
                       }
@@ -368,18 +399,48 @@ const PushNotificationSettings = () => {
                         const currentPlatform = navigator.platform;
                         const currentIsIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
                         const currentIsPWA = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+                        const currentUserAgent = navigator.userAgent;
                         
-                        addDebugInfo(`Current device: Platform=${currentPlatform}, iOS=${currentIsIOS}, PWA=${currentIsPWA}`);
+                        addDebugInfo(`Current device:`);
+                        addDebugInfo(`  Platform: ${currentPlatform}`);
+                        addDebugInfo(`  User Agent: ${currentUserAgent.substring(0, 100)}...`);
+                        addDebugInfo(`  iOS: ${currentIsIOS}`);
+                        addDebugInfo(`  PWA: ${currentIsPWA}`);
                         
+                        // More flexible matching - prioritize iOS detection and user agent similarity
                         const matchingToken = tokens.find(t => {
                           const d = t.deviceInfo || {};
+                          
+                          // For iOS devices, match based on iOS flag and user agent similarity
+                          if (currentIsIOS && d.isIOS) {
+                            // Check if user agents contain similar iOS version info
+                            const currentIOSMatch = currentUserAgent.match(/OS (\d+)_(\d+)/);
+                            const storedIOSMatch = (d.userAgent || '').match(/OS (\d+)_(\d+)/);
+                            
+                            if (currentIOSMatch && storedIOSMatch) {
+                              // Same iOS major version is good enough
+                              return currentIOSMatch[1] === storedIOSMatch[1];
+                            }
+                            
+                            // Fallback: if both are iOS and PWA status matches
+                            return d.isPWA === currentIsPWA;
+                          }
+                          
+                          // For non-iOS devices, use the original strict matching
                           return d.platform === currentPlatform && d.isIOS === currentIsIOS && d.isPWA === currentIsPWA;
                         });
                         
                         if (matchingToken) {
                           addDebugInfo(`✅ Current device matches Token ID: ${matchingToken.id}`);
+                          const d = matchingToken.deviceInfo || {};
+                          addDebugInfo(`  Matched token platform: ${d.platform}, iOS: ${d.isIOS}, PWA: ${d.isPWA}`);
                         } else {
-                          addDebugInfo(`⚠️  Current device doesn't match any registered tokens - may need to re-register`);
+                          addDebugInfo(`⚠️  Current device doesn't match any registered tokens`);
+                          addDebugInfo(`All registered tokens:`);
+                          tokens.forEach((token, index) => {
+                            const d = token.deviceInfo || {};
+                            addDebugInfo(`  Token ${index + 1}: Platform=${d.platform}, iOS=${d.isIOS}, PWA=${d.isPWA}, UserAgent=${(d.userAgent || '').substring(0, 60)}...`);
+                          });
                         }
                       } else {
                         addDebugInfo(`❌ Failed to fetch FCM info: ${result.message}`);

@@ -84,11 +84,20 @@ self.addEventListener('activate', function(event) {
 
 // Handle background messages
 messaging.onBackgroundMessage(function(payload) {
+  console.log('[firebase-messaging-sw.js] Background message received:', payload);
+  
+  // Detect if we're on iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isPWA = self.location.protocol === 'https:' && self.location.hostname !== 'localhost';
+  
   logNotification('RECEIVED_BACKGROUND_MESSAGE', {
     title: payload.notification?.title,
     body: payload.notification?.body,
     data: payload.data,
-    serverNotificationId: payload.data?.serverNotificationId
+    serverNotificationId: payload.data?.serverNotificationId,
+    isIOS: isIOS,
+    isPWA: isPWA,
+    userAgent: navigator.userAgent.substring(0, 100)
   });
   
   // Create a unique identifier for this notification to prevent duplicates
@@ -124,6 +133,7 @@ messaging.onBackgroundMessage(function(payload) {
   const uniqueTag = payload.data?.notificationId || 
                    `${notificationType}_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
   
+  // iOS-specific notification options (iOS has stricter requirements)
   const notificationOptions = {
     body: notificationBody,
     icon: '/android/android-launchericon-192-192.png',
@@ -135,22 +145,48 @@ messaging.onBackgroundMessage(function(payload) {
       notificationId: uniqueTag,
       source: 'service-worker',
       dedupeKey: dedupeKey,
-      receivedAt: timestamp
+      receivedAt: timestamp,
+      isIOS: isIOS,
+      isPWA: isPWA
     },
     actions: payload.data?.actions ? JSON.parse(payload.data.actions) : undefined,
-    requireInteraction: payload.data?.requireInteraction === 'true',
+    requireInteraction: false, // iOS doesn't support this well
     silent: false,
-    renotify: true
+    renotify: true,
+    // iOS-specific enhancements
+    vibrate: isIOS ? undefined : [200, 100, 200], // iOS handles vibration differently
+    timestamp: timestamp
   };
 
   logNotification('SHOWING_NOTIFICATION', {
     uniqueTag,
     dedupeKey,
     serverNotificationId,
+    isIOS,
+    isPWA,
     notificationOptions
   });
   
-  return self.registration.showNotification(notificationTitle, notificationOptions);
+  // On iOS, sometimes we need to explicitly request notification display
+  const showNotificationPromise = self.registration.showNotification(notificationTitle, notificationOptions);
+  
+  if (isIOS) {
+    // Additional iOS-specific logging
+    showNotificationPromise.then(() => {
+      logNotification('NOTIFICATION_SHOWN_SUCCESS_IOS', {
+        uniqueTag,
+        timestamp: Date.now()
+      });
+    }).catch((error) => {
+      logNotification('NOTIFICATION_SHOW_ERROR_IOS', {
+        uniqueTag,
+        error: error.message,
+        timestamp: Date.now()
+      });
+    });
+  }
+  
+  return showNotificationPromise;
 });
 
 // Handle notification clicks
