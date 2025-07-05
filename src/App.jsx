@@ -15,6 +15,7 @@ import Settings from "./pages/Settings";
 import AdminLeagues from "./pages/AdminLeagues"
 import AdminDraft from "./pages/AdminDraft";
 import AdminJobs from "./pages/AdminJobs";
+import AdminPushNotifications from "./pages/AdminPushNotifications";
 import Notes from "./pages/Notes";
 import Draft from "./pages/Draft";
 import Register from "./pages/Register";
@@ -66,6 +67,11 @@ export default function App() {
         <Route path="admin-jobs" element={
           <RequireAdmin>
             <AdminJobs />
+          </RequireAdmin>
+        } />
+        <Route path="admin-push-notifications" element={
+          <RequireAdmin>
+            <AdminPushNotifications />
           </RequireAdmin>
         } />
         <Route path="league/:leagueId" element={
