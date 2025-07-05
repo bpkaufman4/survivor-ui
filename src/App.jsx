@@ -22,10 +22,12 @@ import VerifyEmail from "./pages/VerifyEmail";
 import Leagues from "./pages/Leagues";
 import Players from "./pages/Players";
 import { UserProvider } from "./contexts/UserContext";
+import FCMInitializer from "./components/FCMInitializer";
 
 export default function App() {
   return (
     <UserProvider>
+      <FCMInitializer />
       <BrowserRouter>
       <Routes>
         <Route index element={

@@ -2,7 +2,7 @@ import { useState } from "react";
 import Main from "../components/Main";
 import WaterLoader from "../components/WaterLoader";
 import { useUser } from "../contexts/UserContext";
-import { NameEdit, EmailPreferences, EmailVerification } from "./SettingsComponents";
+import { NameEdit, EmailPreferences, EmailVerification, PushNotificationSettings } from "./SettingsComponents";
 
 export default function Settings() {
   const { user, needsEmailVerification } = useUser();
@@ -34,6 +34,7 @@ export default function Settings() {
             <div className="flex-grow-1">
               <NameEdit user={user} />
               <EmailPreferences user={user} />
+              <PushNotificationSettings />
               {needsEmailVerification && <EmailVerification user={user} />}
             </div>
           </div>
