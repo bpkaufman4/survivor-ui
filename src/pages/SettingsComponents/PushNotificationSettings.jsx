@@ -23,24 +23,63 @@ const PushNotificationSettings = () => {
   // Function to get service worker notification log
   const fetchServiceWorkerLog = async () => {
     try {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
-        if (registration && registration.active) {
-          // Try to communicate with service worker to get log
-          const messageChannel = new MessageChannel();
-          
-          messageChannel.port1.onmessage = function(event) {
-            if (event.data && event.data.type === 'notification-log') {
-              setSwLog(event.data.log || []);
-            }
-          };
-          
-          registration.active.postMessage({
-            type: 'get-notification-log'
-          }, [messageChannel.port2]);
-        }
+      addDebugInfo('Attempting to fetch service worker log...');
+      
+      if (!('serviceWorker' in navigator)) {
+        addDebugInfo('❌ Service Worker not supported');
+        return;
       }
+
+      // Get the registration
+      const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      if (!registration) {
+        addDebugInfo('❌ Service Worker not registered');
+        return;
+      }
+
+      addDebugInfo('✅ Service Worker registration found');
+
+      const serviceWorker = registration.active;
+      if (!serviceWorker) {
+        addDebugInfo('❌ No active service worker');
+        return;
+      }
+
+      addDebugInfo('✅ Active service worker found, requesting log...');
+
+      // Create a message channel for communication
+      const messageChannel = new MessageChannel();
+      
+      // Set up response handler
+      const responsePromise = new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Service worker response timeout'));
+        }, 5000);
+
+        messageChannel.port1.onmessage = function(event) {
+          clearTimeout(timeout);
+          addDebugInfo('✅ Received response from service worker');
+          
+          if (event.data && event.data.type === 'notification-log') {
+            resolve(event.data.log || []);
+          } else {
+            reject(new Error('Invalid response from service worker'));
+          }
+        };
+      });
+      
+      // Send message to service worker
+      serviceWorker.postMessage({
+        type: 'get-notification-log'
+      }, [messageChannel.port2]);
+
+      // Wait for response
+      const log = await responsePromise;
+      addDebugInfo(`✅ Received ${log.length} log entries`);
+      setSwLog(log);
+      
     } catch (error) {
+      addDebugInfo(`❌ Error fetching service worker log: ${error.message}`);
       console.error('Error fetching service worker log:', error);
     }
   };
@@ -221,34 +260,65 @@ const PushNotificationSettings = () => {
             
             {/* Service Worker Debug Log */}
             <div className="mt-3">
-              <button 
-                className="btn btn-outline-secondary btn-sm" 
-                onClick={fetchServiceWorkerLog}
-              >
-                <i className="fas fa-bug me-1"></i>
-                Check Notification Log
-              </button>
+              <div className="d-flex gap-2 flex-wrap">
+                <button 
+                  className="btn btn-outline-secondary btn-sm" 
+                  onClick={fetchServiceWorkerLog}
+                >
+                  <i className="fas fa-bug me-1"></i>
+                  Check Notification Log
+                </button>
+                
+                <button 
+                  className="btn btn-outline-info btn-sm" 
+                  onClick={async () => {
+                    try {
+                      const registration = await navigator.serviceWorker.getRegistration();
+                      addDebugInfo(`SW Registration: ${registration ? 'Found' : 'Not found'}`);
+                      if (registration) {
+                        addDebugInfo(`SW State: ${registration.active ? 'Active' : 'Not active'}`);
+                        addDebugInfo(`SW Scope: ${registration.scope}`);
+                      }
+                    } catch (error) {
+                      addDebugInfo(`SW Check Error: ${error.message}`);
+                    }
+                  }}
+                >
+                  <i className="fas fa-cog me-1"></i>
+                  Check SW Status
+                </button>
+              </div>
               
-              {swLog.length > 0 && (
+              {(swLog.length > 0 || debugInfo.some(info => info.includes('service worker'))) && (
                 <div className="mt-2">
-                  <details>
-                    <summary className="text-primary" style={{cursor: 'pointer'}}>
-                      <small>Service Worker Notification Log ({swLog.length} entries)</small>
-                    </summary>
-                    <div className="alert alert-info mt-2" style={{maxHeight: '300px', overflowY: 'auto'}}>
+                  {swLog.length > 0 && (
+                    <details>
+                      <summary className="text-primary" style={{cursor: 'pointer'}}>
+                        <small>Service Worker Notification Log ({swLog.length} entries)</small>
+                      </summary>
+                      <div className="alert alert-info mt-2" style={{maxHeight: '300px', overflowY: 'auto'}}>
+                        <small>
+                          {swLog.map((entry, index) => (
+                            <div key={index} className="mb-2 border-bottom pb-1">
+                              <strong>{new Date(entry.timestamp).toLocaleTimeString()}</strong> - {entry.action}
+                              <br />
+                              <code className="small text-muted">
+                                {JSON.stringify(entry.data, null, 2)}
+                              </code>
+                            </div>
+                          ))}
+                        </small>
+                      </div>
+                    </details>
+                  )}
+                  
+                  {swLog.length === 0 && debugInfo.some(info => info.includes('service worker')) && (
+                    <div className="alert alert-warning mt-2">
                       <small>
-                        {swLog.map((entry, index) => (
-                          <div key={index} className="mb-2 border-bottom pb-1">
-                            <strong>{new Date(entry.timestamp).toLocaleTimeString()}</strong> - {entry.action}
-                            <br />
-                            <code className="small text-muted">
-                              {JSON.stringify(entry.data, null, 2)}
-                            </code>
-                          </div>
-                        ))}
+                        No service worker log entries found. Check the debug info below for connection issues.
                       </small>
                     </div>
-                  </details>
+                  )}
                 </div>
               )}
             </div>

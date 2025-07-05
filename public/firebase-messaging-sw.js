@@ -55,6 +55,12 @@ setInterval(() => {
 // Expose notification log for debugging (can be accessed from main thread)
 self.getNotificationLog = () => notificationLog;
 
+// Add initial test entries to verify logging is working
+logNotification('SERVICE_WORKER_INITIALIZED', {
+  timestamp: Date.now(),
+  message: 'Service worker loaded and Firebase initialized'
+});
+
 // Service worker lifecycle events for debugging
 self.addEventListener('install', function(event) {
   console.log('[firebase-messaging-sw.js] Service worker installing...');
@@ -193,11 +199,21 @@ self.addEventListener('notificationclick', function(event) {
 
 // Handle messages from main thread
 self.addEventListener('message', function(event) {
+  console.log('[firebase-messaging-sw.js] Received message from main thread:', event.data);
+  
   if (event.data && event.data.type === 'get-notification-log') {
+    console.log('[firebase-messaging-sw.js] Sending notification log, entries:', notificationLog.length);
+    
     // Send notification log back to main thread
-    event.ports[0].postMessage({
-      type: 'notification-log',
-      log: notificationLog
-    });
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage({
+        type: 'notification-log',
+        log: notificationLog,
+        timestamp: Date.now()
+      });
+      console.log('[firebase-messaging-sw.js] Notification log sent via MessageChannel');
+    } else {
+      console.error('[firebase-messaging-sw.js] No message port available');
+    }
   }
 });
