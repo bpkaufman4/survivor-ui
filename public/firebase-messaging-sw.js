@@ -90,6 +90,23 @@ messaging.onBackgroundMessage(function(payload) {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isPWA = self.location.protocol === 'https:' && self.location.hostname !== 'localhost';
   
+  // Extract notification details
+  const notificationTitle = payload.notification?.title || 'React Survivor';
+  const notificationBody = payload.notification?.body || 'You have a new notification';
+  const notificationType = payload.data?.type || 'general';
+  const serverNotificationId = payload.data?.serverNotificationId || 'unknown';
+  const timestamp = Date.now();
+  
+  // Detailed logging for debugging duplicates
+  console.log('[firebase-messaging-sw.js] Notification details:', {
+    title: notificationTitle,
+    body: notificationBody,
+    type: notificationType,
+    serverNotificationId: serverNotificationId,
+    timestamp: timestamp,
+    payloadData: payload.data
+  });
+  
   logNotification('RECEIVED_BACKGROUND_MESSAGE', {
     title: payload.notification?.title,
     body: payload.notification?.body,
@@ -97,15 +114,9 @@ messaging.onBackgroundMessage(function(payload) {
     serverNotificationId: payload.data?.serverNotificationId,
     isIOS: isIOS,
     isPWA: isPWA,
-    userAgent: navigator.userAgent.substring(0, 100)
+    userAgent: navigator.userAgent.substring(0, 100),
+    fullPayload: payload
   });
-  
-  // Create a unique identifier for this notification to prevent duplicates
-  const notificationTitle = payload.notification?.title || 'React Survivor';
-  const notificationBody = payload.notification?.body || 'You have a new notification';
-  const notificationType = payload.data?.type || 'general';
-  const serverNotificationId = payload.data?.serverNotificationId || 'unknown';
-  const timestamp = Date.now();
   
   // Create deduplication key based on server notification ID (most reliable)
   // Use server notification ID as the deduplication key AND browser notification tag
@@ -119,25 +130,44 @@ messaging.onBackgroundMessage(function(payload) {
     ? serverNotificationId 
     : dedupeKey;
   
-  console.log(`[firebase-messaging-sw.js] Deduplication key: ${dedupeKey}`);
-  console.log(`[firebase-messaging-sw.js] Browser notification tag: ${browserNotificationTag}`);
+  console.log(`[firebase-messaging-sw.js] DEDUPLICATION CHECK:`);
+  console.log(`  Server Notification ID: ${serverNotificationId}`);
+  console.log(`  Dedupe Key: ${dedupeKey}`);
+  console.log(`  Browser Tag: ${browserNotificationTag}`);
+  console.log(`  Recent notifications map size: ${recentNotifications.size}`);
+  console.log(`  Recent notifications keys:`, Array.from(recentNotifications.keys()));
   
   // Check if we've recently shown this notification
   if (recentNotifications.has(dedupeKey)) {
     const lastShown = recentNotifications.get(dedupeKey);
-    if (timestamp - lastShown < DUPLICATE_WINDOW_MS) {
+    const timeSinceLastShown = timestamp - lastShown;
+    console.log(`[firebase-messaging-sw.js] DUPLICATE DETECTED!`);
+    console.log(`  Last shown: ${lastShown}`);
+    console.log(`  Current time: ${timestamp}`);
+    console.log(`  Time since last: ${timeSinceLastShown}ms`);
+    console.log(`  Duplicate window: ${DUPLICATE_WINDOW_MS}ms`);
+    
+    if (timeSinceLastShown < DUPLICATE_WINDOW_MS) {
       logNotification('DUPLICATE_DETECTED_SKIPPED', {
         dedupeKey,
         browserNotificationTag,
         serverNotificationId,
-        timeSinceLastShown: timestamp - lastShown
+        timeSinceLastShown: timeSinceLastShown,
+        duplicateWindowMs: DUPLICATE_WINDOW_MS,
+        action: 'SKIPPED - Within duplicate window'
       });
+      console.log(`[firebase-messaging-sw.js] SKIPPING DUPLICATE NOTIFICATION`);
       return;
+    } else {
+      console.log(`[firebase-messaging-sw.js] Outside duplicate window, allowing notification`);
     }
+  } else {
+    console.log(`[firebase-messaging-sw.js] First time seeing this notification`);
   }
   
   // Record this notification
   recentNotifications.set(dedupeKey, timestamp);
+  console.log(`[firebase-messaging-sw.js] Added to recent notifications map. New size: ${recentNotifications.size}`);
   
   // Use the server notification ID as the notification tag for browser-level deduplication
   const uniqueTag = browserNotificationTag;
@@ -176,8 +206,19 @@ messaging.onBackgroundMessage(function(payload) {
     isPWA,
     notificationTitle,
     notificationBody,
-    message: `Using tag: ${uniqueTag} for deduplication`
+    message: `Using tag: ${uniqueTag} for deduplication`,
+    notificationOptions: {
+      tag: uniqueTag,
+      renotify: notificationOptions.renotify
+    }
   });
+  
+  console.log(`[firebase-messaging-sw.js] SHOWING NOTIFICATION:`);
+  console.log(`  Title: ${notificationTitle}`);
+  console.log(`  Body: ${notificationBody}`);
+  console.log(`  Tag: ${uniqueTag}`);
+  console.log(`  iOS: ${isIOS}, PWA: ${isPWA}`);
+  console.log(`  Renotify: ${notificationOptions.renotify}`);
   
   // On iOS, sometimes we need to explicitly request notification display
   const showNotificationPromise = self.registration.showNotification(notificationTitle, notificationOptions);
@@ -185,16 +226,25 @@ messaging.onBackgroundMessage(function(payload) {
   if (isIOS) {
     // Additional iOS-specific logging
     showNotificationPromise.then(() => {
+      console.log(`[firebase-messaging-sw.js] iOS Notification shown successfully: ${uniqueTag}`);
       logNotification('NOTIFICATION_SHOWN_SUCCESS_IOS', {
         uniqueTag,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        message: 'iOS notification displayed successfully'
       });
     }).catch((error) => {
+      console.error(`[firebase-messaging-sw.js] iOS Notification show error: ${error.message}`);
       logNotification('NOTIFICATION_SHOW_ERROR_IOS', {
         uniqueTag,
         error: error.message,
         timestamp: Date.now()
       });
+    });
+  } else {
+    showNotificationPromise.then(() => {
+      console.log(`[firebase-messaging-sw.js] Desktop Notification shown successfully: ${uniqueTag}`);
+    }).catch((error) => {
+      console.error(`[firebase-messaging-sw.js] Desktop Notification show error: ${error.message}`);
     });
   }
   

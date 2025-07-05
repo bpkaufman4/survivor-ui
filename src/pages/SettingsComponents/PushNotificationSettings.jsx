@@ -271,6 +271,42 @@ const PushNotificationSettings = () => {
                 </button>
                 
                 <button 
+                  className="btn btn-outline-danger btn-sm" 
+                  onClick={async () => {
+                    try {
+                      addDebugInfo('🔍 Checking for duplicate notifications...');
+                      await fetchServiceWorkerLog();
+                      
+                      // Filter for duplicate-related entries
+                      const duplicateEntries = swLog.filter(entry => 
+                        entry.action === 'DUPLICATE_DETECTED_SKIPPED' ||
+                        entry.action === 'SHOWING_NOTIFICATION' ||
+                        entry.action === 'RECEIVED_BACKGROUND_MESSAGE'
+                      );
+                      
+                      addDebugInfo(`Found ${duplicateEntries.length} notification-related entries`);
+                      
+                      const receivedCount = duplicateEntries.filter(e => e.action === 'RECEIVED_BACKGROUND_MESSAGE').length;
+                      const shownCount = duplicateEntries.filter(e => e.action === 'SHOWING_NOTIFICATION').length;
+                      const duplicateCount = duplicateEntries.filter(e => e.action === 'DUPLICATE_DETECTED_SKIPPED').length;
+                      
+                      addDebugInfo(`📥 Received: ${receivedCount}, ✅ Shown: ${shownCount}, 🚫 Duplicates Blocked: ${duplicateCount}`);
+                      
+                      if (shownCount > 1 && duplicateCount === 0) {
+                        addDebugInfo('⚠️  Multiple notifications shown with no duplicates blocked - deduplication may not be working');
+                      } else if (duplicateCount > 0) {
+                        addDebugInfo('✅ Deduplication is working - some notifications were blocked');
+                      }
+                    } catch (error) {
+                      addDebugInfo(`❌ Error checking duplicates: ${error.message}`);
+                    }
+                  }}
+                >
+                  <i className="fas fa-search me-1"></i>
+                  Check for Duplicates
+                </button>
+                
+                <button 
                   className="btn btn-outline-info btn-sm" 
                   onClick={async () => {
                     try {
@@ -458,21 +494,31 @@ const PushNotificationSettings = () => {
               {(swLog.length > 0 || debugInfo.some(info => info.includes('service worker'))) && (
                 <div className="mt-2">
                   {swLog.length > 0 && (
-                    <details>
+                    <details open>
                       <summary className="text-primary" style={{cursor: 'pointer'}}>
-                        <small>Service Worker Notification Log ({swLog.length} entries)</small>
+                        <small>🔍 Service Worker Log ({swLog.length} entries) - Check for Duplicates</small>
                       </summary>
-                      <div className="alert alert-info mt-2" style={{maxHeight: '300px', overflowY: 'auto'}}>
+                      <div className="alert alert-info mt-2" style={{maxHeight: '400px', overflowY: 'auto'}}>
                         <small>
-                          {swLog.map((entry, index) => (
-                            <div key={index} className="mb-2 border-bottom pb-1">
-                              <strong>{new Date(entry.timestamp).toLocaleTimeString()}</strong> - {entry.action}
-                              <br />
-                              <code className="small text-muted">
-                                {JSON.stringify(entry.data, null, 2)}
-                              </code>
-                            </div>
-                          ))}
+                          {swLog.map((entry, index) => {
+                            const isDuplicate = entry.action === 'DUPLICATE_DETECTED_SKIPPED';
+                            const isShowing = entry.action === 'SHOWING_NOTIFICATION';
+                            const isReceived = entry.action === 'RECEIVED_BACKGROUND_MESSAGE';
+                            
+                            return (
+                              <div key={index} className={`mb-2 border-bottom pb-1 ${isDuplicate ? 'bg-warning' : isShowing ? 'bg-success' : isReceived ? 'bg-info' : ''}`}>
+                                <strong>{new Date(entry.timestamp).toLocaleTimeString()}</strong> - 
+                                <span className={isDuplicate ? 'text-dark' : isShowing ? 'text-light' : isReceived ? 'text-light' : ''}> {entry.action}</span>
+                                {isDuplicate && <span className="text-danger"> 🚫 DUPLICATE</span>}
+                                {isShowing && <span className="text-light"> ✅ SHOWN</span>}
+                                {isReceived && <span className="text-light"> 📥 RECEIVED</span>}
+                                <br />
+                                <code className={`small ${isDuplicate ? 'text-dark' : isShowing ? 'text-light' : isReceived ? 'text-light' : 'text-muted'}`}>
+                                  {typeof entry.data === 'object' ? JSON.stringify(entry.data, null, 2) : entry.data}
+                                </code>
+                              </div>
+                            );
+                          })}
                         </small>
                       </div>
                     </details>
