@@ -333,10 +333,22 @@ const PushNotificationSettings = () => {
                     try {
                       addDebugInfo('Fetching your FCM token info...');
                       
-                      const response = await fetch(`${apiUrl}user/admin-fcm-debug?userId=${localStorage.getItem('userId') || 'current'}`, {
+                      // Get current user ID from JWT
+                      const jwt = localStorage.getItem('jwt');
+                      if (!jwt) {
+                        addDebugInfo('❌ No JWT token found');
+                        return;
+                      }
+                      
+                      // Decode JWT to get user ID (simple decode, not verification)
+                      const payload = JSON.parse(atob(jwt.split('.')[1]));
+                      const userId = payload.id;
+                      addDebugInfo(`Using user ID: ${userId}`);
+                      
+                      const response = await fetch(`${apiUrl}user/admin-fcm-debug?userId=${userId}`, {
                         method: 'GET',
                         headers: {
-                          'authorization': localStorage.getItem('jwt')
+                          'authorization': jwt
                         }
                       });
                       
