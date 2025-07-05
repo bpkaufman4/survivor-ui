@@ -20,22 +20,29 @@ html {
   #root {
     padding: 0;
     max-width: 100%;
+    /* Use both viewport units for better PWA support */
     height: 100vh;
-    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: 100svh; /* Small viewport height for PWAs */
+    /* Fallback for browsers that don't support env() */
+    height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    height: calc(100svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     overflow: hidden;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   
   body {
     overflow: hidden;
     -webkit-overflow-scrolling: touch;
+    /* PWA specific */
+    position: fixed;
+    width: 100%;
   }
   
   /* Ensure proper viewport handling on iOS */
   .container {
-    padding-left: max(15px, env(safe-area-inset-left));
-    padding-right: max(15px, env(safe-area-inset-right));
+    padding-left: max(15px, env(safe-area-inset-left, 15px));
+    padding-right: max(15px, env(safe-area-inset-right, 15px));
   }
   
   /* Prevent content from going behind navigation on iOS */

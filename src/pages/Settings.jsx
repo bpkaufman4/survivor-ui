@@ -31,7 +31,7 @@ export default function Settings() {
             </div>
 
             {/* Settings components with proper spacing */}
-            <div className="d-flex flex-column gap-3" style={{paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'}}>
+            <div className="d-flex flex-column gap-3">
               <NameEdit user={user} />
               <EmailPreferences user={user} />
               <PushNotificationSettings />

@@ -102,8 +102,8 @@ const Main = ({ children, page, additionalClasses }) => {
       <nav className="navbar bg-dark d-lg-none d-flex justify-content-around" style={{
         height: headerHeight,
         flexShrink: 0,
-        paddingLeft: 'env(safe-area-inset-left)',
-        paddingRight: 'env(safe-area-inset-right)'
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)'
       }} data-bs-theme="dark">
         <img src={icon} className="h-100" onClick={() => window.location.assign(localStorage.getItem('homeTarget') || '/')} />
       </nav>
@@ -124,8 +124,8 @@ const Main = ({ children, page, additionalClasses }) => {
       <nav className='d-lg-none border-top border-black' style={{
         height: footerHeight,
         flexShrink: 0,
-        paddingLeft: 'env(safe-area-inset-left)',
-        paddingRight: 'env(safe-area-inset-right)'
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)'
       }}>
         <div className="row text-center bg-white mx-0 h-100">
           <div className="col-3 d-flex flex-column justify-content-center align-items-center" onClick={() => window.location.assign('../')}>
