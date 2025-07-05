@@ -326,6 +326,60 @@ const PushNotificationSettings = () => {
                   <i className="fas fa-vial me-1"></i>
                   Send Test Notification
                 </button>
+                
+                <button 
+                  className="btn btn-outline-primary btn-sm" 
+                  onClick={async () => {
+                    try {
+                      addDebugInfo('Fetching your FCM token info...');
+                      
+                      const response = await fetch(`${apiUrl}user/admin-fcm-debug?userId=${localStorage.getItem('userId') || 'current'}`, {
+                        method: 'GET',
+                        headers: {
+                          'authorization': localStorage.getItem('jwt')
+                        }
+                      });
+                      
+                      const result = await response.json();
+                      addDebugInfo(`FCM Debug Response: ${response.status}`);
+                      
+                      if (response.ok && result.status === 'success') {
+                        const tokens = result.fcmTokens || [];
+                        addDebugInfo(`✅ Found ${tokens.length} FCM tokens for your account:`);
+                        
+                        tokens.forEach((token, index) => {
+                          const device = token.deviceInfo || {};
+                          addDebugInfo(`Token ${index + 1}: ${token.fcmToken.substring(0, 20)}... (${device.platform || 'Unknown'}, iOS: ${device.isIOS || false}, PWA: ${device.isPWA || false})`);
+                        });
+                        
+                        // Check if current device matches any token
+                        const currentPlatform = navigator.platform;
+                        const currentIsIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                        const currentIsPWA = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+                        
+                        addDebugInfo(`Current device: Platform=${currentPlatform}, iOS=${currentIsIOS}, PWA=${currentIsPWA}`);
+                        
+                        const matchingToken = tokens.find(t => {
+                          const d = t.deviceInfo || {};
+                          return d.platform === currentPlatform && d.isIOS === currentIsIOS && d.isPWA === currentIsPWA;
+                        });
+                        
+                        if (matchingToken) {
+                          addDebugInfo(`✅ Current device matches Token ID: ${matchingToken.id}`);
+                        } else {
+                          addDebugInfo(`⚠️  Current device doesn't match any registered tokens - may need to re-register`);
+                        }
+                      } else {
+                        addDebugInfo(`❌ Failed to fetch FCM info: ${result.message}`);
+                      }
+                    } catch (error) {
+                      addDebugInfo(`❌ FCM debug error: ${error.message}`);
+                    }
+                  }}
+                >
+                  <i className="fas fa-mobile-alt me-1"></i>
+                  Check My FCM Tokens
+                </button>
               </div>
               
               {(swLog.length > 0 || debugInfo.some(info => info.includes('service worker'))) && (
