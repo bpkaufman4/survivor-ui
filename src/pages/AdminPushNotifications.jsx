@@ -4,7 +4,8 @@ import apiUrl from '../apiUrls';
 
 const AdminPushNotifications = () => {
   const [users, setUsers] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState('all');
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [sendToAll, setSendToAll] = useState(true);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [type, setType] = useState('admin_test');
@@ -45,12 +46,18 @@ const AdminPushNotifications = () => {
       return;
     }
 
+    if (!sendToAll && selectedUsers.length === 0) {
+      setMessage('Please select at least one user or choose "All Users"');
+      setMessageType('error');
+      return;
+    }
+
     setIsLoading(true);
     setMessage('');
 
     try {
       const payload = {
-        targetUsers: selectedUsers,
+        targetUsers: sendToAll ? 'all' : selectedUsers,
         title: title.trim(),
         body: body.trim(),
         type,
@@ -69,7 +76,11 @@ const AdminPushNotifications = () => {
       const result = await response.json();
       
       if (result.status === 'success') {
-        setMessage(`✅ Notification sent successfully to ${result.devicesNotified} devices (${result.successCount} successful, ${result.failureCount} failed)`);
+        const targetDescription = sendToAll 
+          ? `all users (${users.length} users)` 
+          : `${selectedUsers.length} selected user${selectedUsers.length > 1 ? 's' : ''}`;
+        
+        setMessage(`✅ Notification sent successfully to ${targetDescription} - ${result.devicesNotified} devices (${result.successCount} successful, ${result.failureCount} failed)`);
         setMessageType('success');
         
         // Clear form
@@ -85,6 +96,24 @@ const AdminPushNotifications = () => {
       setMessageType('error');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleUserSelection = (userId) => {
+    setSelectedUsers(prev => {
+      if (prev.includes(userId)) {
+        return prev.filter(id => id !== userId);
+      } else {
+        return [...prev, userId];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedUsers.length === users.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(users.map(user => user.userId));
     }
   };
 
@@ -144,23 +173,73 @@ const AdminPushNotifications = () => {
                   <div className="row">
                     <div className="col-md-6">
                       <div className="mb-3">
-                        <label htmlFor="targetUsers" className="form-label">
+                        <label className="form-label">
                           <i className="fas fa-users me-1"></i>
                           Target Users
                         </label>
-                        <select
-                          id="targetUsers"
-                          className="form-select"
-                          value={selectedUsers}
-                          onChange={(e) => setSelectedUsers(e.target.value)}
-                        >
-                          <option value="all">All Users ({users.length} users)</option>
-                          {users.map(user => (
-                            <option key={user.userId} value={user.userId}>
-                              {user.name} ({user.email})
-                            </option>
-                          ))}
-                        </select>
+                        
+                        <div className="mb-2">
+                          <div className="form-check">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              name="targetType"
+                              id="sendToAll"
+                              checked={sendToAll}
+                              onChange={() => {
+                                setSendToAll(true);
+                                setSelectedUsers([]);
+                              }}
+                            />
+                            <label className="form-check-label" htmlFor="sendToAll">
+                              <strong>All Users</strong> ({users.length} users)
+                            </label>
+                          </div>
+                          <div className="form-check">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              name="targetType"
+                              id="sendToSelected"
+                              checked={!sendToAll}
+                              onChange={() => setSendToAll(false)}
+                            />
+                            <label className="form-check-label" htmlFor="sendToSelected">
+                              <strong>Selected Users</strong> ({selectedUsers.length} selected)
+                            </label>
+                          </div>
+                        </div>
+
+                        {!sendToAll && (
+                          <div className="border rounded p-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                            <div className="mb-2">
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={handleSelectAll}
+                              >
+                                {selectedUsers.length === users.length ? 'Deselect All' : 'Select All'}
+                              </button>
+                            </div>
+                            {users.map(user => (
+                              <div key={user.userId} className="form-check">
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  id={`user-${user.userId}`}
+                                  checked={selectedUsers.includes(user.userId)}
+                                  onChange={() => handleUserSelection(user.userId)}
+                                />
+                                <label className="form-check-label" htmlFor={`user-${user.userId}`}>
+                                  {user.name} ({user.email})
+                                </label>
+                              </div>
+                            ))}
+                            {users.length === 0 && (
+                              <div className="text-muted small">No users available</div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div className="mb-3">
@@ -247,7 +326,7 @@ const AdminPushNotifications = () => {
                         <button
                           type="submit"
                           className="btn btn-primary"
-                          disabled={isLoading || !title.trim() || !body.trim()}
+                          disabled={isLoading || !title.trim() || !body.trim() || (!sendToAll && selectedUsers.length === 0)}
                         >
                           {isLoading ? (
                             <>
