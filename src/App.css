@@ -3,6 +3,8 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* iOS Safari specific styles */
@@ -18,10 +20,12 @@ html {
   #root {
     padding: 0;
     max-width: 100%;
+    height: 100vh;
+    overflow: hidden;
   }
   
   body {
-    overflow-x: hidden;
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
   }
   

@@ -33,9 +33,9 @@ const Main = ({ children, page, additionalClasses }) => {
     : `calc(100vh - ${headerHeight} - ${footerHeight} - env(safe-area-inset-top) - env(safe-area-inset-bottom))`;
 
   return (
-    <div className="d-flex flex-column min-vh-100">
+    <div className="d-flex flex-column" style={{ height: '100vh', overflow: 'hidden' }}>
       {/* Desktop Header Navigation - Only visible on desktop */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark d-none d-lg-flex" style={{height: headerHeight}}>
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark d-none d-lg-flex" style={{height: headerHeight, flexShrink: 0}}>
         <div className="container-fluid">
           {/* Brand */}
           <div 
@@ -101,6 +101,7 @@ const Main = ({ children, page, additionalClasses }) => {
       {/* Mobile Header - Only visible on mobile */}
       <nav className="navbar bg-dark d-lg-none d-flex justify-content-around" style={{
         height: headerHeight,
+        flexShrink: 0,
         paddingTop: 'max(0.5rem, env(safe-area-inset-top))',
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)'
@@ -110,33 +111,37 @@ const Main = ({ children, page, additionalClasses }) => {
 
       {/* Main Content Area */}
       <main className="flex-grow-1" style={{
-        height: mainHeight,
         overflowY: 'auto',
-        WebkitOverflowScrolling: 'touch' // Smooth scrolling on iOS
+        overflowX: 'hidden',
+        WebkitOverflowScrolling: 'touch',
+        minHeight: 0 // Important: allows flex item to shrink below content size
       }}>
-        <div className={`${contentClasses} ${isDesktop && page !== 'draft' ? 'py-4' : ''}`}>
+        <div className={`${contentClasses} ${isDesktop && page !== 'draft' ? 'py-4' : ''}`} style={{
+          paddingBottom: isDesktop ? undefined : 'max(1rem, env(safe-area-inset-bottom))'
+        }}>
           {children}
         </div>
       </main>
 
       {/* Mobile Bottom Navigation - Only visible on mobile */}
-      <nav className='d-lg-none fixed-bottom border-top border-black' style={{
+      <nav className='d-lg-none border-top border-black' style={{
         height: footerHeight,
+        flexShrink: 0,
         paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)'
       }}>
-        <div className="row text-center bg-white mx-0">
-          <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../')}>
+        <div className="row text-center bg-white mx-0 h-100">
+          <div className="col-3 d-flex flex-column justify-content-center align-items-center" onClick={() => window.location.assign('../')}>
             <HomeIcon color={page === 'home' || page === 'draft' ? 'primary' : ''}></HomeIcon>
           </div>
-          <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../players')}>
+          <div className="col-3 d-flex flex-column justify-content-center align-items-center" onClick={() => window.location.assign('../players')}>
             <PoolIcon color={page === 'players' ? 'primary' : ''}></PoolIcon>
           </div>
-          <div className="col-3 pb-4 pt-2" onClick={() => window.location.assign('../notes')}>
+          <div className="col-3 d-flex flex-column justify-content-center align-items-center" onClick={() => window.location.assign('../notes')}>
             <EmailIcon color={page === 'notes' ? 'primary' : ''}></EmailIcon>
           </div>
-          <div className="col-3 pb-4 pt-2 position-relative" onClick={() => window.location.assign('../settings')}>
+          <div className="col-3 d-flex flex-column justify-content-center align-items-center position-relative" onClick={() => window.location.assign('../settings')}>
             <SettingsIcon color={page === 'settings' ? 'primary' : ''}></SettingsIcon>
             {needsEmailVerification && (
               <span 

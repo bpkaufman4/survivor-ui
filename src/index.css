@@ -13,6 +13,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  height: 100vh;
+  overflow: hidden;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -27,11 +32,13 @@ body {
   display: flex;
   place-items: center;
   min-width: 320px;
-  min-height: 100vh;
+  height: 100vh;
   /* Prevent rubber band scrolling on iOS */
   overscroll-behavior: none;
   /* Ensure touch scrolling works smoothly */
   -webkit-overflow-scrolling: touch;
+  /* Prevent page-level scrolling */
+  overflow: hidden;
 }
 
 h1 {
