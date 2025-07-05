@@ -5,6 +5,7 @@ import {
   requestNotificationPermission,
   sendTokenToServer
 } from '../../firebase';
+import apiUrl from '../../apiUrls';
 
 const PushNotificationSettings = () => {
   const [notificationStatus, setNotificationStatus] = useState(() => {
@@ -293,7 +294,8 @@ const PushNotificationSettings = () => {
                   onClick={async () => {
                     try {
                       addDebugInfo('Sending test notification to yourself...');
-                      const response = await fetch('/api/user/test-push', {
+                      
+                      const response = await fetch(`${apiUrl}user/test-push`, {
                         method: 'POST',
                         headers: {
                           'Content-Type': 'application/json',
@@ -306,11 +308,15 @@ const PushNotificationSettings = () => {
                         })
                       });
                       
-                      if (response.ok) {
+                      const result = await response.json();
+                      addDebugInfo(`Response status: ${response.status}`);
+                      addDebugInfo(`Response: ${JSON.stringify(result)}`);
+                      
+                      if (response.ok && result.status === 'success') {
                         addDebugInfo('✅ Test notification sent successfully');
                         addDebugInfo('Wait a few seconds, then check the notification log to see if duplicates appear');
                       } else {
-                        addDebugInfo('❌ Failed to send test notification');
+                        addDebugInfo(`❌ Failed to send test notification: ${result.message}`);
                       }
                     } catch (error) {
                       addDebugInfo(`❌ Test notification error: ${error.message}`);
