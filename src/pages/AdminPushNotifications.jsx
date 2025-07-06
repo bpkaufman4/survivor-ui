@@ -172,12 +172,14 @@ const AdminPushNotifications = () => {
 
                 <form onSubmit={handleSendNotification}>
                   <div className="row">
-                    <div className="col-md-6">
-                      <div className="mb-3">
+                    <div className="col-md-6">                        <div className="mb-3">
                         <label className="form-label">
                           <i className="fas fa-users me-1"></i>
                           Target Users
                         </label>
+                        <small className="form-text text-muted d-block mb-2">
+                          Only showing users with active push notification tokens
+                        </small>
                         
                         <div className="mb-2">
                           <div className="form-check">
@@ -193,7 +195,7 @@ const AdminPushNotifications = () => {
                               }}
                             />
                             <label className="form-check-label" htmlFor="sendToAll">
-                              <strong>All Users</strong> ({users.length} users)
+                              <strong>All Users with Push Notifications</strong> ({users.length} users)
                             </label>
                           </div>
                           <div className="form-check">
@@ -237,7 +239,7 @@ const AdminPushNotifications = () => {
                               </div>
                             ))}
                             {users.length === 0 && (
-                              <div className="text-muted small">No users available</div>
+                              <div className="text-muted small">No users with active push notification tokens</div>
                             )}
                           </div>
                         )}
