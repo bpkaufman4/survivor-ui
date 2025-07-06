@@ -1,0 +1,157 @@
+/* Admin Leagues Page Styles */
+
+/* Leagues main table */
+.admin-table.leagues-main-table {
+  width: 100%;
+  min-width: unset;
+  table-layout: fixed;
+}
+
+.admin-table.leagues-main-table th:nth-child(1), /* Name */
+.admin-table.leagues-main-table td:nth-child(1) {
+  width: 25%;
+}
+
+.admin-table.leagues-main-table th:nth-child(2), /* Admin */
+.admin-table.leagues-main-table td:nth-child(2) {
+  width: 20%;
+}
+
+.admin-table.leagues-main-table th:nth-child(3), /* Description */
+.admin-table.leagues-main-table td:nth-child(3) {
+  width: 30%;
+}
+
+.admin-table.leagues-main-table th:nth-child(4), /* Status */
+.admin-table.leagues-main-table td:nth-child(4) {
+  width: 15%;
+}
+
+.admin-table.leagues-main-table th:nth-child(5), /* Actions */
+.admin-table.leagues-main-table td:nth-child(5) {
+  width: 10%;
+}
+
+/* League status badges */
+.league-status-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+.league-status-active {
+  background-color: #d1edff;
+  color: #0c5aa6;
+}
+
+.league-status-inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* =================================================================
+   TABLET RESPONSIVE (≤991px)
+   ================================================================= */
+
+@media (max-width: 991.98px) {
+  /* Leagues table adjustments */
+  .admin-table.leagues-main-table th:nth-child(1), 
+  .admin-table.leagues-main-table td:nth-child(1) { 
+    width: 30%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(2), 
+  .admin-table.leagues-main-table td:nth-child(2) { 
+    width: 25%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(3), 
+  .admin-table.leagues-main-table td:nth-child(3) { 
+    width: 25%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(4), 
+  .admin-table.leagues-main-table td:nth-child(4) { 
+    width: 20%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(5), 
+  .admin-table.leagues-main-table td:nth-child(5) { 
+    width: 15%; 
+  }
+}
+
+/* =================================================================
+   MOBILE RESPONSIVE (≤767px)
+   ================================================================= */
+
+@media (max-width: 767.98px) {
+  /* Leagues table mobile adjustments */
+  .admin-table.leagues-main-table th:nth-child(1), 
+  .admin-table.leagues-main-table td:nth-child(1) { 
+    width: 35%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(2), 
+  .admin-table.leagues-main-table td:nth-child(2) { 
+    width: 25%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(3), 
+  .admin-table.leagues-main-table td:nth-child(3) { 
+    width: 20%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(4), 
+  .admin-table.leagues-main-table td:nth-child(4) { 
+    width: 20%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(5), 
+  .admin-table.leagues-main-table td:nth-child(5) { 
+    width: 25%; 
+  }
+  
+  .league-status-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+/* =================================================================
+   SMALL MOBILE RESPONSIVE (≤575px)
+   ================================================================= */
+
+@media (max-width: 575.98px) {
+  /* Leagues table final mobile adjustments */
+  .admin-table.leagues-main-table th:nth-child(1), 
+  .admin-table.leagues-main-table td:nth-child(1) { 
+    width: 40%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(2), 
+  .admin-table.leagues-main-table td:nth-child(2) { 
+    display: none; /* Hide admin column on small screens */
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(3), 
+  .admin-table.leagues-main-table td:nth-child(3) { 
+    width: 35%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(4), 
+  .admin-table.leagues-main-table td:nth-child(4) { 
+    width: 25%; 
+  }
+  
+  .admin-table.leagues-main-table th:nth-child(5), 
+  .admin-table.leagues-main-table td:nth-child(5) { 
+    width: 40%; 
+  }
+  
+  .league-status-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.3rem;
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminMain from '../components/AdminMain';
 import apiUrl from '../apiUrls';
+import "../assets/admin-common.css";
 
 const AdminPushNotifications = () => {
   const [users, setUsers] = useState([]);

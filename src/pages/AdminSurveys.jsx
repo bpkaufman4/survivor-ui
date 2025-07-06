@@ -10,6 +10,7 @@ import { DateTime } from "luxon";
 import Swal from "sweetalert2";
 import Grade from "./AdminSurveysComponents/Grade";
 import GradingIcon from '@mui/icons-material/Grading';
+import "../assets/admin-common.css";
 
 function AdminSurveys() {
 

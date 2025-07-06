@@ -1,3 +1,6 @@
+/* Admin Players Page Styles */
+
+/* Legacy player head shot styles (keep for compatibility) */
 .player-head-shot {    
     height: 100px;
     width: 100px;
@@ -19,6 +22,242 @@
     margin: unset;
     display: block;
     object-fit: cover;
+}
+
+/* Players main table */
+.admin-players-table {
+  width: 100%;
+  min-width: unset !important;
+  table-layout: fixed;
+}
+
+/* Default desktop column widths */
+.admin-players-table th:nth-child(1), /* Photo */
+.admin-players-table td:nth-child(1) {
+  width: 80px;
+  max-width: 80px;
+  min-width: 80px;
+  padding: 0.5rem 0.25rem;
+}
+
+.admin-players-table th:nth-child(2), /* Name */
+.admin-players-table td:nth-child(2) {
+  width: auto; /* Takes remaining space */
+  word-break: keep-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-players-table th:nth-child(3), /* Tribe */
+.admin-players-table td:nth-child(3) {
+  width: 150px;
+  max-width: 150px;
+  min-width: 150px;
+}
+
+.admin-players-table th:nth-child(4), /* Actions */
+.admin-players-table td:nth-child(4) {
+  width: 120px;
+  max-width: 120px;
+  min-width: 120px;
+}
+
+/* Player photo styling */
+.admin-player-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #dee2e6;
+}
+
+.admin-player-photo-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #dee2e6;
+  color: #6c757d;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Player name styling */
+.admin-player-name {
+  font-weight: 500;
+  color: #212529;
+}
+
+/* Tribe badge styling */
+.admin-player-tribe {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: #e9ecef;
+  color: #495057;
+  font-weight: 500;
+}
+
+/* =================================================================
+   TABLET RESPONSIVE (≤991px)
+   ================================================================= */
+
+@media (max-width: 991.98px) {
+  /* Players table - hide tribe column and adjust widths */
+  .admin-players-table th:nth-child(1), 
+  .admin-players-table td:nth-child(1) {
+    width: 70px !important;
+    max-width: 70px !important;
+    min-width: 70px !important;
+    padding: 0.5rem 0.2rem !important;
+  }
+  
+  .admin-players-table th:nth-child(2), 
+  .admin-players-table td:nth-child(2) {
+    width: calc(100% - 170px) !important;
+  }
+  
+  .admin-players-table th:nth-child(3), 
+  .admin-players-table td:nth-child(3) {
+    width: 100px !important;
+    max-width: 100px !important;
+    min-width: 100px !important;
+  }
+  
+  .admin-players-table th:nth-child(4), 
+  .admin-players-table td:nth-child(4) {
+    width: 100px !important;
+    max-width: 100px !important;
+    min-width: 100px !important;
+  }
+  
+  .admin-players-table .admin-table-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  
+  .admin-players-table .admin-table-actions .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .admin-player-photo,
+  .admin-player-photo-placeholder {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .admin-player-tribe {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+/* =================================================================
+   MOBILE RESPONSIVE (≤767px)
+   ================================================================= */
+
+@media (max-width: 767.98px) {
+  /* Legacy player head shot mobile sizing */
+  .player-head-shot.table {
+    height: 40px;
+    width: 40px;
+  }
+  
+  /* Players table - hide tribe column and adjust widths */
+  .admin-players-table th:nth-child(1), 
+  .admin-players-table td:nth-child(1) {
+    width: 65px !important;
+    max-width: 65px !important;
+    min-width: 65px !important;
+    padding: 0.4rem 0.15rem !important;
+  }
+  
+  .admin-players-table th:nth-child(2), 
+  .admin-players-table td:nth-child(2) {
+    width: calc(100% - 145px) !important;
+  }
+  
+  .admin-players-table th:nth-child(3), 
+  .admin-players-table td:nth-child(3) {
+    display: none !important;
+  }
+  
+  .admin-players-table th:nth-child(4), 
+  .admin-players-table td:nth-child(4) {
+    width: 80px !important;
+    max-width: 80px !important;
+    min-width: 80px !important;
+  }
+  
+  .admin-players-table .admin-table-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .admin-players-table .admin-table-actions .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .admin-player-photo,
+  .admin-player-photo-placeholder {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* =================================================================
+   SMALL MOBILE RESPONSIVE (≤575px)
+   ================================================================= */
+
+@media (max-width: 575.98px) {
+  .admin-players-table th:nth-child(1), 
+  .admin-players-table td:nth-child(1) {
+    width: 60px !important;
+    max-width: 60px !important;
+    min-width: 60px !important;
+    padding: 0.4rem 0.15rem !important;
+  }
+  
+  .admin-players-table th:nth-child(2), 
+  .admin-players-table td:nth-child(2) {
+    width: calc(100% - 130px) !important;
+  }
+  
+  .admin-players-table th:nth-child(3), 
+  .admin-players-table td:nth-child(3) {
+    display: none !important;
+  }
+  
+  .admin-players-table th:nth-child(4), 
+  .admin-players-table td:nth-child(4) {
+    width: 70px !important;
+    max-width: 70px !important;
+    min-width: 70px !important;
+  }
+  
+  .admin-players-table .admin-table-actions .btn {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.3rem;
+    line-height: 1.2;
+  }
+  
+  .admin-player-photo,
+  .admin-player-photo-placeholder {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .admin-player-photo-placeholder {
+    font-size: 0.65rem;
+  }
 }
 
 table {width: 100%;}

@@ -6,6 +6,8 @@ import DotLoader from "../components/DotLoader";
 import { Alert, Snackbar } from "@mui/material";
 import Swal from "sweetalert2";
 import apiUrl from "../apiUrls";
+import "../assets/admin-common.css";
+import "../assets/admin-notes.css";
 
 function AdminNotes() {
 
@@ -66,70 +68,123 @@ function AdminNotes() {
 
     return (
       <>
-        <div className="d-flex justify-content-between py-3">
-            <h2 className="w-auto">Notes</h2>
-            <button className="btn btn-primary" onClick={addNote}>Add Note</button>
+        <div className="admin-page-header">
+          <h2>Notes</h2>
+          <button className="btn btn-primary" onClick={addNote}>Add Note</button>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Note</th>
-              <th>Date</th>
-              <th></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              notes.map(note => {
+        <div className="admin-table-container">
+          <table className="table table-striped admin-table notes-main-table">
+            <thead>
+              <tr>
+                <th>Note</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                notes.map(note => {
 
-                function editNote() {
-                  setEditingNote(note);
-                  setView('form');
-                }
+                  function NoteContent({ note }) {
+                    const [expanded, setExpanded] = useState(false);
+                    const maxLength = 100; // Characters to show before truncating
+                    const shouldTruncate = note.note.length > maxLength;
+                    
+                    const displayText = expanded ? note.note : note.note.substring(0, maxLength);
+                    
+                    return (
+                      <div className="note-text-container">
+                        {shouldTruncate && !expanded ? (
+                          <>
+                            {displayText}...
+                            <button 
+                              className="btn btn-link p-0 ms-1 text-decoration-none see-more-btn"
+                              onClick={() => setExpanded(true)}
+                            >
+                              see more
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            {displayText}
+                            {shouldTruncate && expanded && (
+                              <button 
+                                className="btn btn-link p-0 ms-1 text-decoration-none see-more-btn"
+                                onClick={() => setExpanded(false)}
+                              >
+                                see less
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
 
-                function deleteNote() {
-                  Swal.fire({
-                    title: "Delete Note?",
-                    showCancelButton: true
-                  })
-                  .then(reply => {
-                    if(reply.isConfirmed) {
-                      fetch(`${apiUrl}adminNote/${note.adminNoteId}`, {
-                        method: 'DELETE',
-                        headers: {
-                          authorization: localStorage.getItem('jwt')
-                        }
-                      })
-                      .then(response => {
-                        return response.json();
-                      })
-                      .then(reply => {
-                        if(reply.status === 'success') {
-                          fetchNotes();
-                        } else {
-                          console.log(reply);
-                        }
-                      })
-                      .catch(err => {
-                        console.log(err);
-                      })
-                    }
-                  })
-                }
+                  function editNote() {
+                    setEditingNote(note);
+                    setView('form');
+                  }
 
-                return (
-                  <tr key={note.adminNoteId}>
-                    <td>{note.note}</td>
-                    <td>{DateTime.fromISO(note.createdAt).toLocaleString(DateTime.DATE_SHORT)}</td>
-                    <td><button className="btn btn-primary" onClick={editNote}>Edit</button></td>
-                    <td><button className="btn btn-primary" onClick={deleteNote}>Delete</button></td>
-                  </tr>
-                )
-              })
-            }
-          </tbody>
-        </table>
+                  function deleteNote() {
+                    Swal.fire({
+                      title: "Delete Note?",
+                      showCancelButton: true
+                    })
+                    .then(reply => {
+                      if(reply.isConfirmed) {
+                        fetch(`${apiUrl}adminNote/${note.adminNoteId}`, {
+                          method: 'DELETE',
+                          headers: {
+                            authorization: localStorage.getItem('jwt')
+                          }
+                        })
+                        .then(response => {
+                          return response.json();
+                        })
+                        .then(reply => {
+                          if(reply.status === 'success') {
+                            fetchNotes();
+                          } else {
+                            console.log(reply);
+                          }
+                        })
+                        .catch(err => {
+                          console.log(err);
+                        })
+                      }
+                    })
+                  }
+
+                  return (
+                    <tr key={note.adminNoteId}>
+                      <td className="note-content">
+                        <NoteContent note={note} />
+                      </td>
+                      <td>
+                        <span className="d-none d-md-inline">
+                          {DateTime.fromISO(note.createdAt).toLocaleString(DateTime.DATE_SHORT)}
+                        </span>
+                        <span className="d-md-none">
+                          {DateTime.fromISO(note.createdAt).toLocaleString({
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="admin-table-actions">
+                          <button className="btn btn-secondary btn-sm" onClick={editNote}>Edit</button>
+                          <button className="btn btn-danger btn-sm" onClick={deleteNote}>Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              }
+            </tbody>
+          </table>
+        </div>
       </>
     )
   }
@@ -210,24 +265,33 @@ function AdminNotes() {
       setAlertOpen(false);
     }
 
+    const heading = editingNote ? 'Edit Note' : 'Add Note';
+
     return (
-      <>
-        <Snackbar open={alertOpen} autoHideDuration={2000} onClose={closeAlert} anchorOrigin={{vertical: 'top', horizontal: 'center'}}>
-          <Alert severity={alertOptions.severity} sx={{width: '100%'}} onClose={closeAlert}>{alertOptions.message}</Alert>
-        </Snackbar>
+      <div className="admin-form-container">
+        <div className="admin-page-header">
+          <h2>{heading}</h2>
+        </div>
         <form onSubmit={saveNote}>
           <div className="row">
-              <div className="mb-3">
-                  <label htmlFor="note" className="col-form-label">Note*:</label>
-                  <textarea className="form-control" value={noteText} onChange={setText}></textarea>
-              </div>
+            <div className="mb-3 col-12">
+              <label htmlFor="note" className="form-label">Note*:</label>
+              <textarea 
+                className="form-control" 
+                id="note"
+                value={noteText} 
+                onChange={setText}
+                rows="6"
+                placeholder="Enter your note here..."
+              ></textarea>
+            </div>
           </div>
-          <div className="d-flex justify-content-between py-3">
+          <div className="admin-button-group mt-4">
             {(() => {
               if(submitting) {
                 return (
                   <>
-                    <button disabled={true} type="button" className="btn btn-outline-primary">Back</button>
+                    <button disabled={true} type="button" className="btn btn-outline-secondary">Back</button>
                     <button type="submit" disabled={true} className="btn btn-primary">
                       <DotLoader color={"white"}></DotLoader>
                     </button>
@@ -236,15 +300,18 @@ function AdminNotes() {
               } else {
                 return (
                   <>
-                    <button type="button" className="btn btn-outline-primary" onClick={() => setView('table')}>Back</button>
-                    <button type="submit" className="btn btn-primary">Save</button>
+                    <button type="button" className="btn btn-outline-secondary" onClick={() => setView('table')}>Back</button>
+                    <button type="submit" className="btn btn-primary">Save Note</button>
                   </>
                 )
               }
             })()}
           </div>
-      </form>
-      </>
+        </form>
+        <Snackbar open={alertOpen} autoHideDuration={2000} onClose={closeAlert} anchorOrigin={{vertical: 'top', horizontal: 'center'}}>
+          <Alert severity={alertOptions.severity} sx={{width: '100%'}} onClose={closeAlert}>{alertOptions.message}</Alert>
+        </Snackbar>
+      </div>
     )
   }
 

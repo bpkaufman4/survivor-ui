@@ -5,6 +5,7 @@ import DotLoader from "../components/DotLoader";
 import { Alert, Snackbar } from "@mui/material";
 import Swal from "sweetalert2";
 import apiUrl from "../apiUrls";
+import "../assets/admin-common.css";
 
 function AdminStatistics() {
 

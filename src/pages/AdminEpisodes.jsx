@@ -7,6 +7,8 @@ import Swal from "sweetalert2";
 import WaterLoader from "../components/WaterLoader";
 import apiUrl from "../apiUrls";
 import { sanitizeFormValues, getFormValues } from "../helpers/helpers";
+import "../assets/admin-common.css";
+import "../assets/admin-episodes.css";
 
 function AdminEpisode() {
   
@@ -114,10 +116,26 @@ function AdminEpisode() {
       return (
         <tr key={episode.episodeId}>
           <td>{episode.title || "(No title)"}</td>
-          <td>{DateTime.fromISO(episode.airDate).toLocaleString(DateTime.DATETIME_SHORT)}</td>
-          <td><button className="btn btn-primary" onClick={setScores}>Set Scores</button></td>
-          <td><button className="btn btn-primary" onClick={editEpisode}>Edit</button></td>
-          <td><button className="btn btn-primary" onClick={deleteEpisode}>Delete</button></td>
+          <td>
+            <span className="d-none d-md-inline">
+              {DateTime.fromISO(episode.airDate).toLocaleString(DateTime.DATETIME_SHORT)}
+            </span>
+            <span className="d-md-none">
+              {DateTime.fromISO(episode.airDate).toLocaleString({
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                hour12: true
+              })}
+            </span>
+          </td>
+          <td>
+            <div className="admin-table-actions">
+              <button className="btn btn-primary btn-sm" onClick={setScores}>Set Scores</button>
+              <button className="btn btn-secondary btn-sm" onClick={editEpisode}>Edit</button>
+              <button className="btn btn-danger btn-sm" onClick={deleteEpisode}>Delete</button>
+            </div>
+          </td>
         </tr>
       )
     })
@@ -130,21 +148,24 @@ function AdminEpisode() {
 
     return (
       <>
-        <div className="d-flex justify-content-between py-3">
-          <h2 className="w-auto">Episodes</h2>
+        <div className="admin-page-header">
+          <h2>Episodes</h2>
           <button className="btn btn-primary" onClick={addEpisode}>Add Episode</button>
         </div>
-        <table className="w-100">
-        <thead>
-            <tr>
+        <div className="admin-table-container">
+          <table className="table table-striped admin-table episodes-main-table">
+            <thead>
+              <tr>
                 <th>Title</th>
                 <th>Air Date</th>
-            </tr>
-        </thead>
-          <tbody>
-            {rows}
-          </tbody>
-        </table>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows}
+            </tbody>
+          </table>
+        </div>
       </>
     )
 
@@ -245,46 +266,124 @@ function AdminEpisode() {
       })
     }
 
+    const heading = episode ? 'Edit Episode' : 'Add Episode';
+
     return (
-      <form onSubmit={submitEpisode}>
-        <div className="row">
-          <div className="mb-3">
-            <label htmlFor="airDate" className="col-form-label">Air Date*:</label>
-            <input type="datetime-local" defaultValue={airDate} className="form-control" id="airDate"/>
-          </div>
-          <div className="mb-3">
-            <label htmlFor="title" className="col-form-label">Title:</label>
-            <input type="text" defaultValue={title} className="form-control" id="title"/>
-          </div>
+      <div className="admin-form-container">
+        <div className="admin-page-header">
+          <h2>{heading}</h2>
         </div>
-        <div className="d-flex justify-content-between">
-          {(() => {
-            if(submitting) {
-              return (
-                <>
-                  <button disabled={true} type="button" className="btn btn-outline-primary">Back</button>
-                  <button type="submit" disabled={true} className="btn btn-primary">
-                    <DotLoader color={"white"}></DotLoader>
-                  </button>
-                </>
-              )
-            } else {
-              return (
-                <>
-                  <button type="button" className="btn btn-outline-primary" onClick={goBack}>Back</button>
-                  <button type="submit" className="btn btn-primary">Save</button>
-                </>
-              )
-            }
-          })()}
-        </div>
-      </form>
+        <form onSubmit={submitEpisode}>
+          <div className="row">
+            <div className="mb-3 col-md-6">
+              <label htmlFor="airDate" className="form-label">Air Date*:</label>
+              <input type="datetime-local" defaultValue={airDate} className="form-control" id="airDate"/>
+            </div>
+            <div className="mb-3 col-md-6">
+              <label htmlFor="title" className="form-label">Title:</label>
+              <input type="text" defaultValue={title} className="form-control" id="title"/>
+            </div>
+          </div>
+          <div className="admin-button-group mt-4">
+            {(() => {
+              if(submitting) {
+                return (
+                  <>
+                    <button disabled={true} type="button" className="btn btn-outline-secondary">Back</button>
+                    <button type="submit" disabled={true} className="btn btn-primary">
+                      <DotLoader color={"white"}></DotLoader>
+                    </button>
+                  </>
+                )
+              } else {
+                return (
+                  <>
+                    <button type="button" className="btn btn-outline-secondary" onClick={goBack}>Back</button>
+                    <button type="submit" className="btn btn-primary">Save Episode</button>
+                  </>
+                )
+              }
+            })()}
+          </div>
+        </form>
+      </div>
     )
   }
 
   function EpisodeSetScores({ episode }) {
     const [players, setPlayers] = useState([]);
     const [labels, setLabels] = useState([]);
+    const [tableHeight, setTableHeight] = useState('70vh');
+
+    function calculateTableHeight() {
+      // Wait for DOM to be ready and allow for any dynamic content to render
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          // Get the container-fluid padding that wraps all admin content
+          const containerFluid = document.querySelector('.container-fluid');
+          const containerFluidPadding = containerFluid ? 
+            parseInt(window.getComputedStyle(containerFluid).paddingTop) + 
+            parseInt(window.getComputedStyle(containerFluid).paddingBottom) : 0;
+          
+          // Get the admin main padding
+          const adminMain = document.querySelector('.admin-main');
+          const adminMainPadding = adminMain ? 
+            parseInt(window.getComputedStyle(adminMain).paddingTop) + 
+            parseInt(window.getComputedStyle(adminMain).paddingBottom) : 0;
+          
+          // Get the page header height with better measurement
+          const pageHeader = document.querySelector('.admin-page-header');
+          let headerHeight = 0;
+          if (pageHeader) {
+            // Use getBoundingClientRect for more accurate height including margins
+            const headerRect = pageHeader.getBoundingClientRect();
+            const headerStyles = window.getComputedStyle(pageHeader);
+            const headerMargins = parseInt(headerStyles.marginTop) + parseInt(headerStyles.marginBottom);
+            headerHeight = headerRect.height + headerMargins;
+          } else {
+            // Fallback height estimate for admin page header
+            headerHeight = 80;
+          }
+          
+          // Add very conservative buffer space to ensure the table never goes below screen bottom
+          // This includes space for container padding, potential scrollbars, and generous visual breathing room
+          const bufferSpace = 100;
+          
+          // Calculate total space used by other elements
+          const usedSpace = containerFluidPadding + adminMainPadding + headerHeight + bufferSpace;
+          
+          // Calculate available height: full window height minus all used space
+          const availableHeight = window.innerHeight - usedSpace;
+          
+          // Ensure minimum height for usability
+          const minHeight = 200;
+          const finalHeight = Math.max(availableHeight, minHeight);
+          
+          setTableHeight(`${finalHeight}px`);
+        }, 50); // Small delay to ensure DOM is fully settled
+      });
+    }
+
+    useEffect(() => {
+
+      // Calculate table height when component mounts
+      calculateTableHeight();
+
+      // Recalculate on window resize with debouncing
+      let resizeTimeout;
+      const handleResize = () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(calculateTableHeight, 100);
+      };
+
+      window.addEventListener('resize', handleResize);
+
+      // Cleanup listener on component unmount
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        clearTimeout(resizeTimeout);
+      };
+    }, []);
 
     useEffect(() => {
       function fetchPlayers() {
@@ -312,6 +411,16 @@ function AdminEpisode() {
 
       fetchPlayers();
     }, [episode.episodeId])
+
+    // Recalculate height when players data loads (header might change size)
+    useEffect(() => {
+      if (players.length > 0) {
+        // Small delay to ensure the DOM has updated with the new data
+        setTimeout(() => {
+          calculateTableHeight();
+        }, 100);
+      }
+    }, [players]);
 
     function PlayerRow({player}) {
 
@@ -401,43 +510,42 @@ function AdminEpisode() {
 
     return (
       <>
-        <div className="d-flex justify-content-between my-3">
+        <div className="admin-page-header">
           <h2>{episode.title || '(No Title)'}</h2>
           <button className="btn btn-primary" onClick={goBack}>Go Back</button>
-        </div>        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>Elimination</th>
-              {labels.map((label, i) => {
-                return <th key={`${label}${i}`}>{label}</th>
-              })}
-            </tr>
-            <tr className="text-muted small">
-              <td></td>
-              <td></td>
+        </div>
+        <div className="admin-table-container episode-scores-container" style={{ height: tableHeight }}>
+          <table className="table table-striped admin-table episode-scores-table">
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Elimination</th>
+                {labels.map((label, i) => {
+                  // Get default points for this statistic from the first player's stats
+                  const firstPlayer = Object.values(players)[0];
+                  const defaultPoints = firstPlayer && firstPlayer.stats[i] ? firstPlayer.stats[i].defaultPoints : 0;
+                  const pointText = defaultPoints === 1 ? 'pt' : 'pts';
+                  return (
+                    <th key={`${label}${i}`}>
+                      <div>{label}</div>
+                      <div className="text-muted small">({defaultPoints} {pointText})</div>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
               {(() => {
-                // Get default points for each statistic from the first player's stats
-                const firstPlayer = Object.values(players)[0];
-                if (!firstPlayer) return null;
-                  return firstPlayer.stats.map((stat, i) => {
-                  const pointText = stat.defaultPoints === 1 ? 'point' : 'points';
-                  return <td key={`default-${stat.statisticId}-${i}`}>{stat.defaultPoints} {pointText}</td>
-                });
+                let rows = [];
+                for(const key in players) {
+                  const player = players[key];
+                  rows.push(<PlayerRow player={player} key={player.playerId}></PlayerRow>)
+                }
+                return rows;
               })()}
-            </tr>
-          </thead>
-          <tbody>
-            {(() => {
-              let rows = [];
-              for(const key in players) {
-                const player = players[key];
-                rows.push(<PlayerRow player={player} key={player.playerId}></PlayerRow>)
-              }
-              return rows;
-            })()}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </>
     )
   }

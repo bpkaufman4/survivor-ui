@@ -250,7 +250,14 @@ export default function Table({ setView, setSetPlayersLeagueId }) {
       <>
         <tr key={league.leagueId}>
           <td>{league.name}</td>
-          <td>{league.owner.firstName} {league.owner.lastName}</td>
+          <td>
+            <span className="d-none d-md-inline">
+              {league.owner.firstName} {league.owner.lastName}
+            </span>
+            <span className="d-md-none">
+              {league.owner.firstName} {league.owner.lastName.charAt(0)}.
+            </span>
+          </td>
           <td>{league.teamsCount}</td>
           <td>
             {(() => {
@@ -265,7 +272,7 @@ export default function Table({ setView, setSetPlayersLeagueId }) {
                     >
                       Go to Draft
                     </button>
-                    <small className="text-muted">{draftStatus.text}</small>
+                    <small className="text-muted d-none d-md-inline">{draftStatus.text}</small>
                   </div>
                 );
               } else {
@@ -280,39 +287,44 @@ export default function Table({ setView, setSetPlayersLeagueId }) {
                       cursor: 'pointer'
                     }}
                   >
-                    {draftStatus.text}
+                    <span className="d-none d-md-inline">{draftStatus.text}</span>
+                    <span className="d-md-none">
+                      {draftStatus.status === 'not-set' ? 'None' : 'Set'}
+                    </span>
                   </button>
                 );
               }
             })()}
           </td>
           <td>
-            <button className="btn" onClick={() => setPlayers(league.leagueId)}>
-              <AccessibilityIcon></AccessibilityIcon>
-            </button>
-          </td>
-          <td>
-            <button className="btn" onClick={() => deleteLeague(league.leagueId)}>
-              <DeleteIcon></DeleteIcon>
-            </button>
-          </td>
-          <td>
-            <button className="btn" onClick={toggleExpand}>
-              {expanded && <ExpandLessIcon />}
-              {!expanded && <ExpandMoreIcon />}
-            </button>
+            <div className="admin-table-actions">
+              <button className="btn btn-primary btn-sm" onClick={() => setPlayers(league.leagueId)} title="Set Players">
+                <AccessibilityIcon fontSize="small" />
+              </button>
+              <button className="btn btn-secondary btn-sm" onClick={toggleExpand} title="View Teams">
+                {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+              </button>
+              <button className="btn btn-danger btn-sm" onClick={() => deleteLeague(league.leagueId)} title="Delete League">
+                <DeleteIcon fontSize="small" />
+              </button>
+            </div>
           </td>
         </tr>
         {(expanded && league?.teams) && league.teams.map(team => (
           <tr key={team.teamId} className="bg-light">
-            <td colSpan="7">
+            <td colSpan="5">
               <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <strong>{team.name}</strong> - {team?.owner?.firstName} {team?.owner?.lastName}
+                <div className="flex-grow-1 me-2 team-info">
+                  <strong>{team.name}</strong>
+                  <span className="team-owner ms-md-2">
+                    <span className="d-md-none"> - </span>
+                    <span className="d-none d-md-inline"> - </span>
+                    {team?.owner?.firstName} {team?.owner?.lastName}
+                  </span>
                 </div>
                 <div>                  
-                  <button className="btn" onClick={() => deleteTeam(team.teamId)}>
-                    <DeleteIcon></DeleteIcon>
+                  <button className="btn btn-danger btn-sm" onClick={() => deleteTeam(team.teamId)} title="Delete Team">
+                    <DeleteIcon fontSize="small" />
                   </button>
                 </div>
               </div>
@@ -324,26 +336,26 @@ export default function Table({ setView, setSetPlayersLeagueId }) {
   }
 
   return <>
-    <div className="d-flex justify-content-between py-3">
-      <h2 className="w-auto">Leagues</h2>
-      <button className="btn btn-primary">Add Survey</button>
+    <div className="admin-page-header">
+      <h2>Leagues</h2>
+      <button className="btn btn-primary">Add League</button>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Owner</th>
-          <th>Size</th>
-          <th>Draft</th>
-          <th>Set Players</th>
-          <th>Delete</th>
-          <th>View</th>
-        </tr>
-      </thead>
-      <tbody>
-        {leagues && leagues.map(l => <LeagueRow key={l.leagueId} league={l} />)}
-      </tbody>
-    </table>
+    <div className="admin-table-container">
+      <table className="table table-striped admin-table leagues-main-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Owner</th>
+            <th>Size</th>
+            <th>Draft</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {leagues && leagues.map(l => <LeagueRow key={l.leagueId} league={l} />)}
+        </tbody>
+      </table>
+    </div>
 
     {/* Draft Settings Modal */}
     {showDraftModal && selectedLeague && (

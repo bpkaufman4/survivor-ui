@@ -1,0 +1,133 @@
+/* Admin Episodes Page Styles */
+
+/* Episodes main table */
+.admin-table.episodes-main-table {
+  width: 100%;
+  min-width: unset; /* Remove minimum width constraint */
+  table-layout: fixed; /* Fixed layout for better column control */
+}
+
+.admin-table.episodes-main-table th:nth-child(1), /* Title */
+.admin-table.episodes-main-table td:nth-child(1) {
+  width: 40%; /* Title takes most space */
+}
+
+.admin-table.episodes-main-table th:nth-child(2), /* Air Date */
+.admin-table.episodes-main-table td:nth-child(2) {
+  width: 25%; /* Air date fixed width */
+}
+
+.admin-table.episodes-main-table th:nth-child(3), /* Actions */
+.admin-table.episodes-main-table td:nth-child(3) {
+  width: 35%; /* Actions column */
+}
+
+/* Episode scores table container with dynamic height */
+.admin-table-container.episode-scores-container {
+  /* Height will be set dynamically via inline style */
+  min-height: 200px; /* Fallback minimum height */
+  overflow: auto; /* Both horizontal and vertical scroll */
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: 0.375rem;
+  padding: 0; /* Remove padding for episode scores */
+  margin: 0; /* Remove margin for episode scores */
+  position: relative;
+}
+
+/* Episode scores table that needs horizontal scroll */
+.admin-table.episode-scores-table {
+  min-width: 800px; /* Allow horizontal scroll for complex tables */
+  table-layout: auto; /* Let episode scores table auto-size */
+}
+
+/* Episode scores table headers and cells */
+.admin-table.episode-scores-table th,
+.admin-table.episode-scores-table td {
+  min-width: 80px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-table.episode-scores-table th:first-child,
+.admin-table.episode-scores-table td:first-child {
+  min-width: 150px; /* Player name column */
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: var(--bs-body-bg, #fff);
+  z-index: 1;
+}
+
+/* =================================================================
+   TABLET RESPONSIVE (≤991px)
+   ================================================================= */
+
+@media (max-width: 991.98px) {
+  .admin-table-container.episode-scores-container {
+    min-height: 200px;
+    margin: 0;
+  }
+}
+
+/* =================================================================
+   MOBILE RESPONSIVE (≤767px)
+   ================================================================= */
+
+@media (max-width: 767.98px) {
+  /* Episodes table adjustments */
+  .admin-table.episodes-main-table th:nth-child(1), 
+  .admin-table.episodes-main-table td:nth-child(1) { 
+    width: 45%; 
+  }
+  
+  .admin-table.episodes-main-table th:nth-child(2), 
+  .admin-table.episodes-main-table td:nth-child(2) { 
+    width: 20%; 
+  }
+  
+  .admin-table.episodes-main-table th:nth-child(3), 
+  .admin-table.episodes-main-table td:nth-child(3) { 
+    width: 35%; 
+  }
+  
+  .admin-table-container.episode-scores-container {
+    min-height: 180px;
+  }
+  
+  .admin-table.episode-scores-table th:first-child,
+  .admin-table.episode-scores-table td:first-child {
+    min-width: 120px; /* Smaller player name column on mobile */
+  }
+}
+
+/* =================================================================
+   SMALL MOBILE RESPONSIVE (≤575px)
+   ================================================================= */
+
+@media (max-width: 575.98px) {
+  /* Episodes table final mobile adjustments */
+  .admin-table.episodes-main-table th:nth-child(1), 
+  .admin-table.episodes-main-table td:nth-child(1) { 
+    width: 50%; 
+  }
+  
+  .admin-table.episodes-main-table th:nth-child(2), 
+  .admin-table.episodes-main-table td:nth-child(2) { 
+    width: 15%; 
+    font-size: 0.7rem;
+  }
+  
+  .admin-table.episodes-main-table th:nth-child(3), 
+  .admin-table.episodes-main-table td:nth-child(3) { 
+    width: 35%; 
+  }
+  
+  .admin-table-container.episode-scores-container {
+    min-height: 160px;
+  }
+  
+  .admin-table.episode-scores-table th:first-child,
+  .admin-table.episode-scores-table td:first-child {
+    min-width: 100px; /* Even smaller player name column on small mobile */
+  }
+}

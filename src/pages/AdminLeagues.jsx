@@ -2,6 +2,8 @@ import { useState } from "react";
 import AdminMain from "../components/AdminMain";
 import Table from "./AdminLeaguesComponents/Table";
 import SetPlayers from "./AdminLeaguesComponents/SetPlayers";
+import "../assets/admin-common.css";
+import "../assets/admin-leagues.css";
 
 export default function AdminLeagues() {
 
