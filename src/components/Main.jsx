@@ -28,7 +28,7 @@ const Main = ({ children, page, additionalClasses }) => {
   if(additionalClasses) contentClasses += (contentClasses ? " " : "") + additionalClasses;
 
   return (
-    <div className="d-flex flex-column h-100">
+    <div className="d-flex flex-column" style={{ minHeight: '100vh' }}>
       {/* Desktop Header Navigation - Only visible on desktop */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark d-none d-lg-flex" style={{height: headerHeight, flexShrink: 0}}>
         <div className="container-fluid">
@@ -94,11 +94,12 @@ const Main = ({ children, page, additionalClasses }) => {
       </nav>
 
       {/* Mobile Header - Only visible on mobile */}
-      <nav className="navbar bg-dark d-lg-none d-flex justify-content-around fixed-top" style={{
+      <nav className="navbar bg-dark d-lg-none d-flex justify-content-around position-sticky top-0" style={{
         height: headerHeight,
         paddingTop: 'env(safe-area-inset-top, 0px)',
         paddingLeft: 'env(safe-area-inset-left, 0px)',
         paddingRight: 'env(safe-area-inset-right, 0px)',
+        flexShrink: 0,
         zIndex: 1030
       }} data-bs-theme="dark">
         <img src={icon} className="h-100" onClick={() => window.location.assign(localStorage.getItem('homeTarget') || '/')} />
@@ -108,10 +109,7 @@ const Main = ({ children, page, additionalClasses }) => {
       <main className="flex-grow-1" style={{
         overflowY: 'auto',
         overflowX: 'hidden',
-        WebkitOverflowScrolling: 'touch',
-        minHeight: 0, // Important: allows flex item to shrink below content size
-        paddingTop: isDesktop ? 0 : `calc(${headerHeight} + env(safe-area-inset-top, 0px))`,
-        paddingBottom: isDesktop ? 0 : `calc(${footerHeight} + env(safe-area-inset-bottom, 0px))`
+        WebkitOverflowScrolling: 'touch'
       }}>
         <div className={`${contentClasses} ${isDesktop && page !== 'draft' ? 'py-4' : ''}`}>
           {children}
@@ -119,12 +117,13 @@ const Main = ({ children, page, additionalClasses }) => {
       </main>
 
       {/* Mobile Bottom Navigation - Only visible on mobile */}
-      <nav className='d-lg-none fixed-bottom border-top border-black bg-white' style={{
+      <nav className='d-lg-none border-top border-black bg-white position-sticky bottom-0' style={{
         height: footerHeight,
         paddingLeft: 'env(safe-area-inset-left, 0px)',
         paddingRight: 'env(safe-area-inset-right, 0px)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         paddingTop: '8px',
+        flexShrink: 0,
         zIndex: 1030
       }}>
         <div className="row text-center mx-0 h-100">
