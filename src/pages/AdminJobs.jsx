@@ -115,6 +115,8 @@ function AdminJobs() {
 
   const formatSchedule = (schedule) => {
     const scheduleMap = {
+      '0 18 * * *': 'Daily at 6:00 PM UTC',
+      '*/30 * * * * *': 'Every 30 seconds',
       '0 9 * * *': 'Daily at 9:00 AM',
       '0 */6 * * *': 'Every 6 hours',
       '0 0 * * 0': 'Weekly on Sunday at midnight'
@@ -236,18 +238,42 @@ function AdminJobs() {
                 <h5 className="mb-0">Job Information</h5>
               </div>
               <div className="card-body">
-                <h6>Survey Reminder Job</h6>
-                <p className="mb-2">
-                  <strong>Purpose:</strong> Sends reminder emails to team owners who haven't completed 
-                  their surveys for episodes airing the next day.
-                </p>
-                <p className="mb-2">
-                  <strong>Schedule:</strong> Runs daily at 9:00 AM UTC
-                </p>
-                <p className="mb-2">
-                  <strong>Email Requirements:</strong> Only sends to users with verified emails 
-                  and poll reminders enabled in their preferences.
-                </p>
+                <div className="row">
+                  <div className="col-md-6">
+                    <h6>Survey Reminder Job</h6>
+                    <p className="mb-2">
+                      <strong>Purpose:</strong> Sends reminder emails and push notifications to team owners who haven't completed 
+                      their surveys for episodes airing the next day.
+                    </p>
+                    <p className="mb-2">
+                      <strong>Schedule:</strong> Runs daily at 6:00 PM UTC
+                    </p>
+                    <p className="mb-3">
+                      <strong>Requirements:</strong> Only sends to users with verified emails 
+                      and poll reminders enabled in their preferences.
+                    </p>
+                  </div>
+                  <div className="col-md-6">
+                    <h6>Draft Management Job</h6>
+                    <p className="mb-2">
+                      <strong>Purpose:</strong> Manages automated draft processes including scheduled draft starts, 
+                      timer management, auto-picks, and draft notifications.
+                    </p>
+                    <p className="mb-2">
+                      <strong>Schedule:</strong> Runs every 30 seconds
+                    </p>
+                    <p className="mb-3">
+                      <strong>Features:</strong>
+                    </p>
+                    <ul className="small mb-3">
+                      <li>Checks for scheduled drafts that should start</li>
+                      <li>Sends 5-minute warning notifications (email + push)</li>
+                      <li>Manages draft pick timers</li>
+                      <li>Makes automatic picks when timers expire</li>
+                      <li>Broadcasts real-time updates to connected clients</li>
+                    </ul>
+                  </div>
+                </div>
                 <div className="alert alert-info">
                   <strong>Note:</strong> You can manually trigger any job using the "Trigger Now" 
                   button for testing purposes. This will run the job immediately regardless of 

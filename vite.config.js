@@ -3,8 +3,16 @@ import react from '@vitejs/plugin-react'
 import { VitePluginRadar } from 'vite-plugin-radar'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// Version info for cache busting
+const APP_VERSION = '2.0.0'
+const BUILD_TIME = new Date().toISOString()
+
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(APP_VERSION),
+    __BUILD_TIME__: JSON.stringify(BUILD_TIME)
+  },
   plugins: [
     react(),
     VitePluginRadar({
@@ -18,11 +26,26 @@ export default defineConfig({
         enabled: true
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      workbox: {
+        // Force service worker to update immediately
+        skipWaiting: true,
+        clientsClaim: true,
+        // Add version to cache names to force cache busting
+        cacheId: `survivor-v${APP_VERSION}`,
+        // Clean up old caches
+        cleanupOutdatedCaches: true
+      },
       manifest: {
         name: 'Fantasy Survivor',
         short_name: 'Survivor',
         description: 'Play against your friends following the show!',
         theme_color: '#ffffff',
+        // Add version info to manifest
+        version: APP_VERSION,
+        // Add build timestamp for cache busting
+        background_color: '#ffffff',
+        display: 'standalone',
+        start_url: `/?v=${APP_VERSION}`,
         icons: [
           {
             "src": "windows11/SmallTile.scale-100.png",

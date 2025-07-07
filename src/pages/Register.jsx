@@ -98,7 +98,7 @@ function Register() {
 
   return(
     <Main page={"home"}>
-      <div className="d-flex justify-content-center align-items-center min-vh-100">
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 160px)' }}>
         <div className="col-12 col-sm-8 col-md-6 col-lg-4">
           <div className="card shadow">
             <div className="card-body p-4">

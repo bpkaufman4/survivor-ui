@@ -202,7 +202,7 @@ export default function DraftComponent({ isAdminView = false, onBack = null }) {
       const container = containerRef.current;
       const rect = container.getBoundingClientRect();
       const newRatio = ((e.clientX - rect.left) / rect.width) * 100;
-      setSplitRatio(Math.min(Math.max(newRatio, 20), 50)); // Limit between 20% and 50%
+      setSplitRatio(Math.min(Math.max(newRatio, 20), 60)); // Limit between 20% and 60%
     };
 
     const handleMouseUp = () => {
@@ -212,11 +212,18 @@ export default function DraftComponent({ isAdminView = false, onBack = null }) {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
     }
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
     };
   }, [isDragging]);
 
@@ -388,9 +395,9 @@ export default function DraftComponent({ isAdminView = false, onBack = null }) {
 
         {/* Resizer */}
         <div 
-          className="draft-resizer"
+          className={`draft-resizer ${isDragging ? 'dragging' : ''}`}
           onMouseDown={handleMouseDown}
-          style={{ cursor: isDragging ? 'col-resize' : 'col-resize' }}
+          title="Drag to resize panels"
         />
 
         {/* Available Players Panel */}

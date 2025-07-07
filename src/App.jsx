@@ -24,11 +24,13 @@ import Leagues from "./pages/Leagues";
 import Players from "./pages/Players";
 import { UserProvider } from "./contexts/UserContext";
 import FCMInitializer from "./components/FCMInitializer";
+import IOSPWAPrompt from "./components/IOSPWAPrompt";
 
 export default function App() {
   return (
     <UserProvider>
       <FCMInitializer />
+      <IOSPWAPrompt />
       <BrowserRouter>
       <Routes>
         <Route index element={
@@ -92,11 +94,6 @@ export default function App() {
         <Route path="admin-leagues" element={
           <RequireAdmin>
             <AdminLeagues />
-          </RequireAdmin>
-        } />
-        <Route path="admin-draft/:leagueId" element={
-          <RequireAdmin>
-            <AdminDraft />
           </RequireAdmin>
         } />
         <Route path="notes" element={

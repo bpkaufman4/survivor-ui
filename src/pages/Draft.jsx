@@ -26,9 +26,35 @@ export default function Draft() {
   const [draftComplete, setDraftComplete] = useState(false);
   const [splitRatio, setSplitRatio] = useState(30); // Draft order section percentage
   const [isDragging, setIsDragging] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 992);
   const socketRef = useRef(null);
   const containerRef = useRef(null);
   const prevCanPickRef = useRef(false);
+
+  // Constants for height calculation (matching Main component)
+  const headerHeight = 64; // px
+  const footerHeight = 58; // px
+  const draftHeaderHeight = 41; // approximate height of draft header
+
+  // Calculate dynamic height based on screen size
+  const calculateContentHeight = () => {
+    if (isDesktop) {
+      // Desktop: no bottom nav, just subtract header and draft header
+      return `calc(100vh - ${headerHeight + draftHeaderHeight}px - 2rem)`;
+    } else {
+      // Mobile: subtract header, draft header, and bottom nav
+      return `calc(100vh - ${headerHeight + draftHeaderHeight + footerHeight}px)`;
+    }
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 992);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const ws = new WebSocket(websocketUrl);
@@ -70,13 +96,13 @@ export default function Draft() {
                 setCurrentPickingTeam(null);
                 console.log('No current pick found');
               }
-            }            if (payload.availablePlayers) setAvailablePlayers(payload.availablePlayers);
+            } if (payload.availablePlayers) setAvailablePlayers(payload.availablePlayers);
             if (payload.myTeam) setMyTeamId(payload.myTeam.teamId);
             if (payload.draft) {
               setDraftStartTime(payload.draft.startDate);
               setDraftComplete(payload.draft.complete);
             }
-            break;          
+            break;
           case 'draft-timer-started':
             setTimerStart(payload.startTime);
             setTimerDuration(payload.timeoutMs);
@@ -93,7 +119,8 @@ export default function Draft() {
               } else {
                 setCurrentPick(null);
                 setCurrentPickingTeam(null);
-              }            }
+              }
+            }
             if (payload.availablePlayers) setAvailablePlayers(payload.availablePlayers);
             if (payload.draft) {
               setDraftStartTime(payload.draft.startDate);
@@ -142,27 +169,28 @@ export default function Draft() {
       setTimeUntilStart(null);
       return;
     }
-    
+
     const updateCountdown = () => {
       const now = Date.now();
       const startTime = new Date(draftStartTime).getTime();
       const remaining = Math.max(0, Math.floor((startTime - now) / 1000));
       setTimeUntilStart(remaining);
     };
-    
+
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);  }, [draftStartTime]);
+    return () => clearInterval(interval);
+  }, [draftStartTime]);
 
   if (error) return <p>Something went wrong</p>
   const currentPicker = !currentPickingTeam ? '' : currentPickingTeam.teamId === myTeamId ? 'You' : `${currentPickingTeam.owner.firstName} ${currentPickingTeam.owner.lastName}`;
   const isMyTurn = currentPickingTeam && currentPickingTeam.teamId === myTeamId;
-  
+
   // Check if draft has started
   const now = new Date();
   const draftStarted = draftStartTime ? now >= new Date(draftStartTime) : false;
   const canPick = isMyTurn && draftStarted && !draftComplete;
-  
+
   // Play sound when it becomes user's turn
   useEffect(() => {
     // Only play sound if it just became the user's turn (canPick changed from false to true)
@@ -179,11 +207,11 @@ export default function Draft() {
         console.log('Audio not supported or failed to load:', err);
       }
     }
-    
+
     prevCanPickRef.current = canPick;
   }, [canPick]);
-  
-    // Get status message
+
+  // Get status message
   const getStatusMessage = () => {
     if (draftComplete) {
       return <small className="text-muted">Draft Complete</small>;
@@ -193,14 +221,14 @@ export default function Draft() {
         const hours = Math.floor(timeUntilStart / 3600);
         const minutes = Math.floor((timeUntilStart % 3600) / 60);
         const seconds = timeUntilStart % 60;
-        
+
         let countdownText = '';
         if (hours > 0) {
           countdownText = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         } else {
           countdownText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
-        
+
         return <small className="text-info">Draft starts in: <strong>{countdownText}</strong></small>;
       } else if (timeUntilStart === 0) {
         return <small className="text-success">Draft starting now...</small>;
@@ -242,7 +270,7 @@ export default function Draft() {
     if (timeLeft <= 30) return 'bg-warning text-dark';
     return 'bg-success text-white';
   };
-  
+
   // Handle resize dragging
   const handleMouseDown = (e) => {
     setIsDragging(true);
@@ -260,14 +288,15 @@ export default function Draft() {
   };
 
   const handleMouseMove = (e) => {
-    if (!isDragging || !containerRef.current) return;
-    
+    // Disable resize on desktop
+    if (isDesktop || !isDragging || !containerRef.current) return;
+
     const container = containerRef.current;
     const containerRect = container.getBoundingClientRect();
     const containerHeight = containerRect.height;
     const clientY = getClientY(e);
     const mouseY = clientY - containerRect.top;
-    
+
     // Calculate new split ratio as percentage
     const newRatio = Math.max(10, Math.min(80, (mouseY / containerHeight) * 100));
     setSplitRatio(newRatio);
@@ -286,7 +315,8 @@ export default function Draft() {
   };
 
   useEffect(() => {
-    if (isDragging) {
+    // Only enable resize functionality on mobile
+    if (isDragging && !isDesktop) {
       // Add both mouse and touch event listeners
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -294,7 +324,7 @@ export default function Draft() {
       document.addEventListener('touchend', handleTouchEnd);
       document.body.style.userSelect = 'none'; // Prevent text selection while dragging
       document.body.style.touchAction = 'none'; // Prevent scrolling on mobile while dragging
-      
+
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
@@ -304,35 +334,38 @@ export default function Draft() {
         document.body.style.touchAction = '';
       };
     }
-  }, [isDragging]);  return (
+  }, [isDragging, isDesktop]);
+
+  return (
     <Main page="draft" additionalClasses="p-0 d-flex flex-column h-100">
-      {/* Ultra-compact single row header */}
-      <div className={`border-bottom ${getHeaderClass()}`}>
-        <div className="d-flex align-items-center justify-content-between px-2 py-1">
-          {/* Left side: Back button and title */}
-          <div className="d-flex align-items-center">
-            <button 
-              className="btn btn-sm me-2 p-1"
-              onClick={() => navigate(`/league/${leagueId}`)}
-              style={{lineHeight: 1}}
-            >
-              <ArrowBackIcon fontSize="small" />
-            </button>
-            <h6 className="mb-0">Draft</h6>
-          </div>
-            {/* Center: Current picker status */}          
-          <div className="flex-grow-1 text-center mx-3">
-            {getStatusMessage()}
-          </div>{/* Right side: Timer */}
-          <div>
-            {currentPick && (              
-              <span className={`badge ${canPick ? getTimerClass() : (
-                timeLeft === null ? 'bg-secondary' :
-                timeLeft <= 10 ? 'bg-danger' :
-                timeLeft <= 30 ? 'bg-warning text-dark' :
-                'bg-success'
-              )} ${!canPick ? 'text-white' : ''}`}>                
-              {timeLeft !== null ? (() => {
+      <div className="container-lg my-lg-3 card px-0" style={{overflow: 'hidden', borderColor: isDesktop ? 'var(--bs-secondary-bg-subtle)': '#fff'}}>
+        {/* Ultra-compact single row header */}
+        <div className={`border-bottom ${getHeaderClass()}`}>
+          <div className="d-flex align-items-center justify-content-between px-2 py-1">
+            {/* Left side: Back button and title */}
+            <div className="d-flex align-items-center">
+              <button
+                className="btn btn-sm me-2 p-1"
+                onClick={() => navigate(`/league/${leagueId}`)}
+                style={{ lineHeight: 1 }}
+              >
+                <ArrowBackIcon fontSize="small" />
+              </button>
+              <h6 className="mb-0">Draft</h6>
+            </div>
+            {/* Center: Current picker status */}
+            <div className="flex-grow-1 text-center mx-3">
+              {getStatusMessage()}
+            </div>{/* Right side: Timer */}
+            <div>
+              {currentPick && (
+                <span className={`badge ${canPick ? getTimerClass() : (
+                  timeLeft === null ? 'bg-secondary' :
+                    timeLeft <= 10 ? 'bg-danger' :
+                      timeLeft <= 30 ? 'bg-warning text-dark' :
+                        'bg-success'
+                )} ${!canPick ? 'text-white' : ''}`}>
+                  {timeLeft !== null ? (() => {
                     const hours = Math.floor(timeLeft / 3600);
                     const minutes = Math.floor((timeLeft % 3600) / 60);
                     const seconds = timeLeft % 60;
@@ -342,99 +375,120 @@ export default function Draft() {
                       return `${minutes}:${seconds.toString().padStart(2, '0')}`;
                     }
                   })()
-                : '--:--'
-              }
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Main content area taking all available space */}
-      <div className="flex-grow-1 d-flex flex-column overflow-hidden" ref={containerRef}>
-        {/* Top section - Draft Order (dynamic percentage) */}
-        <div className="border-bottom d-flex flex-column" style={{height: `${splitRatio}%`, minHeight: '100px'}}>
-          <div className="flex-grow-1 overflow-auto">
-            <table className="table table-sm table-hover mb-0">
-              <thead className="table-light sticky-top">
-                <tr>
-                  <th style={{width: '50px'}} className="py-1 px-2">Pick</th>
-                  <th className="py-1 px-2">Team</th>
-                  <th className="py-1 px-2">Contestant</th>
-                </tr>
-              </thead>
-              <tbody>
-                {draftOrder && draftOrder.map(dp => {
-                  let rowClasses = '';
-
-                  if (dp.currentPick === 1) {
-                    rowClasses = 'table-warning';
-                  } else if (dp.team.teamId === myTeamId) {
-                    rowClasses = 'table-info';
+                    : '--:--'
                   }
-
-                  return (
-                    <tr key={dp.draftPickId} className={rowClasses}>
-                      <td className="py-1 px-2"><strong>#{dp.pickNumber}</strong></td>
-                      <td className="py-1 px-2">{dp.team.owner.firstName} {dp.team.owner.lastName}</td>
-                      <td className="py-1 px-2">{dp.player ? `${dp.player.firstName} ${dp.player.lastName}` : <em className="text-muted">TBD</em>}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Resize handle */}
-        <div 
-          className="bg-light border-top border-bottom d-flex align-items-center justify-content-center"
-          style={{
-            height: '20px',
-            cursor: 'row-resize',
-            backgroundColor: isDragging ? '#dee2e6' : '#f8f9fa',
-            borderColor: isDragging ? '#6c757d' : '#dee2e6'
-          }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
+        {/* Main content area taking all available space */}
+        <div
+          className={`flex-grow-1 d-flex overflow-hidden ${isDesktop ? 'flex-row' : 'flex-column'}`}
+          ref={containerRef}
+          style={{ height: calculateContentHeight() }}
         >
-          <div 
+          {/* Draft Order section */}
+          <div
+            className={`d-flex flex-column ${isDesktop ? 'border-end' : 'border-bottom'}`}
             style={{
-              width: '40px',
-              height: '3px',
-              backgroundColor: '#6c757d',
-              borderRadius: '2px'
+              height: isDesktop ? '100%' : `${splitRatio}%`,
+              width: isDesktop ? '50%' : '100%',
+              minHeight: '100px'
             }}
-          />
-        </div>
+          >
+            <div className="flex-grow-1 overflow-auto">
+              <table className="table table-sm table-hover mb-0">
+                <thead className="table-light sticky-top">
+                  <tr>
+                    <th style={{ width: '50px' }} className="py-1 px-2">Pick</th>
+                    <th className="py-1 px-2">Team</th>
+                    <th className="py-1 px-2">Contestant</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {draftOrder && draftOrder.map(dp => {
+                    let rowClasses = '';
 
-        {/* Bottom section - Available Players (remaining space) */}
-        <div className="d-flex flex-column" style={{height: `${100 - splitRatio}%`, minHeight: '100px'}}>
-          <div className="px-2 py-1 border-bottom bg-light">
-            <small className="text-muted fw-bold">AVAILABLE PLAYERS</small>
-          </div>
-          <div className="flex-grow-1 overflow-auto">
-            <table className="table table-hover mb-0">
-              <tbody>
-                {availablePlayers && availablePlayers.map(ap => {                  function pickPlayer() {
-                    // If 10 seconds or less remaining, pick immediately without confirmation
-                    if (timeLeft !== null && timeLeft <= 10) {
-                      socketRef.current?.send(JSON.stringify({ 
-                        type: "pick", 
-                        payload: { 
-                          player: ap, 
-                          token: localStorage.getItem('jwt'), 
-                          leagueId, 
-                          pick: currentPick 
-                        } 
-                      }));
-                      return;
+                    if (dp.currentPick === 1) {
+                      rowClasses = 'table-warning';
+                    } else if (dp.team.teamId === myTeamId) {
+                      rowClasses = 'table-info';
                     }
 
-                    // Show confirmation dialog when there's more than 10 seconds left
-                    Swal.fire({
-                      title: 'Confirm Your Pick',
-                      html: `
+                    return (
+                      <tr key={dp.draftPickId} className={rowClasses}>
+                        <td className="py-1 px-2"><strong>#{dp.pickNumber}</strong></td>
+                        <td className="py-1 px-2">{dp.team.owner.firstName} {dp.team.owner.lastName}</td>
+                        <td className="py-1 px-2">{dp.player ? `${dp.player.firstName} ${dp.player.lastName}` : <em className="text-muted">TBD</em>}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Resize handle - only show on mobile */}
+          {!isDesktop && (
+            <div
+              className="bg-light border-top border-bottom d-flex align-items-center justify-content-center"
+              style={{
+                height: '20px',
+                cursor: 'row-resize',
+                backgroundColor: isDragging ? '#dee2e6' : '#f8f9fa',
+                borderColor: isDragging ? '#6c757d' : '#dee2e6'
+              }}
+              onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
+            >
+              <div
+                style={{
+                  width: '40px',
+                  height: '3px',
+                  backgroundColor: '#6c757d',
+                  borderRadius: '2px'
+                }}
+              />
+            </div>
+          )}
+
+          {/* Available Players section */}
+          <div
+            className="d-flex flex-column"
+            style={{
+              height: isDesktop ? '100%' : `${100 - splitRatio}%`,
+              width: isDesktop ? '50%' : '100%',
+              minHeight: '100px'
+            }}
+          >
+            <div className="px-2 py-1 border-bottom bg-light">
+              <small className="text-muted fw-bold">AVAILABLE PLAYERS</small>
+            </div>
+            <div className="flex-grow-1 overflow-auto">
+              <table className="table table-hover mb-0">
+                <tbody>
+                  {availablePlayers && availablePlayers.map(ap => {
+                    function pickPlayer() {
+                      // If 10 seconds or less remaining, pick immediately without confirmation
+                      if (timeLeft !== null && timeLeft <= 10) {
+                        socketRef.current?.send(JSON.stringify({
+                          type: "pick",
+                          payload: {
+                            player: ap,
+                            token: localStorage.getItem('jwt'),
+                            leagueId,
+                            pick: currentPick
+                          }
+                        }));
+                        return;
+                      }
+
+                      // Show confirmation dialog when there's more than 10 seconds left
+                      Swal.fire({
+                        title: 'Confirm Your Pick',
+                        html: `
                         <div style="text-align: center;">
                           <img 
                             src="${ap.photoUrl || '/island.png'}" 
@@ -445,55 +499,56 @@ export default function Draft() {
                           <p style="margin: 8px 0 0 0; color: #666;">Are you sure you want to pick this player?</p>
                         </div>
                       `,
-                      showCancelButton: true,
-                      confirmButtonText: 'Yes, Pick Player',
-                      cancelButtonText: 'Cancel',
-                      confirmButtonColor: '#0d6efd',
-                      cancelButtonColor: '#6c757d',
-                      focusConfirm: false
-                    }).then((result) => {
-                      if (result.isConfirmed) {
-                        socketRef.current?.send(JSON.stringify({ 
-                          type: "pick", 
-                          payload: { 
-                            player: ap, 
-                            token: localStorage.getItem('jwt'), 
-                            leagueId, 
-                            pick: currentPick 
-                          } 
-                        }));
-                      }
-                    });
-                  }
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Pick Player',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#0d6efd',
+                        cancelButtonColor: '#6c757d',
+                        focusConfirm: false
+                      }).then((result) => {
+                        if (result.isConfirmed) {
+                          socketRef.current?.send(JSON.stringify({
+                            type: "pick",
+                            payload: {
+                              player: ap,
+                              token: localStorage.getItem('jwt'),
+                              leagueId,
+                              pick: currentPick
+                            }
+                          }));
+                        }
+                      });
+                    }
 
-                  return (
-                    <tr key={ap.playerId}>
-                      <td className="py-1 px-2">
-                        <img 
-                          src={ap.photoUrl} 
-                          alt={`${ap.firstName} ${ap.lastName}`} 
-                          className="rounded"
-                          style={{ height: '32px', width: '32px', objectFit: 'cover' }} 
-                        />
-                      </td>
-                      <td className="align-middle py-1 px-2">
-                        <strong>{ap.firstName} {ap.lastName}</strong>
-                      </td>
-                      {canPick && 
-                        <td className="align-middle py-1 px-2">
-                          <button 
-                            className="btn btn-primary btn-sm" 
-                            onClick={pickPlayer}
-                          >
-                            Pick
-                          </button>
+                    return (
+                      <tr key={ap.playerId}>
+                        <td className="py-1 px-2">
+                          <img
+                            src={ap.photoUrl}
+                            alt={`${ap.firstName} ${ap.lastName}`}
+                            className="rounded"
+                            style={{ height: isDesktop ? '64px' : '32px', width: isDesktop ? '64px' : '32px', objectFit: 'cover' }}
+                          />
                         </td>
-                      }
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                        <td className="align-middle py-1 px-2">
+                          <strong>{ap.firstName} {ap.lastName}</strong>
+                        </td>
+                        {canPick &&
+                          <td className="align-middle py-1 px-2">
+                            <button
+                              className="btn btn-primary btn-sm"
+                              onClick={pickPlayer}
+                            >
+                              Pick
+                            </button>
+                          </td>
+                        }
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
