@@ -4,12 +4,10 @@ import apiUrl from "../../apiUrls";
 
 export default function Draft({ draftStartTime, onJoinDraft, leagueId }) {
 
-  const [now, setNow] = useState(DateTime.now());
   const [showDateTime, setShowDateTime] = useState(false);
   const [showJoinButton, setShowJoinButton] = useState(false);
   const [startingSoon, setStartingSoon] = useState(false);
   const [draftStatus, setDraftStatus] = useState(null); // null, 'pending', 'active', 'complete'
-  const [draftData, setDraftData] = useState(null);
 
   // Memoize draftTime to prevent it from changing on every render
   const draftTime = useMemo(() => {
@@ -51,8 +49,6 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId }) {
         console.log('[Draft] API Response:', data);
         
         if (data.status === 'success' && data.data) {
-          setDraftData(data.data);
-          
           const now = new Date();
           const startTime = new Date(data.data.startDate);
           
@@ -108,9 +104,6 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId }) {
       const minutesUntilDraft = draftTime.diff(newNow, 'minutes').toObject().minutes;
       
       console.log('[Draft] Time check - Minutes until draft:', minutesUntilDraft, 'Status:', draftStatus);
-      
-      // Only update time if it's actually different to prevent unnecessary re-renders
-      setNow(prev => !prev.equals(newNow) ? newNow : prev);
 
       // Only show time-based UI if draft is still pending
       if (draftStatus === 'pending' || draftStatus === null) {

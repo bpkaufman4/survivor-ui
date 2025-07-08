@@ -158,7 +158,7 @@ export default function EmailVerification({ user }) {
   return (
     <div className="card border-warning mb-3">
       <div className="card-header bg-warning text-dark">
-        <strong>⚠️ Email Verification Required</strong>
+        <strong>Email Verification Required</strong>
       </div>
       <div className="card-body">
         {!showVerificationInput ? (

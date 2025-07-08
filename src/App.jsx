@@ -20,6 +20,8 @@ import Notes from "./pages/Notes";
 import Draft from "./pages/Draft";
 import Register from "./pages/Register";
 import VerifyEmail from "./pages/VerifyEmail";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Leagues from "./pages/Leagues";
 import Players from "./pages/Players";
 import { UserProvider } from "./contexts/UserContext";
@@ -41,6 +43,8 @@ export default function App() {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="verify-email" element={<VerifyEmail />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-password" element={<ResetPassword />} />
         <Route path="admin-episodes" element={
           <RequireAdmin>
             <AdminEpisodes />

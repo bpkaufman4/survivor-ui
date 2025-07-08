@@ -32,10 +32,10 @@ export default function Settings() {
 
             {/* Settings components with proper spacing */}
             <div className="d-flex flex-column gap-3">
+              {needsEmailVerification && <EmailVerification user={user} />}
               <NameEdit user={user} />
               <EmailPreferences user={user} />
-              <PushNotificationSettings />
-              {needsEmailVerification && <EmailVerification user={user} />}
+              <PushNotificationSettings user={user} />
             </div>
           </div>
         );

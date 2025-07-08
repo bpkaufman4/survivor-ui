@@ -75,19 +75,14 @@ const Main = ({ children, page, additionalClasses }) => {
             </div>
             <div 
               className={`nav-link text-white px-3 py-2 mx-1 rounded d-flex align-items-center position-relative ${page === 'settings' ? 'bg-primary' : ''}`}
-              style={{cursor: 'pointer'}}
+              style={{
+                cursor: 'pointer',
+                animation: needsEmailVerification ? 'backgroundPulse 2s infinite' : 'none'
+              }}
               onClick={() => window.location.assign('../settings')}
             >
               <SettingsIcon className="me-1" fontSize="small" />
               Settings
-              {needsEmailVerification && (
-                <span 
-                  className="position-absolute top-0 start-100 translate-middle bg-danger rounded-circle"
-                  style={{ width: '8px', height: '8px', marginLeft: '-4px', marginTop: '4px' }}
-                >
-                  <span className="visually-hidden">Email verification needed</span>
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -136,16 +131,14 @@ const Main = ({ children, page, additionalClasses }) => {
           <div className="col-3 d-flex flex-column justify-content-center align-items-center" onClick={() => window.location.assign('../notes')}>
             <EmailIcon color={page === 'notes' ? 'primary' : ''}></EmailIcon>
           </div>
-          <div className="col-3 d-flex flex-column justify-content-center align-items-center position-relative" onClick={() => window.location.assign('../settings')}>
+          <div 
+            className="col-3 d-flex flex-column justify-content-center align-items-center position-relative" 
+            style={{
+              animation: needsEmailVerification ? 'backgroundPulse 2s infinite' : 'none'
+            }}
+            onClick={() => window.location.assign('../settings')}
+          >
             <SettingsIcon color={page === 'settings' ? 'primary' : ''}></SettingsIcon>
-            {needsEmailVerification && (
-              <span 
-                className="position-absolute top-0 start-50 translate-middle p-1 bg-danger border border-light rounded-circle"
-                style={{ width: '8px', height: '8px', marginTop: '8px' }}
-              >
-                <span className="visually-hidden">Email verification needed</span>
-              </span>
-            )}
           </div>
         </div>
       </nav>

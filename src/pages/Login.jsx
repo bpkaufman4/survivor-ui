@@ -1,16 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import apiUrl from "../apiUrls";
 import Main from "../components/Main";
 import Swal from "sweetalert2";
 
 function Login() {
-
-  const [passwordDisplay, setPasswordDisplay] = useState(false);
-
-  function showInstructions(e) {
-    e.preventDefault();
-    setPasswordDisplay(true);
-  }
 
   function login(e) {
     e.preventDefault();
@@ -106,22 +99,13 @@ function Login() {
                   <p className="mb-2">
                     Need an account? <a href="register" className="text-decoration-none">Sign Up</a>
                   </p>
-                  <button 
-                    type="button"
-                    className="btn btn-link text-decoration-none" 
-                    onClick={showInstructions}
+                  <a 
+                    href="/forgot-password"
+                    className="text-decoration-none"
                   >
                     Forgot Password?
-                  </button>
+                  </a>
                 </div>
-                
-                {passwordDisplay && (
-                  <div className="alert alert-info mt-3">
-                    <small>
-                      Password reset is a work in progress. Text BK at 913-991-3541 and he'll get you squared away.
-                    </small>
-                  </div>
-                )}
               </form>
             </div>
           </div>
