@@ -7,7 +7,7 @@ import { Save } from "@mui/icons-material";
 import Swal from "sweetalert2";
 import { handlePatch, handlePost } from "../../helpers/helpers";
 
-export default function Settings({ leagueId, leagueName, isDraftComplete, password, privateInd }) {  const jsDate = new Date;
+export default function Settings({ leagueId, leagueName, isDraftComplete, password, privateInd, playersExist, checkingPlayers }) {  const jsDate = new Date;
   // Set default date to a week from today at 7 PM
   const defaultDraftDate = new Date();
   defaultDraftDate.setDate(defaultDraftDate.getDate() + 7);
@@ -339,7 +339,7 @@ export default function Settings({ leagueId, leagueName, isDraftComplete, passwo
       </div>
 
       {/* Draft Settings Card */}
-      {!isDraftComplete && (
+      {!isDraftComplete && playersExist && (
         <div className="card shadow-sm">
           <div className="card-header bg-primary text-white">
             <div className="d-flex align-items-center justify-content-between">
@@ -464,6 +464,24 @@ export default function Settings({ leagueId, leagueName, isDraftComplete, passwo
           </Reorder.Group>
         </div>
       </div>
+      )}
+
+      {/* No Players Alert */}
+      {!isDraftComplete && !checkingPlayers && !playersExist && (
+        <div className="card shadow-sm">
+          <div className="card-header bg-primary text-white">
+            <div className="d-flex align-items-center justify-content-between">
+              <h5 className="card-title mb-0">Draft Settings</h5>
+            </div>
+          </div>
+          <div className="card-body">
+            <div className="alert mb-0 d-flex align-items-center" role="alert">
+              <div>
+                <strong>No Players Available:</strong> Draft settings are not available until players have been added for the current season. Check back in once the roster is announced to set your draft date and order!
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Draft Complete Alert */}

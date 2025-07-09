@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { useState, useEffect, useMemo } from "react";
 import apiUrl from "../../apiUrls";
 
-export default function Draft({ draftStartTime, onJoinDraft, leagueId }) {
+export default function Draft({ draftStartTime, onJoinDraft, leagueId, onDraftStatusChange, playersExist, checkingPlayers }) {
 
   const [showDateTime, setShowDateTime] = useState(false);
   const [showJoinButton, setShowJoinButton] = useState(false);
@@ -36,7 +36,7 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId }) {
         return;
       }
       
-      console.log('[Draft] Checking draft status for league:', leagueId);
+      console.log('[Draft] Checking draft status for league:', leagueId); 
       
       try {
         const response = await fetch(`${apiUrl}draft/byLeague/${leagueId}`, {
@@ -141,6 +141,24 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId }) {
     };
   }, [draftTime, draftStatus]); // This can depend on draftStatus since it's not updating it
 
+  // Notify parent component when draft status changes
+  useEffect(() => {
+    if (onDraftStatusChange && draftStatus === 'complete') {
+      onDraftStatusChange(true);
+    } else if (onDraftStatusChange && draftStatus && draftStatus !== 'complete') {
+      onDraftStatusChange(false);
+    }
+  }, [draftStatus, onDraftStatusChange]);
+
+  // Don't render anything if no players exist for the current season
+  if (checkingPlayers) {
+    return <></>;
+  }
+  
+  if (!playersExist) {
+    return <></>;
+  }
+  
   // Handle different draft statuses
   console.log('[Draft] Render logic - Status:', draftStatus, 'ShowJoinButton:', showJoinButton, 'ShowDateTime:', showDateTime);
   

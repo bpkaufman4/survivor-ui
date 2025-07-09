@@ -24,6 +24,8 @@ export default function League() {
   const [ownerAccess, setOwnerAccess] = useState(false);
   const [draft, setDraft] = useState(null);
   const [isDraftComplete, setIsDraftComplete] = useState(false);
+  const [playersExist, setPlayersExist] = useState(false);
+  const [checkingPlayers, setCheckingPlayers] = useState(true);
   
   // Memoize draft start time to prevent unnecessary re-renders
   const draftStartTime = useMemo(() => {
@@ -31,6 +33,25 @@ export default function League() {
   }, [draft?.startDate]);
   
   useEffect(() => {
+    async function checkPlayers() {
+      try {
+        const playersResponse = await fetch(`${apiUrl}players`, {
+          headers: {
+            authorization: localStorage.getItem('jwt')
+          }
+        });
+        const playersData = await playersResponse.json();
+        
+        if (playersData.status === 'success') {
+          setPlayersExist(playersData.data && playersData.data.length > 0);
+        }
+      } catch (error) {
+        console.error('Error checking players:', error);
+      } finally {
+        setCheckingPlayers(false);
+      }
+    }
+
     function fetchLeague() {
       fetch(`${apiUrl}league/${leagueId}`, {
         headers: {
@@ -43,22 +64,6 @@ export default function League() {
           setLeague(reply.data);
           if(reply.data.drafts[0]) {
             setDraft(reply.data.drafts[0]);
-          } else {
-            // Check if there's a completed draft for this season
-            fetch(`${apiUrl}draft/byLeague/${leagueId}`, {
-              headers: {
-                authorization: localStorage.getItem('jwt')
-              }
-            })
-            .then(response => response.json())
-            .then(draftReply => {
-              if(draftReply.data && draftReply.data.complete) {
-                setIsDraftComplete(true);
-              }
-            })
-            .catch(err => {
-              console.log('Draft check error:', err);
-            });
           }
         } else {
           console.log(reply);
@@ -89,6 +94,7 @@ export default function League() {
       })
     }
 
+    checkPlayers();
     fetchLeague();
     checkOwnerAccess();
 
@@ -112,7 +118,7 @@ export default function League() {
       case 'polls':
         return <MyPolls leagueId={leagueId}></MyPolls>
       case 'settings':
-        return <Settings leagueId={leagueId} leagueName={league.name || ''} password={league.password || ''} privateInd={league.privateInd} isDraftComplete={isDraftComplete}></Settings>
+        return <Settings leagueId={leagueId} leagueName={league.name || ''} password={league.password || ''} privateInd={league.privateInd} isDraftComplete={isDraftComplete} playersExist={playersExist} checkingPlayers={checkingPlayers}></Settings>
     }
 
   }
@@ -171,7 +177,7 @@ export default function League() {
   return (
     <Main page="home">
       <Content>
-        {draft && <Draft draftStartTime={draftStartTime} onJoinDraft={() => window.location.assign(`/draft/${leagueId}`)} leagueId={leagueId} />}
+        {draft && <Draft draftStartTime={draftStartTime} onJoinDraft={() => window.location.assign(`/draft/${leagueId}`)} leagueId={leagueId} onDraftStatusChange={setIsDraftComplete} playersExist={playersExist} checkingPlayers={checkingPlayers} />}
         <div className="d-flex align-items-center justify-content-between pb-3 border-bottom">
           <h3 className="mb-0 flex-grow-1">{league && league.name}</h3>
           <div className="d-flex align-items-center gap-2">
@@ -184,7 +190,7 @@ export default function League() {
             )}
           </div>
         </div>
-        {ownerAccess && !draft && !isDraftComplete && (
+        {ownerAccess && !draft && !isDraftComplete && playersExist && !checkingPlayers && (
           <div className="alert alert-warning mt-3 mb-2" role="alert">
             <strong>Action needed:</strong> Your league draft date hasn't been set yet. Visit the settings to schedule your draft.
           </div>

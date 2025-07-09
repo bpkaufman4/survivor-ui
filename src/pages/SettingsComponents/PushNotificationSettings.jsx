@@ -161,11 +161,6 @@ const PushNotificationSettings = ({ user }) => {
       case 'granted':
         return (
           <div>
-            <div className="alert alert-success mb-3">
-              <i className="fas fa-check-circle me-2"></i>
-              Push notifications are enabled! You can customize which notifications you receive below.
-            </div>
-            
             <div className="mb-3">
               <small className="text-muted mb-2 d-block">Choose which types of push notifications you'd like to receive:</small>
               
