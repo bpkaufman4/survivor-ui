@@ -112,6 +112,9 @@ Preference Engine → Targeting Logic → Delivery Optimization
 ```javascript
 // Enterprise email features:
 ✅ Template-based email system with variable substitution
+✅ Transactional email delivery with tracking
+✅ Survey reminders and admin notifications
+✅ Password reset flows with secure token handling
 ```
 
 ### 🔔 **Firebase Cloud Messaging**
@@ -120,6 +123,7 @@ Preference Engine → Targeting Logic → Delivery Optimization
 ✅ Cross-platform push delivery (Web, iOS, Android)
 ✅ User segmentation and targeted messaging
 ✅ Rich notifications with custom actions
+✅ User preference-based targeting and filtering
 ```
 
 ### 🎨 **Advanced UI/UX Engineering**
@@ -135,21 +139,17 @@ Preference Engine → Targeting Logic → Delivery Optimization
 
 ## 🔒 **Security & Data Protection**
 
-### **Authentication Security**
-- JWT with proper expiration
-- Password hashing with bcrypt
-- Rate limiting on authentication endpoints
-
-### **Authorization Patterns**
-- Role-based access control (RBAC)
-- Resource-level permissions (team ownership)
+### **Authentication & Authorization**
+- JWT-based stateless authentication with proper expiration
+- Role-based access control (RBAC) with granular permissions
 - Route protection with React Router guards
+- Password hashing with bcrypt and rate limiting
 
 ### **Data Protection**
 - Input sanitization and XSS prevention
 - SQL injection prevention with parameterized queries
-- Secure cookie handling with httpOnly flags
 - Environment variable security for API keys
+- Resource-level permissions (team ownership validation)
 
 ---
 
