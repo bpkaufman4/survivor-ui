@@ -22,7 +22,7 @@ const AdminEmails = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${apiUrl}user/admin`, {
+      const response = await fetch(`${apiUrl}user/admin-users-email`, {
         headers: {
           'authorization': localStorage.getItem('jwt')
         }
