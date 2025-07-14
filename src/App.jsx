@@ -13,9 +13,10 @@ import League from "./pages/League";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import AdminLeagues from "./pages/AdminLeagues"
-import AdminDraft from "./pages/AdminDraft";
+import AdminTribes from "./pages/AdminTribes";
 import AdminJobs from "./pages/AdminJobs";
 import AdminPushNotifications from "./pages/AdminPushNotifications";
+import AdminEmails from "./pages/AdminEmails";
 import Notes from "./pages/Notes";
 import Draft from "./pages/Draft";
 import Register from "./pages/Register";
@@ -80,6 +81,11 @@ export default function App() {
             <AdminPushNotifications />
           </RequireAdmin>
         } />
+        <Route path="admin-emails" element={
+          <RequireAdmin>
+            <AdminEmails />
+          </RequireAdmin>
+        } />
         <Route path="league/:leagueId" element={
           <RequireUser>
             <League />
@@ -98,6 +104,11 @@ export default function App() {
         <Route path="admin-leagues" element={
           <RequireAdmin>
             <AdminLeagues />
+          </RequireAdmin>
+        } />
+        <Route path="admin-tribes" element={
+          <RequireAdmin>
+            <AdminTribes />
           </RequireAdmin>
         } />
         <Route path="notes" element={

@@ -34,6 +34,10 @@ const adminPages = [
     link: 'admin-push-notifications'
   },
   {
+    display: 'Emails',
+    link: 'admin-emails'
+  },
+  {
     display: 'Jobs',
     link: 'admin-jobs'
   },

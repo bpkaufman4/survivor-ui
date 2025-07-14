@@ -64,7 +64,9 @@ export default function PlayerStandings({ leagueId }) {
             <tbody>
               {standings && standings.map(player => {
                 const image = player.photoUrl || '/island.png';
-                const teamName = player.teamName ? `(${player.teamName})` : '';
+                const teamName = player.teamName ? `${player.teamName}` : '';
+                const tribeName = player.tribeName ? `${player.tribeName}` : '';
+                const tribeColor = player.tribeColor || '#000000';
                 const rankClass = player.place === 1 ? 'text-warning fw-bold' : player.place === 2 ? 'text-secondary fw-bold' : player.place === 3 ? 'text-dark fw-bold' : '';
                 
                 return (
@@ -86,11 +88,28 @@ export default function PlayerStandings({ leagueId }) {
                         <a href={`../../player/${player.playerId}`} className="text-decoration-none fw-semibold">
                           {player.firstName} {player.lastName}
                         </a>
-                        {teamName && (
-                          <div className="text-muted small">
-                            {teamName}
-                          </div>
-                        )}
+                        <div className="text-muted small">
+                          {tribeName && (
+                            <div className="d-flex align-items-center mb-1">
+                              <div 
+                                style={{
+                                  width: '12px',
+                                  height: '12px',
+                                  backgroundColor: tribeColor,
+                                  borderRadius: '50%',
+                                  marginRight: '6px',
+                                  border: '1px solid #ccc'
+                                }}
+                              ></div>
+                              {tribeName}
+                            </div>
+                          )}
+                          {teamName && (
+                            <div>
+                              {teamName}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="text-center">
