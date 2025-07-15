@@ -14,6 +14,7 @@ import Note from "./LeagueComponents/Note";
 import MyPolls from "./LeagueComponents/MyPolls";
 import Settings from "./LeagueComponents/Settings";
 import Draft from "./LeagueComponents/Draft";
+import Scoring from "./LeagueComponents/Scoring";
 
 export default function League() {
   const { leagueId } = useParams();
@@ -183,6 +184,7 @@ export default function League() {
           <div className="d-flex align-items-center gap-2">
             <Survey leagueId={league && league.leagueId} />
             <Note />
+            <Scoring />
             {ownerAccess && (
               <button className="btn" onClick={() => setView('settings')}>
                 <SettingsIcon fontSize="small" color={view === 'settings' ? 'primary' : 'inherit'} />
