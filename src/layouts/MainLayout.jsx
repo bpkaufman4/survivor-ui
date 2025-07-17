@@ -98,10 +98,7 @@ const MainLayout = () => {
       {/* Mobile Header - Only visible on mobile */}
       <nav className="navbar bg-dark d-lg-none d-flex justify-content-around position-sticky top-0" style={{
         height: headerHeight,
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-        paddingLeft: 'env(safe-area-inset-left, 0px)',
-        paddingRight: 'env(safe-area-inset-right, 0px)',
-        paddingBottom: '12px',
+        padding: '12px',
         flexShrink: 0,
         zIndex: 1030
       }} data-bs-theme="dark">
@@ -119,20 +116,13 @@ const MainLayout = () => {
 
       {/* Mobile Bottom Navigation - Only visible on mobile */}
       <nav className='d-lg-none border-top border-black bg-white position-sticky bottom-0' style={{
-        paddingLeft: 'env(safe-area-inset-left, 0px)',
-        paddingRight: 'env(safe-area-inset-right, 0px)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         flexShrink: 0,
         zIndex: 1030
       }}>
         <div className="row mx-0 h-100">
           <NavLink 
             to="/" 
-            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none"
-            style={{
-              paddingTop: '16px',
-              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))'
-            }}
+            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none py-3"
           >
             {({ isActive }) => (
               <HomeIcon color={isActive || isDraftPage ? 'primary' : 'action'} fontSize="large" />
@@ -140,11 +130,7 @@ const MainLayout = () => {
           </NavLink>
           <NavLink 
             to="/players" 
-            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none"
-            style={{
-              paddingTop: '16px',
-              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))'
-            }}
+            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none py-3"
           >
             {({ isActive }) => (
               <PoolIcon color={isActive ? 'primary' : 'action'} fontSize="large" />
@@ -152,11 +138,7 @@ const MainLayout = () => {
           </NavLink>
           <NavLink 
             to="/notes" 
-            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none"
-            style={{
-              paddingTop: '16px',
-              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))'
-            }}
+            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none py-3"
           >
             {({ isActive }) => (
               <EmailIcon color={isActive ? 'primary' : 'action'} fontSize="large" />
@@ -164,10 +146,8 @@ const MainLayout = () => {
           </NavLink>
           <NavLink 
             to="/settings"
-            className="col-3 d-flex flex-column justify-content-center align-items-center position-relative text-decoration-none"
+            className="col-3 d-flex flex-column justify-content-center align-items-center position-relative text-decoration-none py-3"
             style={{
-              paddingTop: '16px',
-              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
               animation: needsEmailVerification ? 'backgroundPulse 2s infinite' : 'none'
             }}
           >
