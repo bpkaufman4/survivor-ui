@@ -391,9 +391,7 @@ function AdminSurveys() {
   }
 
   return (
-    <AdminMain page={'admin-polls'}>
-      <Content></Content>
-    </AdminMain>
+    <Content></Content>
   )
 }
 

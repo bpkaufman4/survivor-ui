@@ -348,9 +348,7 @@ function AdminStatistics() {
   }
 
   return (
-    <AdminMain page="admin-statistics">
-      <Content></Content>
-    </AdminMain>
+    <Content></Content>
   )
 }
 

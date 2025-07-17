@@ -568,12 +568,12 @@ function AdminEpisode() {
   }
 
   return (
-    <AdminMain page="admin-episodes">
+    <>
       <Content></Content>
       <Snackbar open={alertOpen} autoHideDuration={2000} onClose={closeAlert} anchorOrigin={{vertical: 'top', horizontal: 'center'}}>
         <Alert severity={alertOptions.severity} sx={{width: '100%'}} onClose={closeAlert}>{alertOptions.message}</Alert>
       </Snackbar>
-    </AdminMain>
+    </>
   )
 }
 

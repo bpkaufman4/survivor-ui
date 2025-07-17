@@ -326,9 +326,7 @@ function AdminNotes() {
   }
 
   return (
-    <AdminMain page="admin-notes">
-      <Content></Content>
-    </AdminMain>
+    <Content></Content>
   )
 }
 

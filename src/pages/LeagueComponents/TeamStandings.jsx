@@ -77,9 +77,9 @@ export default function TeamStandings({ leagueId }) {
                     </td>
                     <td>
                       <div>
-                        <a href={`../../team/${team.teamId}`} className="text-decoration-none fw-semibold">
+                        <p className="text-decoration-none fw-semibold my-0">
                           {team.name}
-                        </a>
+                        </p>
                         <div className="text-muted small">
                           {team.firstName} {team.lastName}
                         </div>

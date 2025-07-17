@@ -147,7 +147,7 @@ const AdminPushNotifications = () => {
   };
 
   return (
-    <AdminMain page="Push Notifications">
+    <>
       <div className="container-fluid">
         <div className="row">
           <div className="col-12">
@@ -383,7 +383,7 @@ const AdminPushNotifications = () => {
           </div>
         </div>
       </div>
-    </AdminMain>
+    </>
   );
 };
 

@@ -1,21 +1,22 @@
 import { useState } from "react";
-import Main from "../components/Main";
 import WaterLoader from "../components/WaterLoader";
 import { useUser } from "../contexts/UserContext";
 import { NameEdit, EmailPreferences, EmailVerification, PushNotificationSettings } from "./SettingsComponents";
+import { useNavigate } from "react-router-dom";
 
 export default function Settings() {
+  const navigate = useNavigate();
   const { user, needsEmailVerification } = useUser();
   const [error, setError] = useState(false);
 
   function logOut() {
     localStorage.removeItem('jwt');
     localStorage.removeItem('homeTarget');
-    window.location.assign('login');
+    navigate('/login');
   }
 
   return (
-    <Main page={'settings'}>
+    <>
       {(() => {
         if (!user) return <WaterLoader></WaterLoader>;
         if (error) return <p>Something went wrong</p>;
@@ -69,6 +70,6 @@ export default function Settings() {
           </div>
         </div>
       </div>
-    </Main>
+    </>
   );
 }

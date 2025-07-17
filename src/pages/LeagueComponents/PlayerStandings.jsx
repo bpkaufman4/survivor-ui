@@ -84,10 +84,10 @@ export default function PlayerStandings({ leagueId }) {
                       />
                     </td>
                     <td>
-                      <div>
-                        <a href={`../../player/${player.playerId}`} className="text-decoration-none fw-semibold">
+                      <div> 
+                        <p className="text-decoration-none fw-semibold my-0">
                           {player.firstName} {player.lastName}
-                        </a>
+                        </p>
                         <div className="text-muted small">
                           {tribeName && (
                             <div className="d-flex align-items-center mb-1">

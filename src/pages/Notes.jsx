@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Main from "../components/Main";
 import apiUrl from "../apiUrls";
 import WaterLoader from "../components/WaterLoader";
 import { DateTime } from "luxon";
@@ -102,7 +101,5 @@ export default function Notes() {
 
   }
 
-  return (<Main page={'notes'}>
-    <Content></Content>
-  </Main>)
+  return <Content></Content>
 }

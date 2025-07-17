@@ -125,25 +125,15 @@ function AdminJobs() {
   };
 
   if (loading) {
-    return (
-      <AdminMain page="jobs">
-        <WaterLoader />
-      </AdminMain>
-    );
+    return <WaterLoader />;
   }
 
   if (error) {
-    return (
-      <AdminMain page="jobs">
-        <div className="alert alert-danger">
-          Error loading background jobs status
-        </div>
-      </AdminMain>
-    );
+    return <div className="alert alert-danger">Error loading background jobs status</div>;
   }
 
   return (
-    <AdminMain page="jobs">
+    <>
       <div className="container-fluid">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2>Background Jobs</h2>
@@ -284,7 +274,7 @@ function AdminJobs() {
           </div>
         </div>
       </div>
-    </AdminMain>
+    </>
   );
 }
 

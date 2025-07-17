@@ -20,7 +20,7 @@ export default function AdminLeagues() {
     }
   }
 
-  return (<AdminMain page="admin-leagues">
+  return (
     <Content></Content>
-  </AdminMain>);
+  );
 }

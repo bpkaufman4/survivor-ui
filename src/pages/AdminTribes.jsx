@@ -10,17 +10,17 @@ import Swal from "sweetalert2";
 
 function AdminTribes() {
 
-  const [editingTribe, setEditingTribe] = useState(null); 
+  const [editingTribe, setEditingTribe] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
 
-  const [alertOptions, setAlertOptions] = useState({severity: null, message: null});
+  const [alertOptions, setAlertOptions] = useState({ severity: null, message: null });
   const [alertOpen, setAlertOpen] = useState(false);
-  
+
   function TribesTbody() {
     const [tribes, setTribes] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
-  
+
     useEffect(() => {
       async function fetchTribes() {
         await fetch(`${apiUrl}tribe/admin`, {
@@ -28,32 +28,32 @@ function AdminTribes() {
             'authorization': localStorage.getItem('jwt')
           }
         })
-        .then(response => {
-          return response.json();
-        })
-        .then(reply => {
-          if(reply.status === 'success') {
-            setTribes(reply.data);
-          } else {
-            console.log(reply);
+          .then(response => {
+            return response.json();
+          })
+          .then(reply => {
+            if (reply.status === 'success') {
+              setTribes(reply.data);
+            } else {
+              console.log(reply);
+              setError(true);
+            }
+          })
+          .catch(err => {
+            console.log(err);
             setError(true);
-          }
-        })
-        .catch(err => {
-          console.log(err);
-          setError(true);
-        })
-        .finally(() => {
-          setTimeout(() => {
-            setLoading(false);
-          }, 300);
-        })
+          })
+          .finally(() => {
+            setTimeout(() => {
+              setLoading(false);
+            }, 300);
+          })
       }
 
       fetchTribes();
     }, []);
 
-    if(loading) {
+    if (loading) {
       return (
         <tr>
           <td colSpan={3} className="text-center">
@@ -65,7 +65,7 @@ function AdminTribes() {
       )
     }
 
-    if(error) {
+    if (error) {
       return (
         <tr>
           <td colSpan={4} className="text-center">Something went wrong</td>
@@ -78,35 +78,35 @@ function AdminTribes() {
       setLoading(true);
       // Clear any existing alerts
       setAlertOpen(false);
-      fetch(`${apiUrl}tribe/admin/${tribeId}`,{
+      fetch(`${apiUrl}tribe/admin/${tribeId}`, {
         headers: {
           authorization: localStorage.getItem('jwt')
         }
       })
-      .then(response => {
-        return response.json();
-      })
-      .then(reply => {
-        if(reply.status === 'success') {
-          setEditingTribe(reply.data);
-          setFormOpen(true);
-        } else {
+        .then(response => {
+          return response.json();
+        })
+        .then(reply => {
+          if (reply.status === 'success') {
+            setEditingTribe(reply.data);
+            setFormOpen(true);
+          } else {
+            setError(true);
+          }
+        })
+        .catch(err => {
+          console.log(err);
           setError(true);
-        }
-      })
-      .catch(err => {
-        console.log(err);
-        setError(true);
-      })
-      .finally(() => {
-        setLoading(false);
-      })
+        })
+        .finally(() => {
+          setLoading(false);
+        })
     }
 
     function deleteTribe(e) {
       const tribeId = e.target.dataset.tribeId;
       const tribeName = e.target.dataset.tribeName;
-      
+
       Swal.fire({
         title: 'Are you sure?',
         text: `You are about to delete the tribe "${tribeName}". This action cannot be undone.`,
@@ -125,17 +125,31 @@ function AdminTribes() {
               authorization: localStorage.getItem('jwt')
             }
           })
-          .then(response => response.json())
-          .then(reply => {
-            if(reply.status === 'success') {
-              // Remove the deleted tribe from the list
-              setTribes(prev => prev.filter(tribe => tribe.tribeId !== tribeId));
-              setAlertOptions({
-                message: 'Tribe deleted successfully',
-                severity: 'success'
-              });
-              setAlertOpen(true);
-            } else {
+            .then(response => response.json())
+            .then(reply => {
+              if (reply.status === 'success') {
+                // Remove the deleted tribe from the list
+                setTribes(prev => prev.filter(tribe => tribe.tribeId !== tribeId));
+                setAlertOptions({
+                  message: 'Tribe deleted successfully',
+                  severity: 'success'
+                });
+                setAlertOpen(true);
+              } else {
+                setAlertOptions({
+                  message: 'Error deleting tribe',
+                  severity: 'error'
+                });
+                setAlertOpen(true);
+                Swal.fire(
+                  'Error!',
+                  'There was an error deleting the tribe.',
+                  'error'
+                );
+              }
+            })
+            .catch(err => {
+              console.log(err);
               setAlertOptions({
                 message: 'Error deleting tribe',
                 severity: 'error'
@@ -146,24 +160,10 @@ function AdminTribes() {
                 'There was an error deleting the tribe.',
                 'error'
               );
-            }
-          })
-          .catch(err => {
-            console.log(err);
-            setAlertOptions({
-              message: 'Error deleting tribe',
-              severity: 'error'
+            })
+            .finally(() => {
+              setLoading(false);
             });
-            setAlertOpen(true);
-            Swal.fire(
-              'Error!',
-              'There was an error deleting the tribe.',
-              'error'
-            );
-          })
-          .finally(() => {
-            setLoading(false);
-          });
         }
       });
     }
@@ -173,7 +173,7 @@ function AdminTribes() {
         <tr key={tribe.tribeId}>
           <td>
             <div className="d-flex align-items-center">
-              <div 
+              <div
                 style={{
                   width: '20px',
                   height: '20px',
@@ -203,7 +203,7 @@ function AdminTribes() {
   function TribeForm({ editingTribe }) {
     var heading = editingTribe ? `Edit Tribe: ${editingTribe.name}` : 'New Tribe';
 
-    if(!editingTribe) {
+    if (!editingTribe) {
       editingTribe = {
         name: '',
         color: '#000000'
@@ -211,7 +211,7 @@ function AdminTribes() {
     }
 
     const [submitting, setSubmitting] = useState(false);
-    
+
     function handleTribeSubmit(e) {
       e.preventDefault();
       const idArray = ['tribeId', 'name', 'color'];
@@ -219,15 +219,15 @@ function AdminTribes() {
       const bodyJSON = getFormValues(idArray);
       const bodySanitized = sanitizeFormValues(bodyJSON);
       const isEditing = bodySanitized.tribeId && bodySanitized.tribeId.trim() !== '';
-      
+
       // Store tribeId for URL construction before potentially removing it
       const tribeId = bodySanitized.tribeId;
-      
+
       // Remove tribeId from request body for POST requests (new tribes)
-      if(!isEditing) {
+      if (!isEditing) {
         delete bodySanitized.tribeId;
       }
-      
+
       const body = JSON.stringify(bodySanitized);
 
       console.log('Form submission data:', bodySanitized); // Debug log
@@ -237,7 +237,7 @@ function AdminTribes() {
         name: bodySanitized.name,
         color: bodySanitized.color
       }));
-      
+
       setAlertOpen(false);
       setSubmitting(true);
 
@@ -253,43 +253,43 @@ function AdminTribes() {
           authorization: localStorage.getItem('jwt')
         }
       })
-      .then(response => {
-        return response.json();
-      })
-      .then(reply => {
-        if(reply.status === 'success') {
-          console.log(reply);
-          setTimeout(() => {
-            setSubmitting(false);
-            setAlertOptions({
-              message: 'Tribe Saved',
-              severity: 'success'
-            })
-            setAlertOpen(true);
-          }, 1000);
-        } else {
-          console.log(reply);
+        .then(response => {
+          return response.json();
+        })
+        .then(reply => {
+          if (reply.status === 'success') {
+            console.log(reply);
+            setTimeout(() => {
+              setSubmitting(false);
+              setAlertOptions({
+                message: 'Tribe Saved',
+                severity: 'success'
+              })
+              setAlertOpen(true);
+            }, 1000);
+          } else {
+            console.log(reply);
+            setTimeout(() => {
+              setAlertOptions({
+                message: 'Error saving tribe',
+                severity: 'error'
+              });
+              setAlertOpen(true);
+              setSubmitting(false)
+            }, 1000);
+          }
+        })
+        .catch(err => {
+          console.log(err);
           setTimeout(() => {
             setAlertOptions({
               message: 'Error saving tribe',
               severity: 'error'
             });
-            setAlertOpen(true);
             setSubmitting(false)
+            setAlertOpen(true);
           }, 1000);
-        }
-      })
-      .catch(err => {
-        console.log(err);
-        setTimeout(() => {
-          setAlertOptions({
-            message: 'Error saving tribe',
-            severity: 'error'
-          });
-          setSubmitting(false)
-          setAlertOpen(true);
-        }, 1000);
-      })
+        })
     }
 
     function goBack(e) {
@@ -305,37 +305,37 @@ function AdminTribes() {
           <h2>{heading}</h2>
         </div>
         <form onSubmit={handleTribeSubmit}>
-          <input type="hidden" name="tribeId" id="tribeId" defaultValue={editingTribe.tribeId}/>
-          
+          <input type="hidden" name="tribeId" id="tribeId" defaultValue={editingTribe.tribeId} />
+
           <div className="row">
-              <div className="mb-3 col-md-8">
-                  <label htmlFor="name" className="form-label">Tribe Name:*</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    id="name" 
-                    name="name"
-                    defaultValue={editingTribe.name}
-                    disabled={submitting}
-                    required
-                  />
-              </div>
-              <div className="mb-3 col-md-4">
-                  <label htmlFor="color" className="form-label">Tribe Color:*</label>
-                  <input 
-                    type="color" 
-                    className="form-control form-control-color" 
-                    id="color" 
-                    name="color"
-                    defaultValue={editingTribe.color}
-                    disabled={submitting}
-                    title="Choose your tribe color"
-                  />
-              </div>
-          </div>          
+            <div className="mb-3 col-md-8">
+              <label htmlFor="name" className="form-label">Tribe Name:*</label>
+              <input
+                type="text"
+                className="form-control"
+                id="name"
+                name="name"
+                defaultValue={editingTribe.name}
+                disabled={submitting}
+                required
+              />
+            </div>
+            <div className="mb-3 col-md-4">
+              <label htmlFor="color" className="form-label">Tribe Color:*</label>
+              <input
+                type="color"
+                className="form-control form-control-color"
+                id="color"
+                name="color"
+                defaultValue={editingTribe.color}
+                disabled={submitting}
+                title="Choose your tribe color"
+              />
+            </div>
+          </div>
           <div className="admin-button-group mt-4">
             {(() => {
-              if(submitting) {
+              if (submitting) {
                 return (
                   <>
                     <button disabled={true} type="button" className="btn btn-outline-secondary">Back</button>
@@ -366,49 +366,47 @@ function AdminTribes() {
   }
 
   function closeAlert(e, reason) {
-    if(reason === 'clickaway') return;
+    if (reason === 'clickaway') return;
     setAlertOpen(false);
   }
 
   return (
     <>
-      <Snackbar open={alertOpen} autoHideDuration={2000} onClose={closeAlert} anchorOrigin={{vertical: 'top', horizontal: 'center'}}>
-        <Alert severity={alertOptions.severity} sx={{width: '100%'}} onClose={closeAlert}>{alertOptions.message}</Alert>
+      <Snackbar open={alertOpen} autoHideDuration={2000} onClose={closeAlert} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert severity={alertOptions.severity} sx={{ width: '100%' }} onClose={closeAlert}>{alertOptions.message}</Alert>
       </Snackbar>
-      <AdminMain page="admin-tribes">
-        {(() => {
-          if(formOpen) {
-            return (
-              <div className="admin-form-container">
-                <TribeForm editingTribe={editingTribe}></TribeForm>
+      {(() => {
+        if (formOpen) {
+          return (
+            <div className="admin-form-container">
+              <TribeForm editingTribe={editingTribe}></TribeForm>
+            </div>
+          )
+        } else {
+          return (
+            <>
+              <div className="admin-page-header">
+                <h2>Tribes</h2>
+                <button className="btn btn-primary" onClick={addTribe}>Add Tribe</button>
               </div>
-            )
-          } else {
-            return (
-              <>
-                <div className="admin-page-header">
-                  <h2>Tribes</h2>
-                  <button className="btn btn-primary" onClick={addTribe}>Add Tribe</button>
-                </div>
-                <div className="admin-table-container">
-                  <table className="table table-striped admin-table">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <TribesTbody></TribesTbody>
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )
-          }
-        })()}
-      </AdminMain>
+              <div className="admin-table-container">
+                <table className="table table-striped admin-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Created</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <TribesTbody></TribesTbody>
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )
+        }
+      })()}
     </>
   )
 }

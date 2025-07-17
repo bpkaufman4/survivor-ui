@@ -1,40 +1,24 @@
-// src/components/RequireAdmin.jsx
 import { Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import apiUrl from "../apiUrls";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function RequireUser({ children }) {
-  const [loading, setLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const { user, loading, initialized } = useAuth();
 
-  useEffect(() => {
-    function checkAdmin() {
-      fetch(`${apiUrl}login/check`, {
-        headers: {
-          authorization: localStorage.getItem('jwt')
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if(!data.verified) {
-          localStorage.removeItem('jwt');
-        } else {
-          setIsAuthorized(true);
-        }
-      })
-      .catch(err => {
-        console.error("Admin Check Failed", err);
-      })
-      .finally(() => {
-        setLoading(false);
-      })
-    }
+  // Show loading placeholder that maintains layout
+  if (loading || !initialized) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
-    checkAdmin();
-  }, [])
-  
-  if(loading) return <></>;
-  if(!isAuthorized) return <Navigate to="/login" replace />;
+  // Redirect if not authenticated
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return children;
 }

@@ -5,7 +5,6 @@ import '../assets/league.css'
 import WaterLoader from "../components/WaterLoader";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import SettingsIcon from '@mui/icons-material/Settings';
-import Main from "../components/Main";
 import TeamStandings from "./LeagueComponents/TeamStandings";
 import PlayerStandings from "./LeagueComponents/PlayerStandings";
 import MyTeam from "./LeagueComponents/MyTeam";
@@ -176,34 +175,32 @@ export default function League() {
   }
 
   return (
-    <Main page="home">
-      <Content>
-        {draft && <Draft draftStartTime={draftStartTime} onJoinDraft={() => window.location.assign(`/draft/${leagueId}`)} leagueId={leagueId} onDraftStatusChange={setIsDraftComplete} playersExist={playersExist} checkingPlayers={checkingPlayers} />}
-        <div className="d-flex align-items-center justify-content-between pb-3 border-bottom">
-          <h3 className="mb-0 flex-grow-1">{league && league.name}</h3>
-          <div className="d-flex align-items-center gap-2">
-            <Survey leagueId={league && league.leagueId} />
-            <Note />
-            <Scoring />
-            {ownerAccess && (
-              <button className="btn" onClick={() => setView('settings')}>
-                <SettingsIcon fontSize="small" color={view === 'settings' ? 'primary' : 'inherit'} />
-              </button>
-            )}
-          </div>
+    <Content>
+      {draft && <Draft draftStartTime={draftStartTime} onJoinDraft={() => window.location.assign(`/draft/${leagueId}`)} leagueId={leagueId} onDraftStatusChange={setIsDraftComplete} playersExist={playersExist} checkingPlayers={checkingPlayers} />}
+      <div className="d-flex align-items-center justify-content-between pb-3 border-bottom">
+        <h3 className="mb-0 flex-grow-1">{league && league.name}</h3>
+        <div className="d-flex align-items-center gap-2">
+          <Survey leagueId={league && league.leagueId} />
+          <Note />
+          <Scoring />
+          {ownerAccess && (
+            <button className="btn" onClick={() => setView('settings')}>
+              <SettingsIcon fontSize="small" color={view === 'settings' ? 'primary' : 'inherit'} />
+            </button>
+          )}
         </div>
-        {ownerAccess && !draft && !isDraftComplete && playersExist && !checkingPlayers && (
-          <div className="alert alert-warning mt-3 mb-2" role="alert">
-            <strong>Action needed:</strong> Your league draft date hasn't been set yet. Visit the settings to schedule your draft.
-          </div>
-        )}
-        <div className="my-2">
-          <MenuOptions />
+      </div>
+      {ownerAccess && !draft && !isDraftComplete && playersExist && !checkingPlayers && (
+        <div className="alert alert-warning mt-3 mb-2" role="alert">
+          <strong>Action needed:</strong> Your league draft date hasn't been set yet. Visit the settings to schedule your draft.
         </div>
-        <div>
-          <View />
-        </div>
-      </Content>
-    </Main>
+      )}
+      <div className="my-2">
+        <MenuOptions />
+      </div>
+      <div>
+        <View />
+      </div>
+    </Content>
   )
 }

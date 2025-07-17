@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import apiUrl from "../apiUrls";
 import Main from "../components/Main";
 import Swal from "sweetalert2";
+import { Link } from "react-router-dom";
 
 function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -14,7 +15,7 @@ function ResetPassword() {
     // Get token from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const tokenParam = urlParams.get('token');
-    
+
     if (tokenParam) {
       setToken(tokenParam);
       setValidToken(true);
@@ -74,20 +75,33 @@ function ResetPassword() {
         "Content-Type": "application/json"
       }
     })
-    .then(response => response.json())
-    .then(reply => {
-      if (reply.status === 'success') {
+      .then(response => response.json())
+      .then(reply => {
+        if (reply.status === 'success') {
+          Swal.fire({
+            title: 'Password Reset!',
+            text: 'Your password has been successfully reset.',
+            icon: 'success',
+            confirmButtonText: 'Go to Login'
+          }).then(() => {
+            window.location.assign('/login');
+          });
+        } else {
+          Swal.fire({
+            text: reply.message || 'Something went wrong',
+            icon: 'error',
+            toast: true,
+            showCancelButton: false,
+            showConfirmButton: false,
+            timer: 3000,
+            position: 'top'
+          });
+        }
+      })
+      .catch(err => {
+        console.log(err);
         Swal.fire({
-          title: 'Password Reset!',
-          text: 'Your password has been successfully reset.',
-          icon: 'success',
-          confirmButtonText: 'Go to Login'
-        }).then(() => {
-          window.location.assign('/login');
-        });
-      } else {
-        Swal.fire({
-          text: reply.message || 'Something went wrong',
+          text: 'Something went wrong',
           icon: 'error',
           toast: true,
           showCancelButton: false,
@@ -95,123 +109,104 @@ function ResetPassword() {
           timer: 3000,
           position: 'top'
         });
-      }
-    })
-    .catch(err => {
-      console.log(err);
-      Swal.fire({
-        text: 'Something went wrong',
-        icon: 'error',
-        toast: true,
-        showCancelButton: false,
-        showConfirmButton: false,
-        timer: 3000,
-        position: 'top'
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    })
-    .finally(() => {
-      setLoading(false);
-    });
   }
 
   if (validToken === null) {
     return (
-      <Main>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 160px)' }}>
-          <div className="text-center">
-            <p>Loading...</p>
-          </div>
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 160px)' }}>
+        <div className="text-center">
+          <p>Loading...</p>
         </div>
-      </Main>
+      </div>
     );
   }
 
   if (validToken === false) {
     return (
-      <Main>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 160px)' }}>
-          <div className="col-12 col-sm-8 col-md-6 col-lg-4">
-            <div className="card shadow">
-              <div className="card-body p-4 text-center">
-                <h2 className="card-title text-danger">Invalid Reset Link</h2>
-                <p className="text-muted mb-4">
-                  This password reset link is invalid or has expired.
-                </p>
-                <div className="d-grid gap-2">
-                  <a href="/forgot-password" className="btn btn-primary">
-                    Request New Reset Link
-                  </a>
-                  <a href="/login" className="btn btn-outline-secondary">
-                    Back to Login
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Main>
-    );
-  }
-
-  return (
-    <Main>
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 160px)' }}>
         <div className="col-12 col-sm-8 col-md-6 col-lg-4">
           <div className="card shadow">
-            <div className="card-body p-4">
-              <div className="text-center mb-4">
-                <h2 className="card-title">Reset Password</h2>
-                <p className="text-muted">Enter your new password</p>
+            <div className="card-body p-4 text-center">
+              <h2 className="card-title text-danger">Invalid Reset Link</h2>
+              <p className="text-muted mb-4">
+                This password reset link is invalid or has expired.
+              </p>
+              <div className="d-grid gap-2">
+                <Link to="/forgot-password" className="btn btn-primary">
+                  Request New Reset Link
+                </Link>
+                <Link to="/login" className="btn btn-outline-secondary">
+                  Back to Login
+                </Link>
               </div>
-              
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">New Password</label>
-                  <input 
-                    type="password" 
-                    className="form-control" 
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter new password"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-3">
-                  <label htmlFor="confirmPassword" className="form-label">Confirm New Password</label>
-                  <input 
-                    type="password" 
-                    className="form-control" 
-                    id="confirmPassword"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-3">
-                  <button 
-                    className="btn btn-primary w-100" 
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {loading ? 'Resetting...' : 'Reset Password'}
-                  </button>
-                </div>
-                
-                <div className="text-center">
-                  <a href="/login" className="text-decoration-none">
-                    Back to Login
-                  </a>
-                </div>
-              </form>
             </div>
           </div>
         </div>
       </div>
-    </Main>
+    );
+  }
+
+  return (
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 160px)' }}>
+      <div className="col-12 col-sm-8 col-md-6 col-lg-4">
+        <div className="card shadow">
+          <div className="card-body p-4">
+            <div className="text-center mb-4">
+              <h2 className="card-title">Reset Password</h2>
+              <p className="text-muted">Enter your new password</p>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label htmlFor="password" className="form-label">New Password</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter new password"
+                  required
+                />
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="confirmPassword" className="form-label">Confirm New Password</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password"
+                  required
+                />
+              </div>
+
+              <div className="mb-3">
+                <button
+                  className="btn btn-primary w-100"
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? 'Resetting...' : 'Reset Password'}
+                </button>
+              </div>
+
+              <div className="text-center">
+                <Link to="/login" className="text-decoration-none">
+                  Back to Login
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -2,7 +2,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import websocketUrl from "../websocketUrls";
 import { useEffect, useRef, useState } from "react";
 import { handleGet } from "../helpers/helpers";
-import Main from "../components/Main";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import "../assets/draft.css"
 import chimeSound from "../assets/nfl-draft-chime.mp3"
@@ -337,7 +336,7 @@ export default function Draft() {
   }, [isDragging, isDesktop]);
 
   return (
-    <Main page="draft" additionalClasses="p-0 d-flex flex-column h-100">
+    <>
       <div className="container-lg my-lg-3 card px-0" style={{overflow: 'hidden', borderColor: isDesktop ? 'var(--bs-secondary-bg-subtle)': '#fff'}}>
         {/* Ultra-compact single row header */}
         <div className={`border-bottom ${getHeaderClass()}`}>
@@ -552,6 +551,6 @@ export default function Draft() {
           </div>
         </div>
       </div>
-    </Main>
+    </>
   )
 }
