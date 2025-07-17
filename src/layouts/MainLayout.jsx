@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const headerHeight = '64px';
-const footerHeight = '58px';
+const footerHeight = '74px';
 
 const MainLayout = () => {
   console.log('MainLayout rendering'); // Debug log
@@ -119,48 +119,62 @@ const MainLayout = () => {
 
       {/* Mobile Bottom Navigation - Only visible on mobile */}
       <nav className='d-lg-none border-top border-black bg-white position-sticky bottom-0' style={{
-        height: footerHeight,
         paddingLeft: 'env(safe-area-inset-left, 0px)',
         paddingRight: 'env(safe-area-inset-right, 0px)',
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
-        paddingTop: '16px',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         flexShrink: 0,
         zIndex: 1030
       }}>
-        <div className="row text-center mx-0 h-100">
-          <div className="col-3 d-flex flex-column justify-content-center align-items-center">
-            <NavLink to="/">
-              {({ isActive }) => (
-                <HomeIcon color={isActive || isDraftPage ? 'primary' : 'action'} fontSize="large" />
-              )}
-            </NavLink>
-          </div>
-          <div className="col-3 d-flex flex-column justify-content-center align-items-center">
-            <NavLink to="/players">
-              {({ isActive }) => (
-                <PoolIcon color={isActive ? 'primary' : 'action'} fontSize="large" />
-              )}
-            </NavLink>
-          </div>
-          <div className="col-3 d-flex flex-column justify-content-center align-items-center">
-            <NavLink to="/notes">
-              {({ isActive }) => (
-                <EmailIcon color={isActive ? 'primary' : 'action'} fontSize="large" />
-              )}
-            </NavLink>
-          </div>
-          <div 
-            className="col-3 d-flex flex-column justify-content-center align-items-center position-relative" 
+        <div className="row mx-0 h-100">
+          <NavLink 
+            to="/" 
+            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none"
             style={{
+              paddingTop: '16px',
+              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))'
+            }}
+          >
+            {({ isActive }) => (
+              <HomeIcon color={isActive || isDraftPage ? 'primary' : 'action'} fontSize="large" />
+            )}
+          </NavLink>
+          <NavLink 
+            to="/players" 
+            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none"
+            style={{
+              paddingTop: '16px',
+              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))'
+            }}
+          >
+            {({ isActive }) => (
+              <PoolIcon color={isActive ? 'primary' : 'action'} fontSize="large" />
+            )}
+          </NavLink>
+          <NavLink 
+            to="/notes" 
+            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none"
+            style={{
+              paddingTop: '16px',
+              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))'
+            }}
+          >
+            {({ isActive }) => (
+              <EmailIcon color={isActive ? 'primary' : 'action'} fontSize="large" />
+            )}
+          </NavLink>
+          <NavLink 
+            to="/settings"
+            className="col-3 d-flex flex-column justify-content-center align-items-center position-relative text-decoration-none"
+            style={{
+              paddingTop: '16px',
+              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
               animation: needsEmailVerification ? 'backgroundPulse 2s infinite' : 'none'
             }}
           >
-            <NavLink to="/settings">
-              {({ isActive }) => (
-                <SettingsIcon color={isActive ? 'primary' : 'action'} fontSize="large" />
-              )}
-            </NavLink>
-          </div>
+            {({ isActive }) => (
+              <SettingsIcon color={isActive ? 'primary' : 'action'} fontSize="large" />
+            )}
+          </NavLink>
         </div>
       </nav>
     </div>
