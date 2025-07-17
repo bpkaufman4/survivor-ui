@@ -122,7 +122,7 @@ const MainLayout = () => {
         <div className="row mx-0 h-100">
           <NavLink 
             to="/" 
-            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none py-3"
+            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none pt-2 pb-4"
           >
             {({ isActive }) => (
               <HomeIcon color={isActive || isDraftPage ? 'primary' : 'action'} fontSize="large" />
@@ -130,7 +130,7 @@ const MainLayout = () => {
           </NavLink>
           <NavLink 
             to="/players" 
-            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none py-3"
+            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none pt-2 pb-4"
           >
             {({ isActive }) => (
               <PoolIcon color={isActive ? 'primary' : 'action'} fontSize="large" />
@@ -138,7 +138,7 @@ const MainLayout = () => {
           </NavLink>
           <NavLink 
             to="/notes" 
-            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none py-3"
+            className="col-3 d-flex flex-column justify-content-center align-items-center text-decoration-none pt-2 pb-4"
           >
             {({ isActive }) => (
               <EmailIcon color={isActive ? 'primary' : 'action'} fontSize="large" />
@@ -146,7 +146,7 @@ const MainLayout = () => {
           </NavLink>
           <NavLink 
             to="/settings"
-            className="col-3 d-flex flex-column justify-content-center align-items-center position-relative text-decoration-none py-3"
+            className="col-3 d-flex flex-column justify-content-center align-items-center position-relative text-decoration-none pt-2 pb-4"
             style={{
               animation: needsEmailVerification ? 'backgroundPulse 2s infinite' : 'none'
             }}
