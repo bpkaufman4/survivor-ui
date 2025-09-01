@@ -61,9 +61,7 @@ function App() {
             </RequireUser>
           } />
           <Route path="draft/:leagueId" element={
-            <RequireUser>
-              <Draft />
-            </RequireUser>
+            <Draft />
           } />
           <Route path="settings" element={
             <RequireUser>
