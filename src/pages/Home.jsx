@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import apiUrl from "../apiUrls";
 import WaterLoader from "../components/WaterLoader";
+import ChangeTeamNameButton from "./HomeComponents/ChangeTeamNameButton";
 
 
 function Home() {
@@ -40,7 +41,7 @@ function Home() {
   }, []);
 
 
-  function Team({ name, league, leagueId }) {
+  function Team({ name, league, leagueId, teamId }) {
     const redirect = () => window.location.assign(`league/${leagueId}`);
 
     return (
@@ -48,7 +49,10 @@ function Home() {
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-center">
             <div>
-              <h5 className="card-title mb-1">{name}</h5>
+              <h5 className="card-title mb-1 d-flex align-items-center">
+                {name}
+                <ChangeTeamNameButton teamNameProp={name} teamId={teamId} />
+              </h5>
               <p className="card-text text-muted mb-0">{league.name}</p>
             </div>
             <button
@@ -94,7 +98,7 @@ function Home() {
               <div className="row">
                 {teams.map(team => (
                   <div key={team.league.leagueId} className="col-12 col-md-6 col-lg-4">
-                    <Team name={team.name} league={team.league} leagueId={team.league.leagueId} />
+                    <Team name={team.name} league={team.league} leagueId={team.league.leagueId} teamId={team.teamId} />
                   </div>
                 ))}
               </div>
