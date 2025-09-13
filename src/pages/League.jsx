@@ -189,11 +189,6 @@ export default function League() {
           )}
         </div>
       </div>
-      {ownerAccess && !draft && !isDraftComplete && playersExist && !checkingPlayers && (
-        <div className="alert alert-warning mt-3 mb-2" role="alert">
-          <strong>Action needed:</strong> Your league draft date hasn't been set yet. Visit the settings to schedule your draft.
-        </div>
-      )}
       <div className="my-2">
         <MenuOptions />
       </div>
