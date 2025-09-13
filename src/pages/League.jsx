@@ -176,7 +176,6 @@ export default function League() {
 
   return (
     <Content>
-      {draft && <Draft draftStartTime={draftStartTime} onJoinDraft={() => window.location.assign(`/draft/${leagueId}`)} leagueId={leagueId} onDraftStatusChange={setIsDraftComplete} playersExist={playersExist} checkingPlayers={checkingPlayers} />}
       <div className="d-flex align-items-center justify-content-between pb-3 border-bottom">
         <h3 className="mb-0 flex-grow-1">{league && league.name}</h3>
         <div className="d-flex align-items-center gap-2">
