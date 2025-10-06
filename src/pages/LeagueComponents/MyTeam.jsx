@@ -5,38 +5,65 @@ import "../../assets/my-team.css"
 import WaterLoader from "../../components/WaterLoader";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlayerEpisodeScores from "./PlayerEpisodesScores";
 
-export default function MyTeam({ leagueId }) {
+export default function MyTeam({ leagueId, theirTeamId, setTheirTeamId }) {
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     function fetchTeam() {
-      fetch(`${apiUrl}team/myTeam/${leagueId}`, {
-        headers: {
-          authorization: localStorage.getItem('jwt')
-        }
-      })
-      .then(response => response.json())
-      .then(reply => {
-        if(reply.status === 'success') {
-          setTeam(reply.data);
-        } else {
-          console.error('Error fetching my team', reply);
+      if(theirTeamId) {
+        fetch(`${apiUrl}team/theirTeam/${theirTeamId}`, {
+          headers: {
+            authorization: localStorage.getItem('jwt')
+          }
+        })
+        .then(response => response.json())
+        .then(reply => {
+          if(reply.status === 'success') {
+            setTeam(reply.data);
+          } else {
+            console.error('Error fetching their team', reply);
+            setError(true);
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching their team", err);
           setError(true);
-        }
-      })
-      .catch(err => {
-        console.error("Error fetching my team", err);
-        setError(true);
-      })
-      .finally(() => {
-        setTimeout(() => {
-          setLoading(false);
-        }, 300)
-      })
+        })
+        .finally(() => {
+          setTimeout(() => {
+            setLoading(false);
+          }, 300)
+        })
+      } else {
+        fetch(`${apiUrl}team/myTeam/${leagueId}`, {
+          headers: {
+            authorization: localStorage.getItem('jwt')
+          }
+        })
+        .then(response => response.json())
+        .then(reply => {
+          if(reply.status === 'success') {
+            setTeam(reply.data);
+          } else {
+            console.error('Error fetching my team', reply);
+            setError(true);
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching my team", err);
+          setError(true);
+        })
+        .finally(() => {
+          setTimeout(() => {
+            setLoading(false);
+          }, 300)
+        })
+      }
     }
 
     fetchTeam();
@@ -65,7 +92,7 @@ export default function MyTeam({ leagueId }) {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <h6 className="mb-1 fw-semibold">{player.firstName} {player.lastName}</h6>
-                  <span className="badge bg-info fs-6">{player.totalPoints} points</span>
+                  <span className={`badge ${theirTeamId ? "bg-primary" : "bg-info"} fs-6`}>{player.totalPoints} points</span>
                 </div>
                 <button className="btn btn-outline-secondary btn-sm" onClick={toggleExpanded}>
                   {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
@@ -91,9 +118,12 @@ export default function MyTeam({ leagueId }) {
 
   return (
     <div className="card shadow-sm">
-      <div className="card-header bg-info text-white">
+      <div className={`card-header ${theirTeamId ? "bg-primary" : "bg-info"} text-white`}>
         <div className="d-flex justify-content-between align-items-center">
-          <h5 className="card-title mb-0">{team.name}</h5>
+          <h5 className="card-title mb-0">
+            {theirTeamId && <ArrowBackIcon style={{ cursor: 'pointer' }} onClick={() => setTheirTeamId(null)} />}
+            {team.name}
+          </h5>
           <span className="badge bg-light text-dark fs-6">Total: {team.totalPoints} points</span>
         </div>
       </div>

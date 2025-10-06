@@ -26,6 +26,7 @@ export default function League() {
   const [isDraftComplete, setIsDraftComplete] = useState(false);
   const [playersExist, setPlayersExist] = useState(false);
   const [checkingPlayers, setCheckingPlayers] = useState(true);
+  const [theirTeamId, setTheirTeamId] = useState(null);
   
   // Memoize draft start time to prevent unnecessary re-renders
   const draftStartTime = useMemo(() => {
@@ -110,7 +111,11 @@ export default function League() {
     switch(view) {
       default:
       case 'standings':
-        return <TeamStandings leagueId={leagueId} />
+        if(theirTeamId) {
+          return <MyTeam theirTeamId={theirTeamId} setTheirTeamId={setTheirTeamId}></MyTeam>
+        } else {
+          return <TeamStandings setTheirTeamId={setTheirTeamId} leagueId={leagueId} />
+        }
       case 'players':
         return <PlayerStandings leagueId={leagueId}></PlayerStandings>
       case 'my-team':

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import apiUrl from "../../apiUrls"
 import WaterLoader from "../../components/WaterLoader";
 
-export default function TeamStandings({ leagueId }) {
+export default function TeamStandings({ leagueId, setTheirTeamId }) {
 
   const [standings, setStandings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +70,7 @@ export default function TeamStandings({ leagueId }) {
                 const rankClass = i === 0 ? 'text-warning fw-bold' : i === 1 ? 'text-secondary fw-bold' : i === 2 ? 'text-dark fw-bold' : '';
                 
                 return (
-                  <tr key={team.teamId}>
+                  <tr key={team.teamId} onClick={() => setTheirTeamId(team.teamId)} style={{ cursor: 'pointer' }}>
                     <td className={`text-center ${rankClass}`}>
                       {i < 3 && <span className="me-1">🏆</span>}
                       {(i+1)}
