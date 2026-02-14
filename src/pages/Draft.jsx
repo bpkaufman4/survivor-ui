@@ -187,7 +187,11 @@ export default function Draft() {
 
   // Check if draft has started
   const now = new Date();
-  const draftStarted = draftStartTime ? now >= new Date(draftStartTime) : false;
+
+  // Allow if time passed OR if any player has been picked (handling potential clock skew)
+  const picksMade = draftOrder && draftOrder.some(p => p.playerId || p.player);
+  const draftStarted = (draftStartTime ? now >= new Date(draftStartTime) : false) || picksMade;
+
   const canPick = isMyTurn && draftStarted && !draftComplete;
 
   // Play sound when it becomes user's turn
@@ -337,7 +341,7 @@ export default function Draft() {
 
   return (
     <>
-      <div className="container-lg my-lg-3 card px-0" style={{overflow: 'hidden', borderColor: isDesktop ? 'var(--bs-secondary-bg-subtle)': '#fff'}}>
+      <div className="container-lg my-lg-3 card px-0" style={{ overflow: 'hidden', borderColor: isDesktop ? 'var(--bs-secondary-bg-subtle)' : '#fff' }}>
         {/* Ultra-compact single row header */}
         <div className={`border-bottom ${getHeaderClass()}`}>
           <div className="d-flex align-items-center justify-content-between px-2 py-1">

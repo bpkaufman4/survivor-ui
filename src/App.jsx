@@ -10,6 +10,7 @@ import AdminNotes from "./pages/AdminNotes";
 import AdminStatistics from "./pages/AdminStatistics";
 import AdminPlayers from "./pages/AdminPlayers";
 import AdminSurveys from "./pages/AdminSurveys";
+import AdminPolls from "./pages/AdminPolls";
 import League from "./pages/League";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
@@ -34,112 +35,117 @@ import AdminLayout from "./layouts/AdminLayout";
 
 function App() {
   console.log('App component rendering'); // Debug log
-  
+
   return (
     <AuthProvider>
       <FCMInitializer />
       <IOSPWAPrompt />
       <BrowserRouter>
-      <Routes>
-        {/* Auth routes (no layout) */}
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="verify-email" element={<VerifyEmail />} />
-        <Route path="forgot-password" element={<ForgotPassword />} />
-        <Route path="reset-password" element={<ResetPassword />} />
-        
-        {/* Main app routes with MainLayout */}
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={
-            <RequireUser>
-              <Home />
-            </RequireUser>
-          } />
-          <Route path="league/:leagueId" element={
-            <RequireUser>
-              <League />
-            </RequireUser>
-          } />
-          <Route path="draft/:leagueId" element={
-            <Draft />
-          } />
-          <Route path="settings" element={
-            <RequireUser>
-              <Settings />
-            </RequireUser>
-          } />
-          <Route path="notes" element={
-            <RequireUser>
-              <Notes />
-            </RequireUser>
-          } />
-          <Route path="leagues" element={
-            <RequireUser>
-              <Leagues />
-            </RequireUser>
-          } />
-          <Route path="players" element={
-            <RequireUser>
-              <Players />
-            </RequireUser>
-          } />
-        </Route>
+        <Routes>
+          {/* Auth routes (no layout) */}
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="verify-email" element={<VerifyEmail />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
 
-        {/* Admin routes with AdminLayout */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route path="episodes" element={
-            <RequireAdmin>
-              <AdminEpisodes />
-            </RequireAdmin>
-          } />
-          <Route path="notes" element={
-            <RequireAdmin>
-              <AdminNotes />
-            </RequireAdmin>
-          } />
-          <Route path="players" element={
-            <RequireAdmin>
-              <AdminPlayers />
-            </RequireAdmin>
-          } />
-          <Route path="scoring" element={
-            <RequireAdmin>
-              <AdminStatistics />
-            </RequireAdmin>
-          } />
-          <Route path="polls" element={
-            <RequireAdmin>
-              <AdminSurveys />
-            </RequireAdmin>
-          } />
-          <Route path="jobs" element={
-            <RequireAdmin>
-              <AdminJobs />
-            </RequireAdmin>
-          } />
-          <Route path="push-notifications" element={
-            <RequireAdmin>
-              <AdminPushNotifications />
-            </RequireAdmin>
-          } />
-          <Route path="emails" element={
-            <RequireAdmin>
-              <AdminEmails />
-            </RequireAdmin>
-          } />
-          <Route path="leagues" element={
-            <RequireAdmin>
-              <AdminLeagues />
-            </RequireAdmin>
-          } />
-          <Route path="tribes" element={
-            <RequireAdmin>
-              <AdminTribes />
-            </RequireAdmin>
-          } />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          {/* Main app routes with MainLayout */}
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={
+              <RequireUser>
+                <Home />
+              </RequireUser>
+            } />
+            <Route path="league/:leagueId" element={
+              <RequireUser>
+                <League />
+              </RequireUser>
+            } />
+            <Route path="draft/:leagueId" element={
+              <Draft />
+            } />
+            <Route path="settings" element={
+              <RequireUser>
+                <Settings />
+              </RequireUser>
+            } />
+            <Route path="notes" element={
+              <RequireUser>
+                <Notes />
+              </RequireUser>
+            } />
+            <Route path="leagues" element={
+              <RequireUser>
+                <Leagues />
+              </RequireUser>
+            } />
+            <Route path="players" element={
+              <RequireUser>
+                <Players />
+              </RequireUser>
+            } />
+          </Route>
+
+          {/* Admin routes with AdminLayout */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="episodes" element={
+              <RequireAdmin>
+                <AdminEpisodes />
+              </RequireAdmin>
+            } />
+            <Route path="notes" element={
+              <RequireAdmin>
+                <AdminNotes />
+              </RequireAdmin>
+            } />
+            <Route path="players" element={
+              <RequireAdmin>
+                <AdminPlayers />
+              </RequireAdmin>
+            } />
+            <Route path="scoring" element={
+              <RequireAdmin>
+                <AdminStatistics />
+              </RequireAdmin>
+            } />
+            <Route path="polls" element={
+              <RequireAdmin>
+                <AdminSurveys />
+              </RequireAdmin>
+            } />
+            <Route path="user-polls" element={
+              <RequireAdmin>
+                <AdminPolls />
+              </RequireAdmin>
+            } />
+            <Route path="jobs" element={
+              <RequireAdmin>
+                <AdminJobs />
+              </RequireAdmin>
+            } />
+            <Route path="push-notifications" element={
+              <RequireAdmin>
+                <AdminPushNotifications />
+              </RequireAdmin>
+            } />
+            <Route path="emails" element={
+              <RequireAdmin>
+                <AdminEmails />
+              </RequireAdmin>
+            } />
+            <Route path="leagues" element={
+              <RequireAdmin>
+                <AdminLeagues />
+              </RequireAdmin>
+            } />
+            <Route path="tribes" element={
+              <RequireAdmin>
+                <AdminTribes />
+              </RequireAdmin>
+            } />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }

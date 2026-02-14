@@ -31,6 +31,10 @@ const adminPages = [
     link: '/admin/polls'
   },
   {
+    display: 'User Polls',
+    link: '/admin/user-polls'
+  },
+  {
     display: 'Tribes',
     link: '/admin/tribes'
   },
@@ -71,9 +75,9 @@ const AdminLayout = () => {
       {isMobile && (
         <nav className="navbar navbar-dark bg-dark d-lg-none" style={{ flexShrink: 0, zIndex: 1050 }}>
           <div className="container-fluid">
-            <button 
-              className="navbar-toggler border-0" 
-              type="button" 
+            <button
+              className="navbar-toggler border-0"
+              type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               style={{ padding: '0.25rem 0.5rem' }}
             >
@@ -86,10 +90,9 @@ const AdminLayout = () => {
 
       <div className="d-flex flex-grow-1" style={{ position: 'relative', overflow: 'hidden' }}>
         {/* Sidebar */}
-        <div 
-          className={`d-flex flex-column flex-shrink-0 p-3 text-white bg-dark ${
-            isMobile ? 'position-fixed h-100 admin-sidebar-mobile' : ''
-          }`} 
+        <div
+          className={`d-flex flex-column flex-shrink-0 p-3 text-white bg-dark ${isMobile ? 'position-fixed h-100 admin-sidebar-mobile' : ''
+            }`}
           style={{
             width: '280px',
             height: isMobile ? '100vh' : '100%',
@@ -113,8 +116,8 @@ const AdminLayout = () => {
           <ul className="nav nav-pills flex-column mb-auto">
             {adminPages.map(page => (
               <li key={page.link}>
-                <Link 
-                  to={page.link} 
+                <Link
+                  to={page.link}
                   className="nav-link text-white"
                   onClick={() => isMobile && setSidebarOpen(false)}
                 >
@@ -132,10 +135,10 @@ const AdminLayout = () => {
 
         {/* Mobile Overlay */}
         {isMobile && sidebarOpen && (
-          <div 
-            className="position-fixed w-100 h-100" 
-            style={{ 
-              backgroundColor: 'rgba(0,0,0,0.5)', 
+          <div
+            className="position-fixed w-100 h-100"
+            style={{
+              backgroundColor: 'rgba(0,0,0,0.5)',
               zIndex: 1030,
               top: 0,
               left: 0
@@ -145,8 +148,8 @@ const AdminLayout = () => {
         )}
 
         {/* Main Content */}
-        <div 
-          className="flex-grow-1" 
+        <div
+          className="flex-grow-1"
           style={{
             width: isMobile ? '100%' : 'calc(100% - 280px)',
             height: '100%',

@@ -29,15 +29,15 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId, onDraftSt
 
   useEffect(() => {
     console.log('[Draft] Status check useEffect triggered - LeagueId:', leagueId);
-    
+
     async function checkDraftStatus() {
       if (!leagueId) {
         console.log('[Draft] No leagueId provided, skipping status check');
         return;
       }
-      
-      console.log('[Draft] Checking draft status for league:', leagueId); 
-      
+
+      console.log('[Draft] Checking draft status for league:', leagueId);
+
       try {
         const response = await fetch(`${apiUrl}draft/byLeague/${leagueId}`, {
           headers: {
@@ -45,24 +45,32 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId, onDraftSt
           }
         });
         const data = await response.json();
-        
+
         console.log('[Draft] API Response:', data);
-        
+
         if (data.status === 'success' && data.data) {
           const now = new Date();
           const startTime = new Date(data.data.startDate);
-          
-          console.log('[Draft] Now:', now, 'Start time:', startTime, 'Complete:', data.data.complete);
-          
+
+          console.log('[Draft] Now:', now, 'Start time:', startTime, 'Complete:', data.data.complete, 'CurrentPick:', data.data.currentPick);
+
           let newStatus;
+          // If draft is complete, mark complete
           if (data.data.complete) {
             newStatus = 'complete';
-          } else if (now >= startTime) {
+          }
+          // If draft has started (time passed OR picks have been made), mark active
+          // Also explicitly consider it active if currentPick > 1
+          else if (now >= startTime || (data.data.currentPick && data.data.currentPick > 1)) {
             newStatus = 'active';
-          } else {
+            // Force join button show if active
+            setShowJoinButton(true);
+          }
+          // Otherwise pending
+          else {
             newStatus = 'pending';
           }
-          
+
           console.log('[Draft] Setting status to:', newStatus);
           setDraftStatus(newStatus);
         } else {
@@ -77,7 +85,7 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId, onDraftSt
 
     // Initial check
     checkDraftStatus();
-    
+
     // Set up interval for periodic status checks
     const statusInterval = setInterval(() => {
       console.log('[Draft] Periodic status check triggered');
@@ -94,15 +102,15 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId, onDraftSt
   useEffect(() => {
     if (!draftTime) {
       console.log('[Draft] No draftTime available for time checks');
-      return () => {}; // Return empty cleanup function
+      return () => { }; // Return empty cleanup function
     }
-    
+
     console.log('[Draft] Time check useEffect triggered - DraftTime:', draftTime.toISO(), 'Status:', draftStatus);
-    
+
     function checkTime() {
       const newNow = DateTime.now();
       const minutesUntilDraft = draftTime.diff(newNow, 'minutes').toObject().minutes;
-      
+
       console.log('[Draft] Time check - Minutes until draft:', minutesUntilDraft, 'Status:', draftStatus);
 
       // Only show time-based UI if draft is still pending
@@ -110,12 +118,12 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId, onDraftSt
         const shouldShowDateTime = minutesUntilDraft > 5;
         const shouldStartingSoon = minutesUntilDraft <= 5 && minutesUntilDraft > 0;
         const shouldShowJoinButton = minutesUntilDraft <= 5;
-        
+
         // Only update state if values have actually changed to prevent unnecessary re-renders
         setShowDateTime(prev => prev !== shouldShowDateTime ? shouldShowDateTime : prev);
         setStartingSoon(prev => prev !== shouldStartingSoon ? shouldStartingSoon : prev);
         setShowJoinButton(prev => prev !== shouldShowJoinButton ? shouldShowJoinButton : prev);
-        
+
         console.log('[Draft] UI State updates:', {
           showDateTime: shouldShowDateTime,
           startingSoon: shouldStartingSoon,
@@ -154,14 +162,14 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId, onDraftSt
   if (checkingPlayers) {
     return <></>;
   }
-  
+
   if (!playersExist) {
     return <></>;
   }
-  
+
   // Handle different draft statuses
   console.log('[Draft] Render logic - Status:', draftStatus, 'ShowJoinButton:', showJoinButton, 'ShowDateTime:', showDateTime);
-  
+
   if (draftStatus === 'active' || showJoinButton) {
     console.log('[Draft] Rendering active/join button status');
     return (
@@ -190,12 +198,12 @@ export default function Draft({ draftStartTime, onJoinDraft, leagueId, onDraftSt
           <div>
             <strong>Draft Scheduled</strong>
             <div className="small">
-              {draftTime.toLocaleString({ 
-                weekday: 'long', 
-                month: 'long', 
-                day: '2-digit', 
-                hour: '2-digit', 
-                minute: '2-digit' 
+              {draftTime.toLocaleString({
+                weekday: 'long',
+                month: 'long',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
               })}
             </div>
           </div>

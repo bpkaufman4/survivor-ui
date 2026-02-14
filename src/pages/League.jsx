@@ -27,12 +27,12 @@ export default function League() {
   const [playersExist, setPlayersExist] = useState(false);
   const [checkingPlayers, setCheckingPlayers] = useState(true);
   const [theirTeamId, setTheirTeamId] = useState(null);
-  
+
   // Memoize draft start time to prevent unnecessary re-renders
   const draftStartTime = useMemo(() => {
     return draft?.startDate || null;
   }, [draft?.startDate]);
-  
+
   useEffect(() => {
     async function checkPlayers() {
       try {
@@ -42,7 +42,7 @@ export default function League() {
           }
         });
         const playersData = await playersResponse.json();
-        
+
         if (playersData.status === 'success') {
           setPlayersExist(playersData.data && playersData.data.length > 0);
         }
@@ -59,25 +59,25 @@ export default function League() {
           authorization: localStorage.getItem('jwt')
         }
       })
-      .then(response => response.json())
-      .then(reply => {
-        if(reply.status === 'success') {
-          setLeague(reply.data);
-          if(reply.data.drafts[0]) {
-            setDraft(reply.data.drafts[0]);
+        .then(response => response.json())
+        .then(reply => {
+          if (reply.status === 'success') {
+            setLeague(reply.data);
+            if (reply.data.drafts[0]) {
+              setDraft(reply.data.drafts[0]);
+            }
+          } else {
+            console.log(reply);
+            setError(true);
           }
-        } else {
-          console.log(reply);
+        })
+        .catch(err => {
+          console.log(err);
           setError(true);
-        }
-      })
-      .catch(err => {
-        console.log(err);
-        setError(true);
-      })
-      .finally(() => {
-        setLoading(false);
-      })
+        })
+        .finally(() => {
+          setLoading(false);
+        })
     }
 
     function checkOwnerAccess() {
@@ -86,13 +86,13 @@ export default function League() {
           authorization: localStorage.getItem('jwt')
         }
       })
-      .then(response => response.json())
-      .then(reply => {
-        setOwnerAccess(reply.access);
-      })
-      .catch(err => {
-        setOwnerAccess(false);
-      })
+        .then(response => response.json())
+        .then(reply => {
+          setOwnerAccess(reply.access);
+        })
+        .catch(err => {
+          setOwnerAccess(false);
+        })
     }
 
     checkPlayers();
@@ -101,17 +101,21 @@ export default function League() {
 
   }, [leagueId])
 
+  function onJoinDraft() {
+    window.location.assign(`/draft/${leagueId}`);
+  }
+
   function Content({ children }) {
-    if(loading) return <WaterLoader></WaterLoader>;
-    if(error) return <p>Something went wrong</p>
+    if (loading) return <WaterLoader></WaterLoader>;
+    if (error) return <p>Something went wrong</p>
     return children;
   }
   function View() {
 
-    switch(view) {
+    switch (view) {
       default:
       case 'standings':
-        if(theirTeamId) {
+        if (theirTeamId) {
           return <MyTeam theirTeamId={theirTeamId} setTheirTeamId={setTheirTeamId}></MyTeam>
         } else {
           return <TeamStandings setTheirTeamId={setTheirTeamId} leagueId={leagueId} />
@@ -123,7 +127,7 @@ export default function League() {
       case 'polls':
         return <MyPolls leagueId={leagueId}></MyPolls>
       case 'settings':
-        return <Settings leagueId={leagueId} leagueName={league.name || ''} password={league.password || ''} privateInd={league.privateInd} isDraftComplete={isDraftComplete} playersExist={playersExist} checkingPlayers={checkingPlayers}></Settings>
+        return <Settings leagueId={leagueId} leagueName={league.name || ''} password={league.password || ''} privateInd={league.privateInd} draftEnabled={league.draftEnabled} isDraftComplete={isDraftComplete} playersExist={playersExist} checkingPlayers={checkingPlayers}></Settings>
     }
 
   }
@@ -160,14 +164,14 @@ export default function League() {
           }
 
           const isActive = o.view === view;
-          const buttonClass = isActive 
-            ? `nav-link active bg-${o.activeColor} text-white border-0 py-1 px-2` 
+          const buttonClass = isActive
+            ? `nav-link active bg-${o.activeColor} text-white border-0 py-1 px-2`
             : 'nav-link text-muted border-0 py-1 px-2';
 
           return (
-            <button 
-              key={o.view} 
-              onClick={menuOptionOnClick} 
+            <button
+              key={o.view}
+              onClick={menuOptionOnClick}
               className={`btn ${buttonClass} flex-fill mx-1`}
               style={{ fontSize: '12px', whiteSpace: 'nowrap' }}
             >
@@ -195,6 +199,16 @@ export default function League() {
         </div>
       </div>
       <div className="my-2">
+        {league && league.draftEnabled && (
+          <Draft
+            draftStartTime={draftStartTime}
+            onJoinDraft={onJoinDraft}
+            leagueId={leagueId}
+            onDraftStatusChange={setIsDraftComplete}
+            playersExist={playersExist}
+            checkingPlayers={checkingPlayers}
+          />
+        )}
         <MenuOptions />
       </div>
       <div>
