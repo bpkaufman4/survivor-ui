@@ -28,6 +28,8 @@ export default function League() {
   const [checkingPlayers, setCheckingPlayers] = useState(true);
   const [theirTeamId, setTheirTeamId] = useState(null);
 
+  const surveyEnabled = league?.surveyEnabled !== false;
+
   // Memoize draft start time to prevent unnecessary re-renders
   const draftStartTime = useMemo(() => {
     return draft?.startDate || null;
@@ -118,13 +120,16 @@ export default function League() {
         if (theirTeamId) {
           return <MyTeam theirTeamId={theirTeamId} setTheirTeamId={setTheirTeamId}></MyTeam>
         } else {
-          return <TeamStandings setTheirTeamId={setTheirTeamId} leagueId={leagueId} />
+          return <TeamStandings setTheirTeamId={setTheirTeamId} leagueId={leagueId} showBonus={surveyEnabled} />
         }
       case 'players':
         return <PlayerStandings leagueId={leagueId}></PlayerStandings>
       case 'my-team':
         return <MyTeam leagueId={leagueId}></MyTeam>
       case 'polls':
+        if (!surveyEnabled) {
+          return <p className="text-muted mt-3">Surveys are disabled for this league.</p>;
+        }
         return <MyPolls leagueId={leagueId}></MyPolls>
       case 'settings':
         return <Settings leagueId={leagueId} leagueName={league.name || ''} password={league.password || ''} privateInd={league.privateInd} draftEnabled={league.draftEnabled} isDraftComplete={isDraftComplete} playersExist={playersExist} checkingPlayers={checkingPlayers}></Settings>
@@ -154,7 +159,7 @@ export default function League() {
         view: 'polls',
         activeColor: 'warning' // My Polls uses warning theme
       }
-    ]
+    ].filter(option => surveyEnabled || option.view !== 'polls')
 
     return (
       <div className="nav nav-pills bg-light rounded-3 p-1 d-flex w-100">
@@ -188,7 +193,7 @@ export default function League() {
       <div className="d-flex align-items-center justify-content-between pb-3 border-bottom">
         <h3 className="mb-0 flex-grow-1">{league && league.name}</h3>
         <div className="d-flex align-items-center gap-2">
-          <Survey leagueId={league && league.leagueId} />
+          {surveyEnabled && <Survey leagueId={league && league.leagueId} />}
           <Note />
           <Scoring />
           {ownerAccess && (

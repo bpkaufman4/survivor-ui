@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import apiUrl from "../../apiUrls";
 import WaterLoader from "../../components/WaterLoader";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
@@ -8,13 +7,15 @@ import SaveIcon from '@mui/icons-material/Save';
 import { handleGet, handlePost } from "../../helpers/helpers";
 import Swal from "sweetalert2";
 
-export default function SetPlayers({ setView, leagueId, setSetPlayersLeagueId }) {
+export default function SetPlayers({ setView, leagueId, setSetPlayersLeagueId, isUnrestricted = false }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [league, setLeague] = useState(null);
   const [teams, setTeams] = useState([]);
   const [availablePlayers, setAvailablePlayers] = useState([]);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const unrestrictedMode = Boolean(league?.allowUnrestrictedPlayerAssignments ?? isUnrestricted);
 
   useEffect(() => {
     async function fetchData() {
@@ -52,24 +53,30 @@ export default function SetPlayers({ setView, leagueId, setSetPlayersLeagueId })
   };
 
   const handleMovePlayerToTeam = (teamId, player) => {
-    // Remove player from other teams first
-    setTeams(prevTeams =>
-      prevTeams.map(team => ({
-        ...team,
-        players: team.players?.filter(p => p.playerId !== player.playerId) || []
-      }))
-    );
+    setTeams(prevTeams => {
+      if (unrestrictedMode) {
+        return prevTeams.map(team => {
+          if (team.teamId !== teamId) return team;
+          const teamPlayers = team.players || [];
+          const alreadyOnTeam = teamPlayers.some(p => p.playerId === player.playerId);
 
-    // Add player to target team
-    setTeams(prevTeams =>
-      prevTeams.map(team =>
-        team.teamId === teamId
-          ? { ...team, players: [...(team.players || []), player] }
-          : team
-      )
-    );
+          return alreadyOnTeam
+            ? team
+            : { ...team, players: [...teamPlayers, player] };
+        });
+      }
 
-    setSelectedPlayer(null);
+      return prevTeams.map(team => {
+        const teamPlayers = (team.players || []).filter(p => p.playerId !== player.playerId);
+        if (team.teamId === teamId) {
+          return { ...team, players: [...teamPlayers, player] };
+        }
+
+        return { ...team, players: teamPlayers };
+      });
+    });
+
+    setSelectedItem(null);
   };
 
   const handleMovePlayerToAvailable = (teamId, playerId) => {
@@ -81,7 +88,7 @@ export default function SetPlayers({ setView, leagueId, setSetPlayersLeagueId })
       )
     );
 
-    setSelectedPlayer(null);
+    setSelectedItem(null);
   };
 
   const savePlayerAssignments = async () => {
@@ -135,6 +142,8 @@ export default function SetPlayers({ setView, leagueId, setSetPlayersLeagueId })
   };
 
   const getUnassignedPlayers = () => {
+    if (unrestrictedMode) return availablePlayers;
+
     const assignedPlayerIds = new Set();
     teams.forEach(team => {
       team.players?.forEach(player => {
@@ -155,13 +164,21 @@ export default function SetPlayers({ setView, leagueId, setSetPlayersLeagueId })
           <button className="btn btn-sm btn-outline-secondary me-2" onClick={handleBack}>
             <ArrowBackIcon style={{ fontSize: '1.2rem' }} />
           </button>
-          <h4 className="mb-0">Set Players - {league.name}</h4>
+          <h4 className="mb-0">
+            {unrestrictedMode ? 'Set Players (Unrestricted)' : 'Set Players'} - {league.name}
+          </h4>
         </div>
         <button className="btn btn-sm btn-primary" onClick={savePlayerAssignments}>
           <SaveIcon className="me-1" style={{ fontSize: '1.1rem' }} />
           Save
         </button>
       </div>
+
+      {unrestrictedMode && (
+        <div className="alert alert-info py-2 mb-2" role="alert">
+          Unrestricted assignments are enabled for this league. Players can be added to multiple teams.
+        </div>
+      )}
 
       <div className="row g-2">
         {/* Available Players */}
@@ -170,7 +187,7 @@ export default function SetPlayers({ setView, leagueId, setSetPlayersLeagueId })
             <div className="card-header bg-secondary text-white py-2">
               <h6 className="mb-0">
                 <PersonIcon className="me-1" style={{ fontSize: '1.1rem' }} />
-                Available ({getUnassignedPlayers().length})
+                {unrestrictedMode ? 'All Players' : 'Available'} ({getUnassignedPlayers().length})
               </h6>
             </div>
             <div className="card-body p-2" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
@@ -178,8 +195,12 @@ export default function SetPlayers({ setView, leagueId, setSetPlayersLeagueId })
                 <PlayerCard
                   key={player.playerId}
                   player={player}
-                  isSelected={selectedPlayer?.playerId === player.playerId}
-                  onClick={() => setSelectedPlayer(selectedPlayer?.playerId === player.playerId ? null : player)}
+                  isSelected={selectedItem?.source === 'available' && selectedItem?.playerId === player.playerId}
+                  onClick={() => setSelectedItem(
+                    selectedItem?.source === 'available' && selectedItem?.playerId === player.playerId
+                      ? null
+                      : { source: 'available', playerId: player.playerId }
+                  )}
                   teams={teams}
                   onMoveToTeam={handleMovePlayerToTeam}
                   variant="available"
@@ -188,7 +209,9 @@ export default function SetPlayers({ setView, leagueId, setSetPlayersLeagueId })
               {getUnassignedPlayers().length === 0 && (
                 <div className="text-center text-muted py-3">
                   <PersonIcon style={{ fontSize: '2rem', opacity: 0.3 }} />
-                  <p className="small mb-0">All players assigned</p>
+                  <p className="small mb-0">
+                    {unrestrictedMode ? 'No players found' : 'All players assigned'}
+                  </p>
                 </div>
               )}
             </div>
@@ -202,11 +225,12 @@ export default function SetPlayers({ setView, leagueId, setSetPlayersLeagueId })
               <div key={team.teamId} className="col-lg-4 col-md-6">
                 <TeamCard
                   team={team}
-                  selectedPlayer={selectedPlayer}
-                  setSelectedPlayer={setSelectedPlayer}
+                  selectedItem={selectedItem}
+                  setSelectedItem={setSelectedItem}
                   teams={teams}
                   onMoveToTeam={handleMovePlayerToTeam}
                   onMoveToAvailable={handleMovePlayerToAvailable}
+                  isUnrestricted={unrestrictedMode}
                 />
               </div>
             ))}
@@ -258,7 +282,7 @@ function PlayerCard({ player, isSelected, onClick, teams, onMoveToTeam, variant 
   );
 }
 
-function TeamCard({ team, selectedPlayer, setSelectedPlayer, teams, onMoveToTeam, onMoveToAvailable }) {
+function TeamCard({ team, selectedItem, setSelectedItem, teams, onMoveToTeam, onMoveToAvailable, isUnrestricted }) {
   return (
     <div className="card h-100">
       <div className="card-header bg-primary text-white py-2">
@@ -279,9 +303,13 @@ function TeamCard({ team, selectedPlayer, setSelectedPlayer, teams, onMoveToTeam
         {(team.players || []).map(player => (
           <div key={player.playerId} className="mb-1">
             <div
-              className={`card player-card ${selectedPlayer?.playerId === player.playerId ? 'border-primary shadow-sm' : 'border-light'}`}
+              className={`card player-card ${selectedItem?.source === 'team' && selectedItem?.teamId === team.teamId && selectedItem?.playerId === player.playerId ? 'border-primary shadow-sm' : 'border-light'}`}
               style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
-              onClick={() => setSelectedPlayer(selectedPlayer?.playerId === player.playerId ? null : player)}
+              onClick={() => setSelectedItem(
+                selectedItem?.source === 'team' && selectedItem?.teamId === team.teamId && selectedItem?.playerId === player.playerId
+                  ? null
+                  : { source: 'team', teamId: team.teamId, playerId: player.playerId }
+              )}
             >
               <div className="card-body p-2">
                 <div className="fw-bold small">{player.firstName} {player.lastName}</div>
@@ -291,7 +319,7 @@ function TeamCard({ team, selectedPlayer, setSelectedPlayer, teams, onMoveToTeam
                   </div>
                 )}
                 
-                {selectedPlayer?.playerId === player.playerId && (
+                {selectedItem?.source === 'team' && selectedItem?.teamId === team.teamId && selectedItem?.playerId === player.playerId && (
                   <div className="mt-2 pt-2 border-top">
                     <div className="d-grid gap-1">
                       <button
@@ -302,7 +330,7 @@ function TeamCard({ team, selectedPlayer, setSelectedPlayer, teams, onMoveToTeam
                           onMoveToAvailable(team.teamId, player.playerId);
                         }}
                       >
-                        ← Available
+                        {isUnrestricted ? 'Remove from Team' : '← Available'}
                       </button>
                       {teams.filter(t => t.teamId !== team.teamId).map(targetTeam => (
                         <button

@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 import withReactContent from 'sweetalert2-react-content'
 import { DateTime } from "luxon";
 
-export default function Survey({ leagueId }) {
+export default function Survey({ leagueId, surveyEnabled = true }) {
   const [latestSurvey, setLatestSurvey] = useState(null);
   const [teamSurvey, setTeamSurvey] = useState(null);
   const [error, setError] = useState(false);
@@ -35,8 +35,9 @@ export default function Survey({ leagueId }) {
   }
 
   useEffect(() => {
+    if (!surveyEnabled) return;
     fetchLatestSurvey();
-  }, []);
+  }, [surveyEnabled]);
 
   function Form() {
     if(error) return <p>Something went wrong</p>;
@@ -80,6 +81,9 @@ export default function Survey({ leagueId }) {
   }
 
   function showPopup() {
+    if (!surveyEnabled) {
+      return;
+    }
 
     if(latestSurvey === null) {
       Swal.fire({

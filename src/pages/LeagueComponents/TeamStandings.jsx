@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import apiUrl from "../../apiUrls"
 import WaterLoader from "../../components/WaterLoader";
 
-export default function TeamStandings({ leagueId, setTheirTeamId }) {
+export default function TeamStandings({ leagueId, setTheirTeamId, showBonus = true }) {
 
   const [standings, setStandings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +61,7 @@ export default function TeamStandings({ leagueId, setTheirTeamId }) {
                 <th className="text-center" style={{ width: '60px' }}>Rank</th>
                 <th>Team</th>
                 <th>Players</th>
-                <th className="text-center">Bonus</th>
+                {showBonus && <th className="text-center">Bonus</th>}
                 <th className="text-center">Total</th>
               </tr>
             </thead>
@@ -77,8 +77,9 @@ export default function TeamStandings({ leagueId, setTheirTeamId }) {
                     </td>
                     <td>
                       <div>
-                        <p className="text-decoration-none fw-semibold my-0">
-                          {team.name}
+                        <p className="text-decoration-none fw-semibold my-0 d-flex align-items-center gap-1">
+                          <span>{team.name}</span>
+                          {team.wonLastSeason ? <span title="Defending champion">👑</span> : null}
                         </p>
                         <div className="text-muted small">
                           {team.firstName} {team.lastName}
@@ -88,9 +89,11 @@ export default function TeamStandings({ leagueId, setTheirTeamId }) {
                     <td>
                       <div dangerouslySetInnerHTML={{__html: team.playersHTML}} className="small"></div>
                     </td>
-                    <td className="text-center">
-                      <span className="badge bg-secondary">{team.bonus}</span>
-                    </td>
+                    {showBonus && (
+                      <td className="text-center">
+                        <span className="badge bg-secondary">{team.bonus}</span>
+                      </td>
+                    )}
                     <td className="text-center">
                       <span className="badge bg-primary fs-6">{team.totalPoints}</span>
                     </td>

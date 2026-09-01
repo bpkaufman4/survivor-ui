@@ -11,7 +11,7 @@ import { handleDelete } from "../../helpers/helpers";
 import Swal from "sweetalert2";
 import DraftSettingsModal from "./DraftSettingsModal";
 
-export default function Table({ setView, setSetPlayersLeagueId }) {
+export default function Table({ setView, setSetPlayersLeagueId, setSetPlayersUnrestricted }) {
   const navigate = useNavigate();
   const [leagues, setLeagues] = useState(null);
   const [error, setError] = useState(false);
@@ -241,8 +241,10 @@ export default function Table({ setView, setSetPlayersLeagueId }) {
       }
     }
 
-    function setPlayers(leagueId) {
-      setSetPlayersLeagueId(leagueId);
+    function setPlayers(league) {
+      const unrestricted = !!league.allowUnrestrictedPlayerAssignments;
+      setSetPlayersLeagueId(league.leagueId);
+      setSetPlayersUnrestricted(unrestricted);
       setView('set-players');
     }
 
@@ -298,7 +300,7 @@ export default function Table({ setView, setSetPlayersLeagueId }) {
           </td>
           <td>
             <div className="admin-table-actions">
-              <button className="btn btn-primary btn-sm" onClick={() => setPlayers(league.leagueId)} title="Set Players">
+              <button className="btn btn-primary btn-sm" onClick={() => setPlayers(league)} title="Set Players">
                 <AccessibilityIcon fontSize="small" />
               </button>
               <button className="btn btn-secondary btn-sm" onClick={toggleExpand} title="View Teams">
