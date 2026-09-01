@@ -30,6 +30,10 @@ export default function League() {
 
   const surveyEnabled = league?.surveyEnabled !== false;
 
+  function handleLeagueUpdated(updatedLeagueFields) {
+    setLeague(prevLeague => prevLeague ? { ...prevLeague, ...updatedLeagueFields } : prevLeague);
+  }
+
   // Memoize draft start time to prevent unnecessary re-renders
   const draftStartTime = useMemo(() => {
     return draft?.startDate || null;
@@ -132,7 +136,19 @@ export default function League() {
         }
         return <MyPolls leagueId={leagueId}></MyPolls>
       case 'settings':
-        return <Settings leagueId={leagueId} leagueName={league.name || ''} password={league.password || ''} privateInd={league.privateInd} draftEnabled={league.draftEnabled} isDraftComplete={isDraftComplete} playersExist={playersExist} checkingPlayers={checkingPlayers}></Settings>
+        return <Settings
+          leagueId={leagueId}
+          leagueName={league.name || ''}
+          password={league.password || ''}
+          privateInd={league.privateInd}
+          draftEnabled={league.draftEnabled}
+          surveyEnabled={league.surveyEnabled}
+          allowUnrestrictedPlayerAssignments={league.allowUnrestrictedPlayerAssignments}
+          isDraftComplete={isDraftComplete}
+          playersExist={playersExist}
+          checkingPlayers={checkingPlayers}
+          onLeagueUpdated={handleLeagueUpdated}
+        ></Settings>
     }
 
   }

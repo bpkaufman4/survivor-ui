@@ -6,8 +6,21 @@ import { Reorder } from "motion/react"
 import { Save } from "@mui/icons-material";
 import Swal from "sweetalert2";
 import { handlePatch, handlePost } from "../../helpers/helpers";
+import SetPlayers from "../AdminLeaguesComponents/SetPlayers";
 
-export default function Settings({ leagueId, leagueName, isDraftComplete, password, privateInd, playersExist, checkingPlayers, draftEnabled }) {
+export default function Settings({
+  leagueId,
+  leagueName,
+  isDraftComplete,
+  password,
+  privateInd,
+  playersExist,
+  checkingPlayers,
+  draftEnabled,
+  surveyEnabled = true,
+  allowUnrestrictedPlayerAssignments = false,
+  onLeagueUpdated
+}) {
   const jsDate = new Date;
   // Set default date to a week from today at 7 PM
   const defaultDraftDate = new Date();
@@ -28,6 +41,9 @@ export default function Settings({ leagueId, leagueName, isDraftComplete, passwo
   const [leaguePassword, setLeaguePassword] = useState(password || '');
   const [isPrivate, setIsPrivate] = useState(privateInd || false);
   const [isDraftEnabled, setIsDraftEnabled] = useState(draftEnabled || false);
+  const [isSurveyEnabled, setIsSurveyEnabled] = useState(surveyEnabled !== false);
+  const [isUnrestrictedPlayerAssignments, setIsUnrestrictedPlayerAssignments] = useState(Boolean(allowUnrestrictedPlayerAssignments));
+  const [subView, setSubView] = useState('settings');
 
   useEffect(() => {
     async function fetchDraft() {
@@ -140,6 +156,12 @@ export default function Settings({ leagueId, leagueName, isDraftComplete, passwo
   function changePrivateToggle(e) {
     setIsPrivate(e.target.checked);
   }
+  function changeSurveyToggle(e) {
+    setIsSurveyEnabled(e.target.checked);
+  }
+  function changeUnrestrictedPlayerAssignmentsToggle(e) {
+    setIsUnrestrictedPlayerAssignments(e.target.checked);
+  }
   // function changeDraftEnabledToggle(e) {
   //   setIsDraftEnabled(e.target.checked);
   // }
@@ -218,10 +240,21 @@ export default function Settings({ leagueId, leagueName, isDraftComplete, passwo
       name: leagueNameEdit,
       privateInd: isPrivate,
       password: isPrivate ? leaguePassword : null,
+      surveyEnabled: isSurveyEnabled,
+      allowUnrestrictedPlayerAssignments: isUnrestrictedPlayerAssignments,
       // draftEnabled: isDraftEnabled // Not editable by user
     }, setLeagueError);
     console.log(save);
     if (save.status === 'success') {
+      if (onLeagueUpdated) {
+        onLeagueUpdated({
+          name: leagueNameEdit,
+          privateInd: isPrivate,
+          password: isPrivate ? leaguePassword : null,
+          surveyEnabled: isSurveyEnabled,
+          allowUnrestrictedPlayerAssignments: isUnrestrictedPlayerAssignments
+        });
+      }
       Swal.fire({
         text: 'League Saved',
         toast: true,
@@ -301,6 +334,18 @@ export default function Settings({ leagueId, leagueName, isDraftComplete, passwo
     }
     return;
   }
+
+  if (subView === 'players') {
+    return (
+      <SetPlayers
+        setView={(nextView) => setSubView(nextView === 'table' ? 'settings' : nextView)}
+        leagueId={leagueId}
+        setSetPlayersLeagueId={() => { }}
+        isUnrestricted={isUnrestrictedPlayerAssignments}
+      />
+    );
+  }
+
   return (
     <div className="settings-container">
       {/* League Settings Card */}
@@ -356,6 +401,60 @@ export default function Settings({ leagueId, leagueName, isDraftComplete, passwo
               </div>
             </div>
           )}
+
+          <div className="border-top pt-3 mt-3">
+            <h6 className="fw-semibold mb-3">League Type and Surveys</h6>
+            <div className="form-check mb-3">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="unrestrictedPlayerAssignmentsToggle"
+                checked={isUnrestrictedPlayerAssignments}
+                onChange={changeUnrestrictedPlayerAssignmentsToggle}
+              />
+              <label className="form-check-label fw-semibold" htmlFor="unrestrictedPlayerAssignmentsToggle">
+                No Player Restrictions
+              </label>
+              <div className="form-text">
+                Allow the same player to be assigned to multiple teams.
+              </div>
+            </div>
+
+            <div className="form-check mb-3">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="surveyEnabledToggle"
+                checked={isSurveyEnabled}
+                onChange={changeSurveyToggle}
+              />
+              <label className="form-check-label fw-semibold" htmlFor="surveyEnabledToggle">
+                Enable Surveys
+              </label>
+              <div className="form-text">
+                Show contest polls and survey submissions for this league.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="card shadow-sm mb-4">
+        <div className="card-header bg-dark text-white">
+          <div className="d-flex align-items-center justify-content-between">
+            <h5 className="card-title mb-0">Manual Player Assignments</h5>
+            <button onClick={() => setSubView('players')} className="btn btn-outline-light btn-sm">
+              Manage Players
+            </button>
+          </div>
+        </div>
+        <div className="card-body">
+          <p className="mb-2">
+            Assign players to teams manually, or let the league use unrestricted assignments if enabled.
+          </p>
+          <p className="text-muted mb-0">
+            Current mode: {isUnrestrictedPlayerAssignments ? 'No player restrictions' : 'One team per player'}
+          </p>
         </div>
       </div>
 
